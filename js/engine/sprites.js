@@ -28,6 +28,7 @@ PKMN.drawPokemonSprite = function (ctx, speciesId, x, y, size, back) {
     return;
   }
   // Placeholder pendant le chargement ou si hors-ligne
+  ctx.save();
   const color = PKMN.TYPE_COLORS[species.types[0]] || "#999";
   ctx.fillStyle = color;
   ctx.beginPath();
@@ -42,4 +43,5 @@ PKMN.drawPokemonSprite = function (ctx, speciesId, x, y, size, back) {
     ctx.font = `${Math.floor(size * 0.12)}px sans-serif`;
     ctx.fillText("(hors-ligne)", x + size / 2, y + size - 6);
   }
+  ctx.restore();
 };

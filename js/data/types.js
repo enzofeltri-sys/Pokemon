@@ -45,3 +45,18 @@ PKMN.getEffectiveness = function (attackType, defTypes) {
   }
   return mult;
 };
+
+// Pour un ou deux types défenseurs, classe chaque type attaquant par
+// multiplicateur reçu (x4/x2 faible, x0.5/x0.25 résistant, x0 immunisé).
+PKMN.typeMatchups = function (defTypes) {
+  const groups = { weak4: [], weak2: [], resist2: [], resist4: [], immune: [] };
+  for (const atk of PKMN.TYPES) {
+    const mult = PKMN.getEffectiveness(atk, defTypes);
+    if (mult === 0) groups.immune.push(atk);
+    else if (mult === 4) groups.weak4.push(atk);
+    else if (mult === 2) groups.weak2.push(atk);
+    else if (mult === 0.5) groups.resist2.push(atk);
+    else if (mult === 0.25) groups.resist4.push(atk);
+  }
+  return groups;
+};

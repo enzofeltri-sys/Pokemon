@@ -287,15 +287,27 @@ PKMN.PartyState = {
 
     ctx.fillText(`XP: ${mon.xp}/${PKMN.xpToNextLevel(mon.level)}`, 116, y + 4);
 
-    y += 30;
-    ctx.font = "bold 14px sans-serif";
+    y += 24;
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillStyle = "#2c3e50";
     ctx.fillText("Capacités:", 16, y);
-    y += 18;
-    ctx.font = "13px sans-serif";
+    y += 16;
+    ctx.font = "12px sans-serif";
     for (const m of mon.moves) {
       ctx.fillText(`${PKMN.MOVES[m.key].name} (${m.pp}/${m.maxPp} PP)`, 16, y);
-      y += 18;
+      y += 15;
     }
+
+    const matchups = PKMN.typeMatchups(species.types);
+    const weak = [...matchups.weak4, ...matchups.weak2];
+    const resist = [...matchups.immune, ...matchups.resist4, ...matchups.resist2];
+    y += 8;
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillStyle = "#c0392b";
+    ctx.fillText(`Faible contre: ${weak.length ? weak.join(", ") : "rien de particulier"}`, 16, y);
+    y += 15;
+    ctx.fillStyle = "#27ae60";
+    ctx.fillText(`Résiste à: ${resist.length ? resist.join(", ") : "rien de particulier"}`, 16, y);
 
     PKMN.drawTextBox(ctx, "Échap pour revenir.", { noPrompt: true });
   }
@@ -596,13 +608,21 @@ PKMN.PCState = {
 
 // ---------- Pokédex ----------
 PKMN.PokedexState = {
-  onEnter() { this.scroll = 0; },
+  onEnter() { this.sel = 0; this.phase = "list"; },
   onKey(key) {
-    if (key === "ArrowDown") this.scroll = Math.min(this.scroll + 1, 151 - 8);
-    if (key === "ArrowUp") this.scroll = Math.max(this.scroll - 1, 0);
-    if (key === "Escape" || key === "Enter" || key === " ") PKMN.switchState("overworld");
+    if (this.phase === "detail") {
+      if (key === "Escape" || key === "Enter" || key === " ") this.phase = "list";
+      return;
+    }
+    if (key === "ArrowDown") this.sel = Math.min(this.sel + 1, 150);
+    if (key === "ArrowUp") this.sel = Math.max(this.sel - 1, 0);
+    if (key === "Escape") { PKMN.switchState("overworld"); return; }
+    if (key === "Enter" || key === " ") {
+      if (PKMN.Player.pokedexSeen.has(this.sel + 1)) this.phase = "detail";
+    }
   },
   render(ctx) {
+    if (this.phase === "detail") { this.renderDetail(ctx); return; }
     ctx.fillStyle = "#1c2833";
     ctx.fillRect(0, 0, CW, CH);
     ctx.fillStyle = "#fff";
@@ -611,8 +631,9 @@ PKMN.PokedexState = {
     const caught = PKMN.Player.pokedexCaught.size;
     ctx.fillText(`Pokédex — ${caught}/151 capturés`, 16, 26);
 
+    const scroll = Math.max(0, Math.min(this.sel - 3, 151 - 8));
     for (let i = 0; i < 8; i++) {
-      const id = this.scroll + i + 1;
+      const id = scroll + i + 1;
       if (id > 151) break;
       const species = PKMN.POKEDEX[id];
       const seen = PKMN.Player.pokedexSeen.has(id);
@@ -620,6 +641,7 @@ PKMN.PokedexState = {
       const y = 44 + i * 42;
       ctx.fillStyle = caughtIt ? "#2ecc71" : seen ? "#7f8c8d" : "#34495e";
       ctx.fillRect(8, y, CW - 16, 36);
+      if (id - 1 === this.sel) { ctx.strokeStyle = "#f4d03f"; ctx.lineWidth = 3; ctx.strokeRect(8, y, CW - 16, 36); }
       ctx.fillStyle = "#fff";
       ctx.font = "14px sans-serif";
       const label = seen ? `#${String(id).padStart(3, "0")} ${species.name} (${species.types.join("/")})` : `#${String(id).padStart(3, "0")} ???`;
@@ -630,6 +652,39 @@ PKMN.PokedexState = {
         ctx.textAlign = "left";
       }
     }
-    PKMN.drawTextBox(ctx, "Flèches haut/bas pour naviguer, Échap pour revenir.", { noPrompt: true });
+    PKMN.drawTextBox(ctx, "Flèches: naviguer · Entrée: détails (si vu) · Échap: revenir", { noPrompt: true });
+  },
+  renderDetail(ctx) {
+    const id = this.sel + 1;
+    const species = PKMN.POKEDEX[id];
+    ctx.fillStyle = "#eafaf1";
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = "#2c3e50";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`#${String(id).padStart(3, "0")} ${species.name} (${species.types.join("/")})`, 16, 26);
+    PKMN.drawPokemonSprite(ctx, id, 16, 34, 90, false);
+
+    const statNames = { hp: "PV", atk: "Attaque", def: "Défense", spa: "Att.Spé", spd: "Déf.Spé", spe: "Vitesse" };
+    let y = 44;
+    ctx.font = "13px sans-serif";
+    for (const key of ["hp", "atk", "def", "spa", "spd", "spe"]) {
+      ctx.fillStyle = "#2c3e50";
+      ctx.fillText(`${statNames[key]}: ${species.baseStats[key]}`, 116, y);
+      y += 18;
+    }
+
+    const matchups = PKMN.typeMatchups(species.types);
+    const weak = [...matchups.weak4, ...matchups.weak2];
+    const resist = [...matchups.immune, ...matchups.resist4, ...matchups.resist2];
+    y += 14;
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillStyle = "#c0392b";
+    ctx.fillText(`Faible contre: ${weak.length ? weak.join(", ") : "rien de particulier"}`, 16, y);
+    y += 16;
+    ctx.fillStyle = "#27ae60";
+    ctx.fillText(`Résiste à: ${resist.length ? resist.join(", ") : "rien de particulier"}`, 16, y);
+
+    PKMN.drawTextBox(ctx, "Échap pour revenir à la liste.", { noPrompt: true });
   }
 };
