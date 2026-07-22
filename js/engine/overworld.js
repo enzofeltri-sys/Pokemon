@@ -288,7 +288,7 @@ PKMN.OverworldState = {
 
   onKey(key) {
     if (this.message) {
-      if (key === "Enter" || key === " ") this.message = null;
+      if (key === "Enter" || key === " " || key === "Escape") this.message = null;
       return;
     }
     if (this.quickMenuOpen) {

@@ -84,13 +84,14 @@ PKMN.DialogueState = {
 
   onKey(key) {
     if (this.phase === "message") {
-      if (key === "Enter" || key === " ") this.advance();
+      if (key === "Enter" || key === " " || key === "Escape") this.advance();
       return;
     }
     if (this.phase === "choices") {
       const n = this.choices.length;
       if (key === "ArrowDown") this.choiceSel = (this.choiceSel + 1) % n;
       if (key === "ArrowUp") this.choiceSel = (this.choiceSel - 1 + n) % n;
+      if (key === "Escape") { PKMN.switchState("overworld"); return; }
       if (key === "Enter" || key === " ") {
         const choice = this.choices[this.choiceSel];
         this.runEffects(choice.effects);

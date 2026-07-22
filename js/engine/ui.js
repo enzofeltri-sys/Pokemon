@@ -362,7 +362,7 @@ PKMN.BagState = {
   },
   onKey(key) {
     if (this.message) {
-      if (key === "Enter" || key === " ") this.message = null;
+      if (key === "Enter" || key === " " || key === "Escape") this.message = null;
       return;
     }
     if (this.phase === "items") {
@@ -445,7 +445,7 @@ PKMN.MartState = {
   onEnter() { this.sel = 0; this.message = null; },
   onKey(key) {
     if (this.message) {
-      if (key === "Enter" || key === " ") this.message = null;
+      if (key === "Enter" || key === " " || key === "Escape") this.message = null;
       return;
     }
     const items = [...PKMN.MART_STOCK, "sortir"];
@@ -507,7 +507,7 @@ PKMN.PCState = {
   },
   onKey(key) {
     if (this.message) {
-      if (key === "Enter" || key === " ") this.message = null;
+      if (key === "Enter" || key === " " || key === "Escape") this.message = null;
       return;
     }
     const partyLen = PKMN.Player.party.length;

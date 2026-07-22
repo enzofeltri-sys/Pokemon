@@ -166,7 +166,7 @@ PKMN.BattleState = {
 
   onKey(key) {
     if (this.phase === "message") {
-      if (key === "Enter" || key === " ") this.advance();
+      if (key === "Enter" || key === " " || key === "Escape") this.advance();
       return;
     }
     if (this.phase === "main_menu") {
@@ -201,7 +201,7 @@ PKMN.BattleState = {
       return;
     }
     if (this.phase === "end") {
-      if (key === "Enter" || key === " ") PKMN.switchState("overworld");
+      if (key === "Enter" || key === " " || key === "Escape") PKMN.switchState("overworld");
       return;
     }
   },
