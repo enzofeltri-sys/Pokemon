@@ -111,6 +111,7 @@ PKMN.BattleState = {
 
   onEnter() {
     this.active = PKMN.Player.firstAlive();
+    this.participants = new Set([this.active]);
     for (const mon of PKMN.Player.party) { mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 }; mon.flinched = false; }
     this.wild.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 };
     this.wild.flinched = false;
@@ -270,6 +271,7 @@ PKMN.BattleState = {
     }
     const was_forced = this.forcedSwitch;
     this.active = mon;
+    this.participants.add(mon);
     mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 };
     const species = PKMN.speciesOf(mon);
     const sendOutMsgs = [`Tu envoies ${species.name} !`];
@@ -604,14 +606,20 @@ PKMN.BattleState = {
       const species = PKMN.speciesOf(this.wild);
       const exp = expReward(species, this.wild.level);
       const money = moneyReward(this.wild.level);
-      PKMN.addEVs(this.active, species.evYield);
-      const lvlMsgs = PKMN.gainExp(this.active, exp);
+      const msgs = [];
+      for (const mon of PKMN.Player.party) {
+        if (mon.hp <= 0) continue;
+        const participated = this.participants.has(mon);
+        if (!participated && !PKMN.Player.options.multiExp) continue;
+        const amount = participated ? exp : Math.max(1, Math.floor(exp * 0.5));
+        if (participated) PKMN.addEVs(mon, species.evYield);
+        const lvlMsgs = PKMN.gainExp(mon, amount);
+        msgs.push(`${PKMN.speciesOf(mon).name} gagne ${amount} points d'expérience !`, ...lvlMsgs);
+      }
       PKMN.Player.money += money;
+      msgs.push(`Tu trouves ${money}₽ !`);
       PKMN.saveGame();
-      this.showMessages(
-        [`${PKMN.speciesOf(this.active).name} gagne ${exp} points d'expérience !`, ...lvlMsgs, `Tu trouves ${money}₽ !`],
-        () => { this.phase = "end"; }
-      );
+      this.showMessages(msgs, () => { this.phase = "end"; });
       return;
     }
     if (this.active.hp <= 0) {

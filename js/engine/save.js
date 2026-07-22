@@ -16,7 +16,12 @@ PKMN.saveGame = function () {
     repelSteps: P.repelSteps,
     mapKey: P.mapKey,
     x: P.x,
-    y: P.y
+    y: P.y,
+    flags: P.flags,
+    quests: P.quests,
+    moral: P.moral,
+    options: P.options,
+    quickItem: P.quickItem
   };
   try {
     localStorage.setItem(PKMN.SAVE_KEY, JSON.stringify(data));
@@ -44,6 +49,11 @@ PKMN.loadGame = function () {
     P.mapKey = data.mapKey || PKMN.START_MAP;
     P.x = data.x ?? PKMN.MAPS[PKMN.START_MAP].playerStart.x;
     P.y = data.y ?? PKMN.MAPS[PKMN.START_MAP].playerStart.y;
+    P.flags = data.flags || {};
+    P.quests = data.quests || {};
+    P.moral = data.moral || { loyaute: 0, ambition: 0, methode: 0 };
+    P.options = Object.assign({ multiExp: true }, data.options || {});
+    P.quickItem = data.quickItem || null;
     return P.party.length > 0;
   } catch (e) {
     console.warn("Chargement impossible:", e);

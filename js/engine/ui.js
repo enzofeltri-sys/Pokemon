@@ -394,23 +394,7 @@ PKMN.BagState = {
     this.message = `Répulsif actif pour ${PKMN.ITEMS.repel.steps} pas !`;
   },
   useItemOn(mon) {
-    const key = this.pendingItem;
-    const species = PKMN.speciesOf(mon);
-    if (key.startsWith("pierre_")) {
-      const result = PKMN.tryEvolveWithStone(mon, key);
-      if (result.evolved) { PKMN.Player.bag[key]--; this.message = `${result.from} évolue en ${result.to} !`; }
-      else this.message = "Ça n'a aucun effet...";
-    } else if (key === "potion") {
-      if (mon.hp <= 0) this.message = "Ce Pokémon est K.O. !";
-      else if (mon.hp >= mon.maxHp) this.message = "Les PV sont déjà au maximum !";
-      else { mon.hp = Math.min(mon.maxHp, mon.hp + PKMN.ITEMS.potion.healAmount); PKMN.Player.bag.potion--; this.message = `${species.name} récupère des PV !`; }
-    } else if (key === "antidote") {
-      if (mon.status !== "poison" && mon.status !== "toxic") this.message = "Ça n'aurait aucun effet !";
-      else { mon.status = null; mon.statusCounter = 0; PKMN.Player.bag.antidote--; this.message = `${species.name} est soigné du poison !`; }
-    } else if (key === "revive") {
-      if (mon.hp > 0) this.message = "Ce Pokémon n'est pas K.O. !";
-      else { mon.hp = Math.max(1, Math.floor(mon.maxHp / 2)); PKMN.Player.bag.revive--; this.message = `${species.name} est ranimé !`; }
-    }
+    this.message = PKMN.applyItemToMon(this.pendingItem, mon);
     PKMN.saveGame();
     this.phase = "items";
     this.sel = 0;
@@ -726,5 +710,72 @@ PKMN.PokedexState = {
     ctx.fillText(`Résiste à: ${resist.length ? resist.join(", ") : "rien de particulier"}`, 16, y);
 
     PKMN.drawTextBox(ctx, "Échap pour revenir à la liste.", { noPrompt: true });
+  }
+};
+
+// ---------- Quêtes ----------
+PKMN.QuestState = {
+  onEnter() { this.sel = 0; },
+  activeIds() {
+    return Object.keys(PKMN.QUESTS).filter((id) => PKMN.Player.questStatus(id) !== "not_started");
+  },
+  onKey(key) {
+    const ids = this.activeIds();
+    if (key === "ArrowDown") this.sel = Math.min(this.sel + 1, Math.max(0, ids.length - 1));
+    if (key === "ArrowUp") this.sel = Math.max(this.sel - 1, 0);
+    if (key === "Escape" || key === "Enter" || key === " ") PKMN.switchState("overworld");
+  },
+  render(ctx) {
+    ctx.fillStyle = "#1c2833";
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 20px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Quêtes", 16, 30);
+
+    const ids = this.activeIds();
+    if (!ids.length) {
+      ctx.font = "15px sans-serif";
+      ctx.fillText("Aucune quête en cours pour l'instant.", 16, 70);
+    } else {
+      ids.forEach((id, i) => {
+        const quest = PKMN.QUESTS[id];
+        const status = PKMN.Player.questStatus(id);
+        const y = 50 + i * 40;
+        if (i === this.sel) { ctx.fillStyle = "#34495e"; ctx.fillRect(8, y - 4, CW - 16, 36); }
+        ctx.fillStyle = status === "done" ? "#2ecc71" : "#fff";
+        ctx.font = "15px sans-serif";
+        ctx.fillText(`${quest.name}${status === "done" ? " (terminée)" : ""}`, 16, y + 16);
+      });
+    }
+    PKMN.drawTextBox(ctx, "Échap: revenir", { noPrompt: true });
+  }
+};
+
+// ---------- Options ----------
+PKMN.OptionsState = {
+  onEnter() { this.sel = 0; },
+  items() {
+    return [`Multi Exp : ${PKMN.Player.options.multiExp ? "Activé" : "Désactivé"}`, "Retour"];
+  },
+  onKey(key) {
+    const items = this.items();
+    if (key === "ArrowDown") this.sel = (this.sel + 1) % items.length;
+    if (key === "ArrowUp") this.sel = (this.sel - 1 + items.length) % items.length;
+    if (key === "Escape") { PKMN.switchState("overworld"); return; }
+    if (key === "Enter" || key === " ") {
+      if (this.sel === 0) { PKMN.Player.options.multiExp = !PKMN.Player.options.multiExp; PKMN.saveGame(); }
+      else PKMN.switchState("overworld");
+    }
+  },
+  render(ctx) {
+    ctx.fillStyle = "#1c2833";
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 20px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Options", 16, 30);
+    PKMN.drawMenu(ctx, 16, 50, this.items(), this.sel, { w: 260 });
+    PKMN.drawTextBox(ctx, "Entrée: changer/valider · Échap: revenir", { noPrompt: true });
   }
 };

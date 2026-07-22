@@ -19,7 +19,8 @@
     <h1>Pokémon — Édition Perso</h1>
     <canvas id="game" width="480" height="400"></canvas>
     <p class="hint desktop-only">
-      Flèches directionnelles pour te déplacer · Entrée / Espace pour valider ou ouvrir le menu · Échap pour revenir
+      Flèches directionnelles pour te déplacer · Entrée / Espace pour valider, parler ou ouvrir le menu Start ·
+      Échap pour revenir · Maj pour le menu Select rapide · E pour utiliser l'objet rapide
     </p>
 
     <div id="touch-controls">
@@ -28,6 +29,10 @@
         <button type="button" class="dpad-btn left" data-key="ArrowLeft">◀</button>
         <button type="button" class="dpad-btn right" data-key="ArrowRight">▶</button>
         <button type="button" class="dpad-btn down" data-key="ArrowDown">▼</button>
+      </div>
+      <div id="system-buttons">
+        <button type="button" class="sys-btn select-btn" data-key="Shift">SELECT</button>
+        <button type="button" class="sys-btn item-btn" data-key="e">OBJET</button>
       </div>
       <div id="action-buttons">
         <button type="button" class="action-btn b-btn" data-key="Escape">B</button>
@@ -48,12 +53,15 @@
   <script src="js/data/abilities.js"></script>
   <script src="js/data/pokedex.js"></script>
   <script src="js/data/maps.js"></script>
+  <script src="js/data/quests.js"></script>
+  <script src="js/data/npcs.js"></script>
   <script src="js/engine/sprites.js"></script>
   <script src="js/engine/player.js"></script>
   <script src="js/engine/save.js"></script>
   <script src="js/engine/ui.js"></script>
   <script src="js/engine/overworld.js"></script>
   <script src="js/engine/battle.js"></script>
+  <script src="js/engine/dialogue.js"></script>
   <script src="js/engine/touch.js"></script>
   <script src="js/engine/game.js"></script>
   <script src="js/main.js"></script>

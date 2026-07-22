@@ -149,6 +149,38 @@ PKMN.gainExp = function (mon, amount) {
   return messages;
 };
 
+// Applique un objet consommable (potion/antidote/rappel/pierre) à un Pokémon donné et
+// renvoie le message à afficher. Partagé par le Sac et le bouton Objet rapide.
+PKMN.applyItemToMon = function (key, mon) {
+  const species = PKMN.speciesOf(mon);
+  if (key.startsWith("pierre_")) {
+    const result = PKMN.tryEvolveWithStone(mon, key);
+    if (result.evolved) { PKMN.Player.bag[key]--; return `${result.from} évolue en ${result.to} !`; }
+    return "Ça n'a aucun effet...";
+  }
+  if (key === "potion") {
+    if (mon.hp <= 0) return "Ce Pokémon est K.O. !";
+    if (mon.hp >= mon.maxHp) return "Les PV sont déjà au maximum !";
+    mon.hp = Math.min(mon.maxHp, mon.hp + PKMN.ITEMS.potion.healAmount);
+    PKMN.Player.bag.potion--;
+    return `${species.name} récupère des PV !`;
+  }
+  if (key === "antidote") {
+    if (mon.status !== "poison" && mon.status !== "toxic") return "Ça n'aurait aucun effet !";
+    mon.status = null;
+    mon.statusCounter = 0;
+    PKMN.Player.bag.antidote--;
+    return `${species.name} est soigné du poison !`;
+  }
+  if (key === "revive") {
+    if (mon.hp > 0) return "Ce Pokémon n'est pas K.O. !";
+    mon.hp = Math.max(1, Math.floor(mon.maxHp / 2));
+    PKMN.Player.bag.revive--;
+    return `${species.name} est ranimé !`;
+  }
+  return "Ça n'a aucun effet...";
+};
+
 PKMN.healParty = function (party) {
   for (const mon of party) {
     mon.hp = mon.maxHp;
@@ -173,10 +205,50 @@ PKMN.Player = {
   facing: "down",
   lastCenter: null,
   repelSteps: 0,
+  flags: {},
+  quests: {},
+  moral: { loyaute: 0, ambition: 0, methode: 0 },
+  options: { multiExp: true },
+  quickItem: null,
 
   initBag() {
     this.bag = { pierre_feu: 2, pierre_eau: 2, pierre_foudre: 2, pierre_plante: 2, pierre_lune: 3, pokeball: 5, potion: 3 };
     this.money = 500;
+  },
+
+  getFlag(key) {
+    return this.flags[key];
+  },
+
+  setFlag(key, value) {
+    this.flags[key] = value === undefined ? true : value;
+  },
+
+  // Compteur générique "a parlé N fois à ce PNJ" (utile pour les récompenses cachées).
+  incTalkCount(npcId) {
+    const k = `talk_${npcId}`;
+    this.flags[k] = (this.flags[k] || 0) + 1;
+    return this.flags[k];
+  },
+
+  startQuest(id) {
+    if (!this.quests[id]) this.quests[id] = { status: "active", step: 0 };
+  },
+
+  setQuestStep(id, step) {
+    if (this.quests[id]) this.quests[id].step = step;
+  },
+
+  completeQuest(id) {
+    this.quests[id] = { status: "done", step: (this.quests[id] && this.quests[id].step) || 0 };
+  },
+
+  questStatus(id) {
+    return this.quests[id] ? this.quests[id].status : "not_started";
+  },
+
+  adjustMoral(axis, delta) {
+    this.moral[axis] = (this.moral[axis] || 0) + delta;
   },
 
   addToParty(speciesId, level) {

@@ -19,7 +19,10 @@ PKMN.initGame = function (canvas) {
     bag: PKMN.BagState,
     mart: PKMN.MartState,
     pc: PKMN.PCState,
-    pokedex: PKMN.PokedexState
+    pokedex: PKMN.PokedexState,
+    dialogue: PKMN.DialogueState,
+    quest: PKMN.QuestState,
+    options: PKMN.OptionsState
   };
 
   const NAV_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "Enter"]);

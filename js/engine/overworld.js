@@ -179,6 +179,20 @@ function drawPlayerSprite(ctx, screenX, screenY, facing, bob) {
   else if (facing === "right") { ctx.fillRect(cx + 3, topY + TILE * 0.30, 2, 2); }
 }
 
+function drawNPCSprite(ctx, screenX, screenY, npc) {
+  const cx = screenX + TILE / 2, cy = screenY + TILE / 2;
+  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.beginPath(); ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = npc.color || "#7f8c8d";
+  ctx.beginPath(); ctx.arc(cx, cy, TILE * 0.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 14px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(npc.letter || npc.name[0], cx, cy + 1);
+  ctx.textBaseline = "alphabetic";
+}
+
 PKMN.OverworldState = {
   onEnter() {
     this.moving = false;
@@ -188,6 +202,10 @@ PKMN.OverworldState = {
     this.facing = "down";
     this.menuOpen = false;
     this.menuSel = 0;
+    this.quickMenuOpen = false;
+    this.quickMenuPhase = "list";
+    this.quickSel = 0;
+    this.quickItemSel = 0;
     this.message = null;
   },
 
@@ -201,13 +219,105 @@ PKMN.OverworldState = {
     return row[x];
   },
 
+  npcsHere() {
+    return PKMN.NPCS[PKMN.Player.mapKey] || [];
+  },
+
+  npcAt(x, y) {
+    return this.npcsHere().find((n) => n.x === x && n.y === y) || null;
+  },
+
+  facingCoords() {
+    const d = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[this.facing];
+    return [PKMN.Player.x + d[0], PKMN.Player.y + d[1]];
+  },
+
+  pauseMenuItems() {
+    return ["Équipe", "Sac", "Lien de Réserve", "Quêtes", "Pokédex", "Options", "Sauvegarder", "Fermer"];
+  },
+
+  quickMenuItems() {
+    return ["Objet rapide", "Quête active", "Zone actuelle", "Lien de réserve", "Fermer"];
+  },
+
+  quickItemChoices() {
+    const items = ["potion", "antidote", "revive", "repel"].filter((k) => (PKMN.Player.bag[k] || 0) > 0);
+    items.push("retour");
+    return items;
+  },
+
+  goToReserveLink() {
+    const map = this.currentMap();
+    if (map.noReserveLink) { this.message = "Indisponible ici."; return; }
+    PKMN.switchState("pc");
+  },
+
+  chooseQuickMenu(choice) {
+    if (choice === "Fermer") { this.quickMenuOpen = false; return; }
+    if (choice === "Objet rapide") { this.quickMenuPhase = "pick_item"; this.quickItemSel = 0; return; }
+    if (choice === "Quête active") {
+      const activeId = Object.keys(PKMN.Player.quests).find((id) => PKMN.Player.quests[id].status === "active");
+      this.quickMenuOpen = false;
+      this.message = activeId ? PKMN.QUESTS[activeId].name : "Aucune quête active pour l'instant.";
+      return;
+    }
+    if (choice === "Zone actuelle") {
+      this.quickMenuOpen = false;
+      this.message = this.currentMap().name;
+      return;
+    }
+    if (choice === "Lien de réserve") { this.quickMenuOpen = false; this.goToReserveLink(); return; }
+  },
+
+  useQuickItem() {
+    const key = PKMN.Player.quickItem;
+    if (!key || !(PKMN.Player.bag[key] > 0)) {
+      this.message = "Aucun objet assigné. Ouvre le menu Select pour en choisir un.";
+      return;
+    }
+    if (key === "repel") {
+      PKMN.Player.repelSteps = PKMN.ITEMS.repel.steps;
+      PKMN.Player.bag.repel--;
+      this.message = `Répulsif actif pour ${PKMN.ITEMS.repel.steps} pas !`;
+    } else {
+      const mon = PKMN.Player.firstAlive() || PKMN.Player.party[0];
+      this.message = PKMN.applyItemToMon(key, mon);
+    }
+    PKMN.saveGame();
+  },
+
   onKey(key) {
     if (this.message) {
       if (key === "Enter" || key === " ") this.message = null;
       return;
     }
+    if (this.quickMenuOpen) {
+      if (this.quickMenuPhase === "list") {
+        const items = this.quickMenuItems();
+        if (key === "ArrowDown") this.quickSel = (this.quickSel + 1) % items.length;
+        if (key === "ArrowUp") this.quickSel = (this.quickSel - 1 + items.length) % items.length;
+        if (key === "Escape") this.quickMenuOpen = false;
+        if (key === "Enter" || key === " ") this.chooseQuickMenu(items[this.quickSel]);
+        return;
+      }
+      if (this.quickMenuPhase === "pick_item") {
+        const items = this.quickItemChoices();
+        if (key === "ArrowDown") this.quickItemSel = (this.quickItemSel + 1) % items.length;
+        if (key === "ArrowUp") this.quickItemSel = (this.quickItemSel - 1 + items.length) % items.length;
+        if (key === "Escape") this.quickMenuPhase = "list";
+        if (key === "Enter" || key === " ") {
+          const choice = items[this.quickItemSel];
+          if (choice !== "retour") PKMN.Player.quickItem = choice;
+          this.quickMenuOpen = false;
+          this.quickMenuPhase = "list";
+          PKMN.saveGame();
+        }
+        return;
+      }
+      return;
+    }
     if (this.menuOpen) {
-      const items = ["Équipe", "Sac", "Boîte PC", "Pokédex", "Sauvegarder", "Fermer"];
+      const items = this.pauseMenuItems();
       if (key === "ArrowDown") this.menuSel = (this.menuSel + 1) % items.length;
       if (key === "ArrowUp") this.menuSel = (this.menuSel - 1 + items.length) % items.length;
       if (key === "Escape") this.menuOpen = false;
@@ -216,14 +326,23 @@ PKMN.OverworldState = {
         this.menuOpen = false;
         if (choice === "Équipe") { PKMN.PartyState.returnTo = "overworld"; PKMN.switchState("party"); }
         else if (choice === "Sac") PKMN.switchState("bag");
-        else if (choice === "Boîte PC") PKMN.switchState("pc");
+        else if (choice === "Lien de Réserve") this.goToReserveLink();
+        else if (choice === "Quêtes") PKMN.switchState("quest");
         else if (choice === "Pokédex") PKMN.switchState("pokedex");
+        else if (choice === "Options") PKMN.switchState("options");
         else if (choice === "Sauvegarder") { PKMN.saveGame(); this.message = "Partie sauvegardée !"; }
       }
       return;
     }
     if (this.moving) return;
-    if (key === "Enter") { this.menuOpen = true; this.menuSel = 0; return; }
+    if (key === "Enter") {
+      const [fx, fy] = this.facingCoords();
+      const npc = this.npcAt(fx, fy);
+      if (npc) { PKMN.DialogueState.startWith(npc); PKMN.switchState("dialogue"); return; }
+      this.menuOpen = true; this.menuSel = 0; return;
+    }
+    if (key === "Shift") { this.quickMenuOpen = true; this.quickMenuPhase = "list"; this.quickSel = 0; return; }
+    if (key === "e") { this.useQuickItem(); return; }
 
     const dirs = { ArrowUp: [0, -1, "up"], ArrowDown: [0, 1, "down"], ArrowLeft: [-1, 0, "left"], ArrowRight: [1, 0, "right"] };
     const d = dirs[key];
@@ -233,7 +352,7 @@ PKMN.OverworldState = {
     const nx = PKMN.Player.x + d[0], ny = PKMN.Player.y + d[1];
     const tile = this.tileAt(map, nx, ny);
     const info = PKMN.TILE_INFO[tile] || { blocked: true };
-    if (info.blocked) return;
+    if (info.blocked || this.npcAt(nx, ny)) return;
 
     this.fromX = PKMN.Player.x; this.fromY = PKMN.Player.y;
     PKMN.Player.x = nx; PKMN.Player.y = ny;
@@ -342,6 +461,13 @@ PKMN.OverworldState = {
       }
     }
 
+    // PNJ
+    for (const npc of this.npcsHere()) {
+      const sx = npc.x * TILE - camX, sy = npc.y * TILE - camY;
+      if (sx < -TILE || sy < -TILE || sx > PKMN.CANVAS_W || sy > PKMN.CANVAS_H) continue;
+      drawNPCSprite(ctx, sx, sy, npc);
+    }
+
     // Joueur
     const screenX = px * TILE - camX, screenY = py * TILE - camY;
     const bob = this.moving ? -Math.abs(Math.sin(this.moveT * Math.PI)) * 3 : 0;
@@ -356,13 +482,23 @@ PKMN.OverworldState = {
     ctx.fillText(map.name, 8, 16);
 
     if (this.menuOpen) {
-      PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, ["Équipe", "Sac", "Boîte PC", "Pokédex", "Sauvegarder", "Fermer"], this.menuSel);
+      const items = this.pauseMenuItems();
+      PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, items, this.menuSel);
+      const moneyY = 10 + items.length * 26 + 16 + 6;
       ctx.fillStyle = "rgba(0,0,0,0.6)";
-      ctx.fillRect(PKMN.CANVAS_W - 160, 226, 150, 26);
+      ctx.fillRect(PKMN.CANVAS_W - 160, moneyY, 150, 26);
       ctx.fillStyle = "#f4d03f";
       ctx.font = "13px sans-serif";
       ctx.textAlign = "left";
-      ctx.fillText(`Argent: ${PKMN.Player.money}₽`, PKMN.CANVAS_W - 152, 243);
+      ctx.fillText(`Argent: ${PKMN.Player.money}₽`, PKMN.CANVAS_W - 152, moneyY + 17);
+    }
+    if (this.quickMenuOpen) {
+      if (this.quickMenuPhase === "list") {
+        PKMN.drawMenu(ctx, PKMN.CANVAS_W - 190, 10, this.quickMenuItems(), this.quickSel, { w: 180 });
+      } else {
+        const items = this.quickItemChoices().map((k) => k === "retour" ? "Retour" : PKMN.ITEMS[k].name);
+        PKMN.drawMenu(ctx, PKMN.CANVAS_W - 190, 10, items, this.quickItemSel, { w: 180 });
+      }
     }
     if (this.message) {
       PKMN.drawTextBox(ctx, this.message);
