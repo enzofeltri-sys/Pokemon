@@ -63,12 +63,12 @@ PKMN.LEARNSETS = {
   41: [[1, "cyclone"], [1, "dard_venin"], [10, "morsure"], [20, "sombre_toxine"]],
   42: [[1, "cyclone"], [1, "dard_venin"], [1, "morsure"], [10, "attak_air"], [24, "sombre_toxine"]],
 
-  43: [[1, "charge"], [1, "poudre_toxik"], [8, "fouet_lianes"], [16, "draine"]],
-  44: [[1, "charge"], [1, "fouet_lianes"], [1, "poudre_toxik"], [16, "draine"], [28, "mega_sangsue"]],
-  45: [[1, "charge"], [1, "fouet_lianes"], [1, "poudre_toxik"], [16, "mega_sangsue"], [28, "lance_soleil"], [40, "sombre_toxine"]],
+  43: [[1, "charge"], [1, "poudre_toxik"], [5, "poudre_dodo"], [8, "fouet_lianes"], [16, "draine"]],
+  44: [[1, "charge"], [1, "fouet_lianes"], [1, "poudre_toxik"], [1, "poudre_dodo"], [16, "draine"], [28, "mega_sangsue"]],
+  45: [[1, "charge"], [1, "fouet_lianes"], [1, "poudre_dodo"], [1, "poudre_toxik"], [16, "mega_sangsue"], [28, "lance_soleil"], [40, "sombre_toxine"]],
 
-  46: [[1, "ligotage"], [1, "charge"], [10, "poudre_toxik"], [20, "mega_sangsue"]],
-  47: [[1, "ligotage"], [1, "charge"], [1, "poudre_toxik"], [20, "mega_sangsue"], [32, "megacorne"]],
+  46: [[1, "ligotage"], [1, "charge"], [7, "poudre_dodo"], [10, "poudre_toxik"], [20, "mega_sangsue"]],
+  47: [[1, "ligotage"], [1, "charge"], [1, "poudre_dodo"], [1, "poudre_toxik"], [20, "mega_sangsue"], [32, "megacorne"]],
 
   48: [[1, "ligotage"], [1, "dard_venin"], [10, "psyko"], [20, "megacorne"]],
   49: [[1, "ligotage"], [1, "dard_venin"], [1, "psyko"], [20, "megacorne"], [30, "choc_mental"]],
@@ -92,9 +92,9 @@ PKMN.LEARNSETS = {
   61: [[1, "charge"], [1, "pistolet_a_o"], [1, "double_pied"], [20, "bulles_d_o"], [31, "poing_karate"]],
   62: [[1, "charge"], [1, "pistolet_a_o"], [1, "double_pied"], [1, "poing_karate"], [20, "bulles_d_o"], [36, "hydrocanon"]],
 
-  63: [[1, "choc_mental"]],
-  64: [[1, "choc_mental"], [1, "lueur"], [16, "psyko"], [30, "repos"]],
-  65: [[1, "choc_mental"], [1, "lueur"], [1, "psyko"], [30, "repos"], [40, "ultralaser"]],
+  63: [[1, "choc_mental"], [8, "regard_confus"]],
+  64: [[1, "choc_mental"], [1, "regard_confus"], [1, "lueur"], [16, "psyko"], [30, "repos"]],
+  65: [[1, "choc_mental"], [1, "regard_confus"], [1, "lueur"], [1, "psyko"], [30, "repos"], [40, "ultralaser"]],
 
   66: [[1, "griffe"], [1, "rugissement"], [10, "poing_karate"], [20, "double_pied"]],
   67: [[1, "griffe"], [1, "poing_karate"], [1, "double_pied"], [20, "frappe_atlas"], [34, "cognobscur"]],
@@ -140,8 +140,8 @@ PKMN.LEARNSETS = {
 
   95: [[1, "charge"], [1, "jet_pierres"], [15, "seisme"], [28, "eboulement"]],
 
-  96: [[1, "charge"], [1, "rugissement"], [10, "choc_mental"], [24, "psyko"]],
-  97: [[1, "charge"], [1, "choc_mental"], [1, "psyko"], [24, "lueur"], [38, "repos"]],
+  96: [[1, "charge"], [1, "rugissement"], [6, "regard_confus"], [10, "choc_mental"], [24, "psyko"]],
+  97: [[1, "charge"], [1, "choc_mental"], [1, "regard_confus"], [1, "psyko"], [24, "lueur"], [38, "repos"]],
 
   98: [[1, "charge"], [1, "griffe"], [10, "pistolet_a_o"], [20, "bulles_d_o"]],
   99: [[1, "charge"], [1, "griffe"], [1, "pistolet_a_o"], [20, "bulles_d_o"], [32, "hydrocanon"]],

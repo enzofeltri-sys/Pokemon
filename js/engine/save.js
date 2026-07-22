@@ -7,10 +7,13 @@ PKMN.saveGame = function () {
   const P = PKMN.Player;
   const data = {
     party: P.party,
+    box: P.box,
     pokedexSeen: [...P.pokedexSeen],
     pokedexCaught: [...P.pokedexCaught],
     bag: P.bag,
     money: P.money,
+    lastCenter: P.lastCenter,
+    repelSteps: P.repelSteps,
     mapKey: P.mapKey,
     x: P.x,
     y: P.y
@@ -31,10 +34,13 @@ PKMN.loadGame = function () {
     const data = JSON.parse(raw);
     const P = PKMN.Player;
     P.party = data.party || [];
+    P.box = data.box || [];
     P.pokedexSeen = new Set(data.pokedexSeen || []);
     P.pokedexCaught = new Set(data.pokedexCaught || []);
     P.bag = data.bag || {};
     P.money = data.money ?? 0;
+    P.lastCenter = data.lastCenter || null;
+    P.repelSteps = data.repelSteps ?? 0;
     P.mapKey = data.mapKey || PKMN.START_MAP;
     P.x = data.x ?? PKMN.MAPS[PKMN.START_MAP].playerStart.x;
     P.y = data.y ?? PKMN.MAPS[PKMN.START_MAP].playerStart.y;

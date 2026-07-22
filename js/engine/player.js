@@ -64,6 +64,9 @@ PKMN.createPokemon = function (speciesId, level) {
     moves: PKMN.movesAtLevel(speciesId, level).map((key) => ({ key, pp: PKMN.MOVES[key].pp, maxPp: PKMN.MOVES[key].pp })),
     statStages: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
     status: null,
+    statusCounter: 0,
+    confused: 0,
+    mustRecharge: false,
     caughtWith: "Poké Ball"
   };
 };
@@ -148,12 +151,16 @@ PKMN.healParty = function (party) {
   for (const mon of party) {
     mon.hp = mon.maxHp;
     mon.status = null;
+    mon.statusCounter = 0;
+    mon.confused = 0;
+    mon.mustRecharge = false;
     for (const m of mon.moves) m.pp = m.maxPp;
   }
 };
 
 PKMN.Player = {
   party: [],
+  box: [],
   pokedexSeen: new Set(),
   pokedexCaught: new Set(),
   bag: {},
@@ -162,6 +169,8 @@ PKMN.Player = {
   x: 0,
   y: 0,
   facing: "down",
+  lastCenter: null,
+  repelSteps: 0,
 
   initBag() {
     this.bag = { pierre_feu: 2, pierre_eau: 2, pierre_foudre: 2, pierre_plante: 2, pierre_lune: 3, pokeball: 5, potion: 3 };
@@ -171,9 +180,44 @@ PKMN.Player = {
   addToParty(speciesId, level) {
     const mon = PKMN.createPokemon(speciesId, level);
     if (this.party.length < 6) this.party.push(mon);
+    else this.box.push(mon);
     this.pokedexCaught.add(speciesId);
     this.pokedexSeen.add(speciesId);
     return mon;
+  },
+
+  // Ajoute un Pokémon capturé à l'équipe si elle a de la place, sinon à la Boîte PC.
+  // Renvoie true si envoyé en boîte.
+  addCaught(mon) {
+    this.pokedexCaught.add(mon.species);
+    this.pokedexSeen.add(mon.species);
+    if (this.party.length < 6) { this.party.push(mon); return false; }
+    this.box.push(mon);
+    return true;
+  },
+
+  releaseFromParty(index) {
+    if (this.party.length <= 1) return false;
+    this.party.splice(index, 1);
+    return true;
+  },
+
+  releaseFromBox(index) {
+    this.box.splice(index, 1);
+  },
+
+  depositToBox(index) {
+    if (this.party.length <= 1) return false;
+    const [mon] = this.party.splice(index, 1);
+    this.box.push(mon);
+    return true;
+  },
+
+  withdrawFromBox(index) {
+    if (this.party.length >= 6) return false;
+    const [mon] = this.box.splice(index, 1);
+    this.party.push(mon);
+    return true;
   },
 
   firstAlive() {

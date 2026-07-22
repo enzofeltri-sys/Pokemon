@@ -14,10 +14,10 @@ PKMN.MOVES = {
   frappe_atlas: { name: "Frappe Atlas",   type: "normal",   power: 130, acc: 100, pp: 10, cat: "physique" },
   ecrasface:    { name: "Écras'Face",     type: "normal",   power: 80,  acc: 100, pp: 15, cat: "physique" },
 
-  flammeche:    { name: "Flammèche",      type: "feu",     power: 40,  acc: 100, pp: 25, cat: "special" },
-  lance_flammes: { name: "Lance-Flammes",  type: "feu",     power: 90,  acc: 100, pp: 15, cat: "special" },
-  deflagration: { name: "Déflagration",   type: "feu",     power: 110, acc: 85,  pp: 5,  cat: "special" },
-  tourbillon_feu: { name: "Tourbillon Feu", type: "feu",   power: 35,  acc: 85,  pp: 15, cat: "special" },
+  flammeche:    { name: "Flammèche",      type: "feu",     power: 40,  acc: 100, pp: 25, cat: "special", secondary: { chance: 10, status: "burn" } },
+  lance_flammes: { name: "Lance-Flammes",  type: "feu",     power: 90,  acc: 100, pp: 15, cat: "special", secondary: { chance: 10, status: "burn" } },
+  deflagration: { name: "Déflagration",   type: "feu",     power: 110, acc: 85,  pp: 5,  cat: "special", secondary: { chance: 10, status: "burn" } },
+  tourbillon_feu: { name: "Tourbillon Feu", type: "feu",   power: 35,  acc: 85,  pp: 15, cat: "special", secondary: { chance: 10, status: "burn" } },
 
   pistolet_a_o: { name: "Pistolet à O",   type: "eau",     power: 40,  acc: 100, pp: 25, cat: "special" },
   bulles_d_o:   { name: "Bulles d'O",     type: "eau",     power: 65,  acc: 100, pp: 20, cat: "special" },
@@ -25,9 +25,9 @@ PKMN.MOVES = {
   surf:         { name: "Surf",           type: "eau",     power: 95,  acc: 100, pp: 15, cat: "special" },
   cascade:      { name: "Cascade",        type: "eau",     power: 80,  acc: 100, pp: 15, cat: "physique" },
 
-  tonnelectrik: { name: "Tonnelectrik",   type: "electrik", power: 40,  acc: 100, pp: 30, cat: "special" },
-  eclair:       { name: "Éclair",         type: "electrik", power: 90,  acc: 100, pp: 15, cat: "special" },
-  tonnerre:     { name: "Tonnerre",       type: "electrik", power: 110, acc: 70,  pp: 10, cat: "special" },
+  tonnelectrik: { name: "Tonnelectrik",   type: "electrik", power: 40,  acc: 100, pp: 30, cat: "special", secondary: { chance: 10, status: "paralysis" } },
+  eclair:       { name: "Éclair",         type: "electrik", power: 90,  acc: 100, pp: 15, cat: "special", secondary: { chance: 10, status: "paralysis" } },
+  tonnerre:     { name: "Tonnerre",       type: "electrik", power: 110, acc: 70,  pp: 10, cat: "special", secondary: { chance: 10, status: "paralysis" } },
 
   fouet_lianes: { name: "Fouet Lianes",   type: "plante",  power: 45,  acc: 100, pp: 25, cat: "physique" },
   tranch_herbe: { name: "Tranch'Herbe",   type: "plante",  power: 55,  acc: 95,  pp: 25, cat: "physique" },
@@ -35,14 +35,14 @@ PKMN.MOVES = {
   synthese:     { name: "Synthèse",       type: "plante",  power: null, acc: 100, pp: 5,  cat: "statut", effect: { heal: 0.5, target: "self" } },
   poudre_toxik: { name: "Poudre Toxik",   type: "poison",  power: null, acc: 75,  pp: 35, cat: "statut", effect: { status: "poison", target: "foe" } },
 
-  poudreuse:    { name: "Poudreuse",      type: "glace",   power: 40,  acc: 100, pp: 25, cat: "special" },
-  huile_glacee: { name: "Huile Glacée",   type: "glace",   power: 95,  acc: 100, pp: 10, cat: "special" },
+  poudreuse:    { name: "Poudreuse",      type: "glace",   power: 40,  acc: 100, pp: 25, cat: "special", secondary: { chance: 10, status: "freeze" } },
+  huile_glacee: { name: "Huile Glacée",   type: "glace",   power: 95,  acc: 100, pp: 10, cat: "special", secondary: { chance: 10, status: "freeze" } },
 
   poing_karate: { name: "Poing Karaté",   type: "combat",  power: 50,  acc: 100, pp: 25, cat: "physique" },
   double_pied:  { name: "Double Pied",    type: "combat",  power: 30,  acc: 100, pp: 30, cat: "physique", hits: 2 },
 
   dard_venin:   { name: "Dard-Venin",     type: "poison",  power: 15,  acc: 100, pp: 35, cat: "physique" },
-  sombre_toxine:{ name: "Sombre Toxine",  type: "poison",  power: null, acc: 90,  pp: 10, cat: "statut", effect: { status: "poison", target: "foe" } },
+  sombre_toxine:{ name: "Sombre Toxine",  type: "poison",  power: null, acc: 90,  pp: 10, cat: "statut", effect: { status: "toxic", target: "foe" } },
 
   seisme:       { name: "Séisme",         type: "sol",     power: 100, acc: 100, pp: 10, cat: "physique" },
   ball_seisme:  { name: "Ball'Seisme",    type: "sol",     power: 100, acc: 100, pp: 10, cat: "physique" },
@@ -53,8 +53,10 @@ PKMN.MOVES = {
   pika_pika:    { name: "Piqué",          type: "vol",     power: 140, acc: 100, pp: 5,  cat: "physique" },
 
   choc_mental:  { name: "Choc Mental",    type: "psy",     power: 65,  acc: 100, pp: 20, cat: "special" },
-  psyko:        { name: "Psyko",          type: "psy",     power: 90,  acc: 100, pp: 10, cat: "special" },
+  psyko:        { name: "Psyko",          type: "psy",     power: 90,  acc: 100, pp: 10, cat: "special", secondary: { chance: 10, confuse: true } },
   lueur:        { name: "Lueur",          type: "psy",     power: null, acc: 100, pp: 20, cat: "statut", effect: { stat: "spd", target: "self", stages: 1 } },
+  poudre_dodo:  { name: "Poudre Dodo",    type: "plante",  power: null, acc: 75,  pp: 15, cat: "statut", effect: { status: "sleep", target: "foe" } },
+  regard_confus:{ name: "Regard Confus",  type: "psy",     power: null, acc: 100, pp: 20, cat: "statut", effect: { confuse: true, target: "foe" } },
 
   ligotage:     { name: "Ligotage",       type: "insecte", power: 15,  acc: 90,  pp: 20, cat: "physique" },
   dard_pin:     { name: "Dard-Pin",       type: "insecte", power: 25,  acc: 85,  pp: 20, cat: "physique", hits: 3 },

@@ -142,6 +142,7 @@ PKMN.StarterState = {
         const start = PKMN.MAPS[PKMN.START_MAP].playerStart;
         PKMN.Player.x = start.x;
         PKMN.Player.y = start.y;
+        PKMN.Player.lastCenter = { mapKey: PKMN.START_MAP, x: start.x, y: start.y };
         PKMN.saveGame();
         PKMN.switchState("overworld");
       } else if (key === "Escape") {
@@ -300,10 +301,13 @@ PKMN.PartyState = {
   }
 };
 
-// ---------- Sac (objets, pierres d'évolution) ----------
+// ---------- Sac (objets, pierres d'évolution, soins) ----------
 PKMN.BagState = {
   onEnter() { this.phase = "items"; this.sel = 0; this.targetSel = 0; this.message = null; this.pendingItem = null; },
-  itemList() { return Object.keys(PKMN.Player.bag).filter((k) => PKMN.Player.bag[k] > 0); },
+  itemList() {
+    // Les Poké Ball ne s'utilisent qu'en combat, pas depuis ce menu.
+    return Object.keys(PKMN.Player.bag).filter((k) => k !== "pokeball" && PKMN.Player.bag[k] > 0);
+  },
   onKey(key) {
     if (this.message) {
       if (key === "Enter" || key === " ") this.message = null;
@@ -315,7 +319,11 @@ PKMN.BagState = {
       if (!items.length) return;
       if (key === "ArrowDown") this.sel = (this.sel + 1) % items.length;
       if (key === "ArrowUp") this.sel = (this.sel - 1 + items.length) % items.length;
-      if (key === "Enter" || key === " ") { this.pendingItem = items[this.sel]; this.phase = "target"; this.targetSel = 0; }
+      if (key === "Enter" || key === " ") {
+        const chosen = items[this.sel];
+        if (chosen === "repel") { this.useRepel(); return; }
+        this.pendingItem = chosen; this.phase = "target"; this.targetSel = 0;
+      }
       return;
     }
     if (this.phase === "target") {
@@ -327,15 +335,31 @@ PKMN.BagState = {
       return;
     }
   },
+  useRepel() {
+    PKMN.Player.repelSteps = PKMN.ITEMS.repel.steps;
+    PKMN.Player.bag.repel--;
+    PKMN.saveGame();
+    this.message = `Répulsif actif pour ${PKMN.ITEMS.repel.steps} pas !`;
+  },
   useItemOn(mon) {
-    const result = PKMN.tryEvolveWithStone(mon, this.pendingItem);
-    if (result.evolved) {
-      PKMN.Player.bag[this.pendingItem]--;
-      PKMN.saveGame();
-      this.message = `${result.from} évolue en ${result.to} !`;
-    } else {
-      this.message = "Ça n'a aucun effet...";
+    const key = this.pendingItem;
+    const species = PKMN.speciesOf(mon);
+    if (key.startsWith("pierre_")) {
+      const result = PKMN.tryEvolveWithStone(mon, key);
+      if (result.evolved) { PKMN.Player.bag[key]--; this.message = `${result.from} évolue en ${result.to} !`; }
+      else this.message = "Ça n'a aucun effet...";
+    } else if (key === "potion") {
+      if (mon.hp <= 0) this.message = "Ce Pokémon est K.O. !";
+      else if (mon.hp >= mon.maxHp) this.message = "Les PV sont déjà au maximum !";
+      else { mon.hp = Math.min(mon.maxHp, mon.hp + PKMN.ITEMS.potion.healAmount); PKMN.Player.bag.potion--; this.message = `${species.name} récupère des PV !`; }
+    } else if (key === "antidote") {
+      if (mon.status !== "poison" && mon.status !== "toxic") this.message = "Ça n'aurait aucun effet !";
+      else { mon.status = null; mon.statusCounter = 0; PKMN.Player.bag.antidote--; this.message = `${species.name} est soigné du poison !`; }
+    } else if (key === "revive") {
+      if (mon.hp > 0) this.message = "Ce Pokémon n'est pas K.O. !";
+      else { mon.hp = Math.max(1, Math.floor(mon.maxHp / 2)); PKMN.Player.bag.revive--; this.message = `${species.name} est ranimé !`; }
     }
+    PKMN.saveGame();
     this.phase = "items";
     this.sel = 0;
   },
@@ -432,6 +456,141 @@ PKMN.MartState = {
 
     if (this.message) PKMN.drawTextBox(ctx, this.message);
     else PKMN.drawTextBox(ctx, "Entrée: acheter · Échap: sortir", { noPrompt: true });
+  }
+};
+
+// ---------- Boîte PC ----------
+PKMN.PCState = {
+  onEnter() {
+    this.focus = "party";
+    this.partySel = 0;
+    this.boxSel = 0;
+    this.phase = "list";
+    this.actionSel = 0;
+    this.message = null;
+  },
+  onKey(key) {
+    if (this.message) {
+      if (key === "Enter" || key === " ") this.message = null;
+      return;
+    }
+    const partyLen = PKMN.Player.party.length;
+    const boxLen = PKMN.Player.box.length;
+    if (this.phase === "list") {
+      if (key === "ArrowLeft" || key === "ArrowRight") this.focus = this.focus === "party" ? "box" : "party";
+      if (this.focus === "party") {
+        if (key === "ArrowDown") this.partySel = (this.partySel + 1) % partyLen;
+        if (key === "ArrowUp") this.partySel = (this.partySel - 1 + partyLen) % partyLen;
+      } else if (boxLen > 0) {
+        if (key === "ArrowDown") this.boxSel = (this.boxSel + 1) % boxLen;
+        if (key === "ArrowUp") this.boxSel = (this.boxSel - 1 + boxLen) % boxLen;
+      }
+      if (key === "Escape") { PKMN.switchState("overworld"); return; }
+      if (key === "Enter" || key === " ") {
+        if (this.focus === "box" && boxLen === 0) return;
+        this.phase = "action"; this.actionSel = 0;
+      }
+      return;
+    }
+    if (this.phase === "action") {
+      const items = this.actionItems();
+      if (key === "ArrowDown") this.actionSel = (this.actionSel + 1) % items.length;
+      if (key === "ArrowUp") this.actionSel = (this.actionSel - 1 + items.length) % items.length;
+      if (key === "Escape") this.phase = "list";
+      if (key === "Enter" || key === " ") this.chooseAction(items[this.actionSel]);
+      return;
+    }
+    if (this.phase === "confirm_release") {
+      if (key === "Enter" || key === " ") this.doRelease();
+      if (key === "Escape") this.phase = "action";
+      return;
+    }
+  },
+  actionItems() {
+    const items = [];
+    if (this.focus === "party") { if (PKMN.Player.party.length > 1) items.push("Déposer"); items.push("Relâcher"); }
+    else { if (PKMN.Player.party.length < 6) items.push("Retirer"); items.push("Relâcher"); }
+    items.push("Retour");
+    return items;
+  },
+  chooseAction(choice) {
+    if (choice === "Retour") { this.phase = "list"; return; }
+    if (choice === "Relâcher") { this.phase = "confirm_release"; return; }
+    if (choice === "Déposer") {
+      PKMN.Player.depositToBox(this.partySel);
+      this.partySel = Math.min(this.partySel, PKMN.Player.party.length - 1);
+      PKMN.saveGame();
+      this.message = "Pokémon déposé en boîte.";
+    } else if (choice === "Retirer") {
+      PKMN.Player.withdrawFromBox(this.boxSel);
+      this.boxSel = Math.max(0, Math.min(this.boxSel, PKMN.Player.box.length - 1));
+      PKMN.saveGame();
+      this.message = "Pokémon ajouté à l'équipe.";
+    }
+    this.phase = "list";
+  },
+  doRelease() {
+    if (this.focus === "party") {
+      const ok = PKMN.Player.releaseFromParty(this.partySel);
+      this.message = ok ? "Pokémon relâché..." : "Il te faut garder au moins un Pokémon !";
+      this.partySel = Math.max(0, Math.min(this.partySel, PKMN.Player.party.length - 1));
+    } else {
+      PKMN.Player.releaseFromBox(this.boxSel);
+      this.boxSel = Math.max(0, Math.min(this.boxSel, PKMN.Player.box.length - 1));
+      this.message = "Pokémon relâché...";
+    }
+    PKMN.saveGame();
+    this.phase = "list";
+  },
+  render(ctx) {
+    ctx.fillStyle = "#1c2833";
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 20px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Boîte PC", 16, 26);
+
+    const drawList = (title, list, selIndex, x, w, focused) => {
+      ctx.fillStyle = focused ? "#f4d03f" : "#7f8c8d";
+      ctx.font = "bold 13px sans-serif";
+      ctx.fillText(title, x, 48);
+      const visible = 6;
+      const scroll = Math.max(0, Math.min(selIndex - 2, Math.max(0, list.length - visible)));
+      for (let i = 0; i < visible; i++) {
+        const idx = scroll + i;
+        if (idx >= list.length) break;
+        const mon = list[idx];
+        const species = PKMN.speciesOf(mon);
+        const y = 58 + i * 30;
+        if (focused && idx === selIndex) { ctx.fillStyle = "#34495e"; ctx.fillRect(x - 4, y - 4, w, 26); }
+        ctx.fillStyle = mon.hp <= 0 ? "#e74c3c" : "#fff";
+        ctx.font = "13px sans-serif";
+        ctx.fillText(`${species.name} Nv.${mon.level}`, x, y + 14);
+      }
+      if (list.length === 0) { ctx.fillStyle = "#7f8c8d"; ctx.font = "12px sans-serif"; ctx.fillText("(vide)", x, 62); }
+    };
+
+    drawList(`Équipe (${PKMN.Player.party.length}/6)`, PKMN.Player.party, this.partySel, 16, 220, this.focus === "party");
+    drawList(`Boîte (${PKMN.Player.box.length})`, PKMN.Player.box, this.boxSel, 250, 220, this.focus === "box");
+
+    if (this.phase === "action") {
+      const list = this.focus === "party" ? PKMN.Player.party : PKMN.Player.box;
+      const sel = this.focus === "party" ? this.partySel : this.boxSel;
+      const x = this.focus === "party" ? 16 : 250;
+      const items = this.actionItems();
+      PKMN.drawMenu(ctx, x, 58 + Math.min(sel, 5) * 30, items, this.actionSel, { w: 170 });
+    }
+
+    if (this.phase === "confirm_release") {
+      const list = this.focus === "party" ? PKMN.Player.party : PKMN.Player.box;
+      const sel = this.focus === "party" ? this.partySel : this.boxSel;
+      const species = PKMN.speciesOf(list[sel]);
+      PKMN.drawTextBox(ctx, `Relâcher ${species.name} pour de bon ? (Entrée=oui, Échap=non)`);
+    } else if (this.message) {
+      PKMN.drawTextBox(ctx, this.message);
+    } else {
+      PKMN.drawTextBox(ctx, "Flèches: naviguer · Entrée: options · Échap: sortir", { noPrompt: true });
+    }
   }
 };
 

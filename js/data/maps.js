@@ -1,6 +1,6 @@
 // Cartes en tuiles (grille de caractères). Chaque caractère = un type de tuile.
 // Légende: '#' mur/arbre (bloqué) | '.' chemin | '"' herbe haute (rencontre) |
-// 'C'/'D' porte (téléportation) | 'H' tuile de soin | 'M' Poké Mart | '<'/'>' sortie de route
+// 'C'/'D' porte (téléportation) | 'H' tuile de soin | 'M' Poké Mart | 'P' Boîte PC | '<'/'>' sortie de route
 window.PKMN = window.PKMN || {};
 
 PKMN.TILE_INFO = {
@@ -11,6 +11,7 @@ PKMN.TILE_INFO = {
   "D": { blocked: false, warp: true },
   "H": { blocked: false, heal: true },
   "M": { blocked: false, mart: true },
+  "P": { blocked: false, pc: true },
   "<": { blocked: false, warp: true },
   ">": { blocked: false, warp: true }
 };
@@ -43,7 +44,7 @@ PKMN.MAPS = {
     tiles: [
       "########",
       "#......#",
-      "#..H...#",
+      "#..H.P.#",
       "#......#",
       "#......#",
       "####D###"
@@ -137,7 +138,7 @@ PKMN.MAPS = {
     tiles: [
       "########",
       "#......#",
-      "#..H...#",
+      "#..H.P.#",
       "#......#",
       "#......#",
       "####D###"

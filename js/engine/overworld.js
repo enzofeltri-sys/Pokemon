@@ -111,6 +111,17 @@ function drawMart(ctx, px, py) {
   ctx.fillText("$", px + TILE / 2, py + TILE - 8);
 }
 
+function drawPC(ctx, px, py) {
+  ctx.fillStyle = "#455a64";
+  ctx.fillRect(px + 5, py + 4, TILE - 10, TILE - 10);
+  ctx.fillStyle = "#29434c";
+  ctx.fillRect(px + 8, py + 7, TILE - 16, TILE - 20);
+  ctx.fillStyle = "#4fc3f7";
+  ctx.fillRect(px + 10, py + 9, TILE - 20, 4);
+  ctx.fillStyle = "#cfd8dc";
+  ctx.fillRect(px + 9, py + TILE - 12, TILE - 18, 4);
+}
+
 function drawHeal(ctx, px, py) {
   ctx.fillStyle = "#eaf6ff";
   ctx.fillRect(px, py, TILE, TILE);
@@ -196,7 +207,7 @@ PKMN.OverworldState = {
       return;
     }
     if (this.menuOpen) {
-      const items = ["Équipe", "Sac", "Pokédex", "Sauvegarder", "Fermer"];
+      const items = ["Équipe", "Sac", "Boîte PC", "Pokédex", "Sauvegarder", "Fermer"];
       if (key === "ArrowDown") this.menuSel = (this.menuSel + 1) % items.length;
       if (key === "ArrowUp") this.menuSel = (this.menuSel - 1 + items.length) % items.length;
       if (key === "Escape") this.menuOpen = false;
@@ -205,6 +216,7 @@ PKMN.OverworldState = {
         this.menuOpen = false;
         if (choice === "Équipe") { PKMN.PartyState.returnTo = "overworld"; PKMN.switchState("party"); }
         else if (choice === "Sac") PKMN.switchState("bag");
+        else if (choice === "Boîte PC") PKMN.switchState("pc");
         else if (choice === "Pokédex") PKMN.switchState("pokedex");
         else if (choice === "Sauvegarder") { PKMN.saveGame(); this.message = "Partie sauvegardée !"; }
       }
@@ -258,6 +270,8 @@ PKMN.OverworldState = {
     if (info.heal) {
       const hurt = PKMN.Player.party.some((m) => m.hp < m.maxHp || m.status);
       PKMN.healParty(PKMN.Player.party);
+      const doorWarp = Object.values(map.warps)[0];
+      if (doorWarp) PKMN.Player.lastCenter = { mapKey: doorWarp.toMap, x: doorWarp.x, y: doorWarp.y };
       if (hurt) this.message = "Votre équipe est soignée !";
       return;
     }
@@ -265,8 +279,16 @@ PKMN.OverworldState = {
       PKMN.switchState("mart");
       return;
     }
-    if (info.grass && Math.random() < (map.encounterRate || 0)) {
-      this.startEncounter(map);
+    if (info.pc) {
+      PKMN.switchState("pc");
+      return;
+    }
+    if (info.grass) {
+      if (PKMN.Player.repelSteps > 0) {
+        PKMN.Player.repelSteps--;
+      } else if (Math.random() < (map.encounterRate || 0)) {
+        this.startEncounter(map);
+      }
     }
   },
 
@@ -312,6 +334,7 @@ PKMN.OverworldState = {
         else if (tile === '"') drawTallGrass(ctx, sx, sy, seed);
         else if (tile === "C" || tile === "D") drawDoor(ctx, sx, sy, map.indoor);
         else if (tile === "M") drawMart(ctx, sx, sy);
+        else if (tile === "P") drawPC(ctx, sx, sy);
         else if (tile === "H") drawHeal(ctx, sx, sy);
         else if (tile === "<" || tile === ">") drawWarp(ctx, sx, sy, tile);
         else if (map.indoor) drawFloor(ctx, sx, sy, tx, ty);
@@ -333,13 +356,13 @@ PKMN.OverworldState = {
     ctx.fillText(map.name, 8, 16);
 
     if (this.menuOpen) {
-      PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, ["Équipe", "Sac", "Pokédex", "Sauvegarder", "Fermer"], this.menuSel);
+      PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, ["Équipe", "Sac", "Boîte PC", "Pokédex", "Sauvegarder", "Fermer"], this.menuSel);
       ctx.fillStyle = "rgba(0,0,0,0.6)";
-      ctx.fillRect(PKMN.CANVAS_W - 160, 200, 150, 26);
+      ctx.fillRect(PKMN.CANVAS_W - 160, 226, 150, 26);
       ctx.fillStyle = "#f4d03f";
       ctx.font = "13px sans-serif";
       ctx.textAlign = "left";
-      ctx.fillText(`Argent: ${PKMN.Player.money}₽`, PKMN.CANVAS_W - 152, 217);
+      ctx.fillText(`Argent: ${PKMN.Player.money}₽`, PKMN.CANVAS_W - 152, 243);
     }
     if (this.message) {
       PKMN.drawTextBox(ctx, this.message);

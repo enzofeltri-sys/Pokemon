@@ -8,10 +8,13 @@ PKMN.ITEMS = {
   pierre_plante: { name: "Pierre Plante" },
   pierre_lune: { name: "Pierre Lune" },
   pokeball: { name: "Poké Ball", price: 200, category: "ball" },
-  potion: { name: "Potion", price: 300, category: "heal", healAmount: 20 }
+  potion: { name: "Potion", price: 300, category: "heal", healAmount: 20 },
+  antidote: { name: "Antidote", price: 100, category: "cure" },
+  revive: { name: "Rappel", price: 1500, category: "revive" },
+  repel: { name: "Répulsif", price: 350, category: "repel", steps: 100 }
 };
 
-PKMN.MART_STOCK = ["pokeball", "potion"];
+PKMN.MART_STOCK = ["pokeball", "potion", "antidote", "revive", "repel"];
 
 // Évoli est un cas particulier: une même espèce évolue différemment
 // selon la pierre utilisée.
