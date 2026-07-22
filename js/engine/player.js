@@ -39,11 +39,12 @@ PKMN.addEVs = function (mon, yieldObj) {
   if (hpGain > 0) mon.hp = Math.min(mon.maxHp, mon.hp + hpGain);
 };
 
-// Courbe linéaire volontairement généreuse: le ratio gain/besoin reste
-// stable à tous les niveaux (~2-4 victoires par niveau), contrairement à une
-// courbe exponentielle qui rend la montée de niveau de plus en plus lente.
+// Courbe fidèle au groupe "Moyenne Rapide" des vrais jeux (XP cumulé = niveau^3).
+// XP nécessaire pour passer de `level` à `level+1` = (level+1)^3 - level^3.
+// Ça grimpe fort avec le niveau: atteindre le niveau 100 est un vrai objectif
+// long terme, pas juste quelques combats de plus.
 PKMN.xpToNextLevel = function (level) {
-  return 20 * level + 30;
+  return Math.pow(level + 1, 3) - Math.pow(level, 3);
 };
 
 PKMN.createPokemon = function (speciesId, level) {

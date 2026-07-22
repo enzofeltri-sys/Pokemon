@@ -22,8 +22,9 @@ function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) 
   return { dmg, eff };
 }
 
+// Formule des jeux originaux: XP de base de l'espèce × son niveau / 7.
 function expReward(species, level) {
-  return 20 + level * 4 + (species.stage || 1) * 10 + (species.legendary ? 200 : 0);
+  return Math.max(1, Math.floor((species.baseExp * level) / 7));
 }
 
 function moneyReward(level) {

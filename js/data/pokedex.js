@@ -168,12 +168,18 @@ for (const row of PKMN.POKEDEX_RAW) {
   // EV rapporté à la victoire = 1 (2 pour un légendaire) dans la statistique la plus élevée,
   // comme dans les jeux originaux (ex: Ptéra rapporte de la Vitesse).
   const topStat = Object.keys(baseStats).reduce((a, b) => (baseStats[b] > baseStats[a] ? b : a));
+  const statTotal = hp + atk + def + spa + spd + spe;
+  // XP de base façon jeux originaux: corrélée à la force globale du Pokémon,
+  // avec un bonus pour les légendaires (ils rapportent proportionnellement plus).
+  let baseExp = 8 + Math.floor(statTotal / 4);
+  if (legendary) baseExp = Math.floor(baseExp * 1.4);
   PKMN.POKEDEX[id] = {
     id, name,
     types: type2 ? [type1, type2] : [type1],
     baseStats,
     evoLevel, evoId, stage, legendary,
     evYield: { [topStat]: legendary ? 2 : 1 },
+    baseExp,
     spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
     spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`
   };
