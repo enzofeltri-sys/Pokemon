@@ -21,11 +21,17 @@ PKMN.initGame = function (canvas) {
 
   const NAV_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "Enter"]);
 
+  PKMN.dispatchKey = function (key) {
+    const state = PKMN.STATES[PKMN.currentStateName];
+    if (state && state.onKey) state.onKey(key);
+  };
+
   window.addEventListener("keydown", (e) => {
     if (NAV_KEYS.has(e.key)) e.preventDefault();
-    const state = PKMN.STATES[PKMN.currentStateName];
-    if (state && state.onKey) state.onKey(e.key, e);
+    PKMN.dispatchKey(e.key);
   });
+
+  if (PKMN.initTouchControls) PKMN.initTouchControls();
 
   PKMN.switchState("title");
 

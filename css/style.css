@@ -1,6 +1,11 @@
+* {
+  box-sizing: border-box;
+}
+
 html, body {
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
   background: #111;
   color: #eee;
   font-family: "Segoe UI", sans-serif;
@@ -23,8 +28,10 @@ canvas {
   image-rendering: pixelated;
   border: 4px solid #f4d03f;
   border-radius: 6px;
-  width: 480px;
-  height: 400px;
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  touch-action: none;
 }
 
 .hint {
@@ -38,4 +45,69 @@ canvas {
   color: #666;
   max-width: 480px;
   margin: 10px auto 0;
+}
+
+#touch-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 480px;
+  margin: 18px auto 0;
+  padding: 0 8px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#dpad {
+  display: grid;
+  grid-template-columns: 48px 48px 48px;
+  grid-template-rows: 48px 48px 48px;
+  grid-template-areas:
+    ".    up    ."
+    "left .     right"
+    ".    down  .";
+  gap: 2px;
+}
+
+.dpad-btn {
+  background: #34495e;
+  color: #fff;
+  border: 2px solid #1c2833;
+  border-radius: 6px;
+  font-size: 18px;
+  touch-action: none;
+}
+.dpad-btn.up { grid-area: up; }
+.dpad-btn.left { grid-area: left; }
+.dpad-btn.right { grid-area: right; }
+.dpad-btn.down { grid-area: down; }
+.dpad-btn.pressed,
+.action-btn.pressed {
+  background: #f4d03f;
+  color: #111;
+}
+
+#action-buttons {
+  display: flex;
+  gap: 14px;
+}
+
+.action-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #e74c3c;
+  color: #fff;
+  border: 2px solid #7a1f13;
+  font-size: 20px;
+  font-weight: bold;
+  touch-action: none;
+}
+.action-btn.b-btn { background: #7f8c8d; border-color: #4d5656; margin-top: 20px; }
+
+@media (min-width: 700px) {
+  .desktop-only { display: block; }
+}
+@media (max-width: 699px) {
+  .desktop-only { display: none; }
 }

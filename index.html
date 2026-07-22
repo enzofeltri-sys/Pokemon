@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>Pokémon — Édition Perso</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -9,9 +10,23 @@
   <div id="game-wrap">
     <h1>Pokémon — Édition Perso</h1>
     <canvas id="game" width="480" height="400"></canvas>
-    <p class="hint">
+    <p class="hint desktop-only">
       Flèches directionnelles pour te déplacer · Entrée / Espace pour valider ou ouvrir le menu · Échap pour revenir
     </p>
+
+    <div id="touch-controls">
+      <div id="dpad">
+        <button type="button" class="dpad-btn up" data-key="ArrowUp">▲</button>
+        <button type="button" class="dpad-btn left" data-key="ArrowLeft">◀</button>
+        <button type="button" class="dpad-btn right" data-key="ArrowRight">▶</button>
+        <button type="button" class="dpad-btn down" data-key="ArrowDown">▼</button>
+      </div>
+      <div id="action-buttons">
+        <button type="button" class="action-btn b-btn" data-key="Escape">B</button>
+        <button type="button" class="action-btn a-btn" data-key="Enter">A</button>
+      </div>
+    </div>
+
     <p class="disclaimer">
       Projet fan réalisé pour un usage strictement personnel. Pokémon et les noms associés sont
       la propriété de Nintendo / Game Freak / The Pokémon Company.
@@ -28,6 +43,7 @@
   <script src="js/engine/ui.js"></script>
   <script src="js/engine/overworld.js"></script>
   <script src="js/engine/battle.js"></script>
+  <script src="js/engine/touch.js"></script>
   <script src="js/engine/game.js"></script>
   <script src="js/main.js"></script>
 </body>
