@@ -150,6 +150,50 @@ PKMN.TRAINERS = {
     name: "Terrakin",
     team: [{ species: 95, level: 45 }, { species: 76, level: 47 }],
     reward: 2000,
-    onWin: [{ badge: "badge8" }, { setFlag: "beat_gym8", value: true }]
+    onWin: [{ badge: "badge8" }, { setFlag: "beat_gym8", value: true }, { setFlag: "all_badges_campaign1", value: true }]
+  },
+
+  elite1_toxine: {
+    name: "Toxine",
+    team: [{ species: 89, level: 46 }, { species: 34, level: 48 }],
+    reward: 1500,
+    onWin: [{ setFlag: "beat_elite1", value: true }]
+  },
+
+  elite2_kojiro: {
+    name: "Kojiro",
+    team: [{ species: 107, level: 46 }, { species: 68, level: 48 }],
+    reward: 1700,
+    onWin: [{ setFlag: "beat_elite2", value: true }]
+  },
+
+  elite3_miroir: {
+    name: "Miroir",
+    team: [{ species: 64, level: 46 }, { species: 65, level: 48 }],
+    reward: 1900,
+    onWin: [{ setFlag: "beat_elite3", value: true }]
+  },
+
+  elite4_drake: {
+    name: "Drake",
+    team: [{ species: 148, level: 47 }, { species: 149, level: 49 }],
+    reward: 2100,
+    onWin: [{ setFlag: "beat_elite4", value: true }]
+  },
+
+  league_champion: {
+    name: "Kian",
+    team() {
+      const baseId = PKMN.rivalStarterId();
+      const stage2 = PKMN.POKEDEX[baseId].evoId || baseId;
+      const stage3 = PKMN.POKEDEX[stage2].evoId || stage2;
+      return [
+        { species: 143, level: 48 },
+        { species: 130, level: 50 },
+        { species: stage3, level: 51 }
+      ];
+    },
+    reward: 3000,
+    onWin: [{ setFlag: "beat_champion1", value: true }]
   }
 };

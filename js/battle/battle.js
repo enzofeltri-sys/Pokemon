@@ -660,21 +660,21 @@ PKMN.BattleState = {
         msgs.push(`Tu trouves ${money}₽ !`);
       }
       PKMN.saveGame();
+      // Cas rare: les dégâts de statut en fin de tour peuvent mettre K.O. notre
+      // dernier Pokémon le même tour où l'adversaire tombe aussi — le combat est
+      // gagné, mais il faut quand même soigner/rentrer au centre plutôt que de
+      // laisser le joueur repartir avec une équipe entièrement K.O.
+      if (!PKMN.Player.party.some((m) => m.hp > 0)) {
+        this.blackoutToCenter(msgs);
+        return;
+      }
       this.showMessages(msgs, () => { this.phase = "end"; });
       return;
     }
     if (this.active.hp <= 0) {
       const alive = PKMN.Player.party.some((m) => m.hp > 0);
       if (!alive) {
-        this.showMessages(["Tu n'as plus de Pokémon en état de combattre...", "Tu cours au centre Pokémon le plus proche."], () => {
-          PKMN.healParty(PKMN.Player.party);
-          const lc = PKMN.Player.lastCenter || { mapKey: PKMN.START_MAP, x: PKMN.MAPS[PKMN.START_MAP].playerStart.x, y: PKMN.MAPS[PKMN.START_MAP].playerStart.y };
-          PKMN.Player.mapKey = lc.mapKey;
-          PKMN.Player.x = lc.x;
-          PKMN.Player.y = lc.y;
-          PKMN.saveGame();
-          PKMN.switchState("overworld");
-        });
+        this.blackoutToCenter();
         return;
       }
       this.forcedSwitch = true;
@@ -683,6 +683,19 @@ PKMN.BattleState = {
     }
     this.phase = "main_menu";
     this.menuSel = 0;
+  },
+
+  blackoutToCenter(prefixMsgs) {
+    const msgs = [...(prefixMsgs || []), "Tu n'as plus de Pokémon en état de combattre...", "Tu cours au centre Pokémon le plus proche."];
+    this.showMessages(msgs, () => {
+      PKMN.healParty(PKMN.Player.party);
+      const lc = PKMN.Player.lastCenter || { mapKey: PKMN.START_MAP, x: PKMN.MAPS[PKMN.START_MAP].playerStart.x, y: PKMN.MAPS[PKMN.START_MAP].playerStart.y };
+      PKMN.Player.mapKey = lc.mapKey;
+      PKMN.Player.x = lc.x;
+      PKMN.Player.y = lc.y;
+      PKMN.saveGame();
+      PKMN.switchState("overworld");
+    });
   },
 
   render(ctx) {

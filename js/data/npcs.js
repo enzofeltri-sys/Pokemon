@@ -953,5 +953,204 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town10: [
+    {
+      id: "badaud_zenithia",
+      name: "Historien",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "H",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Zénithia n'existe que pour la Ligue.", "Chaque génération de Dresseurs y écrit son nom, ou l'oublie."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_zenithia",
+      name: "Ancien Champion",
+      x: 10, y: 7, facing: "left",
+      color: "#34495e", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: [
+              "La Main Noire ? J'ai entendu ce nom, dans mon temps déjà.",
+              "Si elle refait surface, ce n'est pas un badge de plus qui réglera le problème.",
+              "Sois prêt à autre chose que des combats de Dresseurs, plus tard."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint6", value: true }],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  league_hall: [
+    {
+      id: "elite1_toxine",
+      name: "Toxine",
+      x: 4, y: 16, facing: "down",
+      color: "#7d3c98", letter: "T",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "all_badges_campaign1", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_elite1" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: {
+            text: ["Reviens quand tu auras rassemblé les 8 badges de cette région."],
+            next: null
+          },
+          avant_combat: {
+            text: [
+              "Je suis Toxine, premier membre du Conseil des 4.",
+              "Le poison ne pardonne pas la moindre erreur."
+            ],
+            effects: [{ startTrainerBattle: "elite1_toxine" }]
+          },
+          apres_defaite: {
+            text: ["Le suivant t'attend plus haut."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "elite2_kojiro",
+      name: "Kojiro",
+      x: 4, y: 12, facing: "down",
+      color: "#a04000", letter: "K",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_elite1", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_elite2" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: {
+            text: ["Tu dois d'abord affronter Toxine."],
+            next: null
+          },
+          avant_combat: {
+            text: [
+              "Je suis Kojiro, deuxième membre du Conseil.",
+              "Le combat rapproché ne laisse aucune place au doute."
+            ],
+            effects: [{ startTrainerBattle: "elite2_kojiro" }]
+          },
+          apres_defaite: {
+            text: ["Continue. Miroir t'attend."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "elite3_miroir",
+      name: "Miroir",
+      x: 4, y: 8, facing: "down",
+      color: "#a569bd", letter: "M",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_elite2", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_elite3" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: {
+            text: ["Tu dois d'abord affronter Kojiro."],
+            next: null
+          },
+          avant_combat: {
+            text: [
+              "Je suis Miroir, troisième membre du Conseil.",
+              "Voyons si ton esprit est aussi solide que ton équipe."
+            ],
+            effects: [{ startTrainerBattle: "elite3_miroir" }]
+          },
+          apres_defaite: {
+            text: ["Drake se tient juste devant toi."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "elite4_drake",
+      name: "Drake",
+      x: 4, y: 4, facing: "down",
+      color: "#1a5276", letter: "D",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_elite3", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_elite4" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: {
+            text: ["Tu dois d'abord affronter Miroir."],
+            next: null
+          },
+          avant_combat: {
+            text: [
+              "Je suis Drake, dernier membre du Conseil des 4.",
+              "Après moi, il ne reste plus que le Champion."
+            ],
+            effects: [{ startTrainerBattle: "elite4_drake" }]
+          },
+          apres_defaite: {
+            text: ["Le Champion t'attend. Bonne chance."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "league_champion",
+      name: "Kian",
+      x: 4, y: 2, facing: "down",
+      color: "#e67e22", letter: "K",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_elite4", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_champion1" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: {
+            text: ["Tu n'iras pas plus loin sans avoir battu tout le Conseil des 4."],
+            next: null
+          },
+          avant_combat: {
+            text: [
+              "... Ça faisait longtemps.",
+              "Je t'attendais ici. Le titre de Champion, ça ne se donne pas — ça se prend.",
+              "Montre-moi ce que tu vaux, une bonne fois pour toutes !"
+            ],
+            effects: [{ startTrainerBattle: "league_champion" }]
+          },
+          apres_defaite: {
+            text: ["...Tu l'as fait.", "Ce titre est à toi, maintenant. Prends-en soin."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
