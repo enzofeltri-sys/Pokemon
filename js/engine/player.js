@@ -77,6 +77,53 @@ PKMN.speciesOf = function (mon) {
   return PKMN.POKEDEX[mon.species];
 };
 
+// Remet à niveau un Pokémon chargé depuis une sauvegarde plus ancienne que la
+// dernière fonctionnalité ajoutée (IV/EV, talents, objets tenus, statuts...).
+// Sans ça, un champ manquant (ex: ivs/evs sur une sauvegarde d'avant leur
+// ajout) fait planter l'écran Infos en silence et bloque la montée de niveau
+// (xp devient NaN). Complète les champs absents avec des valeurs sûres sans
+// toucher à ce qui existe déjà.
+PKMN.normalizePokemon = function (mon) {
+  const species = PKMN.POKEDEX[mon.species];
+  if (!species) return mon;
+
+  if (typeof mon.level !== "number" || Number.isNaN(mon.level)) mon.level = 5;
+  if (typeof mon.xp !== "number" || Number.isNaN(mon.xp)) mon.xp = 0;
+  if (!mon.ivs || typeof mon.ivs.hp !== "number") mon.ivs = PKMN.randomIVs();
+  if (!mon.evs || typeof mon.evs.hp !== "number") mon.evs = PKMN.zeroEVs();
+
+  const recomputed = PKMN.calcStats(species.baseStats, mon.level, mon.ivs, mon.evs);
+  if (!mon.stats || typeof mon.stats.hp !== "number") mon.stats = recomputed;
+  if (typeof mon.maxHp !== "number" || Number.isNaN(mon.maxHp)) mon.maxHp = mon.stats.hp;
+  if (typeof mon.hp !== "number" || Number.isNaN(mon.hp)) mon.hp = mon.maxHp;
+  mon.hp = Math.max(0, Math.min(mon.hp, mon.maxHp));
+
+  if (!Array.isArray(mon.moves) || !mon.moves.length) {
+    mon.moves = PKMN.movesAtLevel(mon.species, mon.level).map((key) => ({ key, pp: PKMN.MOVES[key].pp, maxPp: PKMN.MOVES[key].pp }));
+  } else {
+    mon.moves = mon.moves
+      .filter((m) => PKMN.MOVES[m.key])
+      .map((m) => ({
+        key: m.key,
+        pp: typeof m.pp === "number" ? m.pp : PKMN.MOVES[m.key].pp,
+        maxPp: typeof m.maxPp === "number" ? m.maxPp : PKMN.MOVES[m.key].pp
+      }));
+    if (!mon.moves.length) {
+      mon.moves = PKMN.movesAtLevel(mon.species, mon.level).map((key) => ({ key, pp: PKMN.MOVES[key].pp, maxPp: PKMN.MOVES[key].pp }));
+    }
+  }
+
+  if (!mon.statStages) mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 };
+  if (mon.status === undefined) mon.status = null;
+  if (typeof mon.statusCounter !== "number") mon.statusCounter = 0;
+  if (typeof mon.confused !== "number") mon.confused = 0;
+  if (typeof mon.mustRecharge !== "boolean") mon.mustRecharge = false;
+  if (typeof mon.flinched !== "boolean") mon.flinched = false;
+  if (mon.heldItem === undefined) mon.heldItem = null;
+  if (!mon.caughtWith) mon.caughtWith = "Poké Ball";
+  return mon;
+};
+
 function performEvolution(mon, newSpeciesId) {
   const fromName = PKMN.speciesOf(mon).name;
   const newSpecies = PKMN.POKEDEX[newSpeciesId];

@@ -38,8 +38,8 @@ PKMN.loadGame = function () {
     if (!raw) return false;
     const data = JSON.parse(raw);
     const P = PKMN.Player;
-    P.party = data.party || [];
-    P.box = data.box || [];
+    P.party = (data.party || []).map(PKMN.normalizePokemon);
+    P.box = (data.box || []).map(PKMN.normalizePokemon);
     P.pokedexSeen = new Set(data.pokedexSeen || []);
     P.pokedexCaught = new Set(data.pokedexCaught || []);
     P.bag = data.bag || {};
