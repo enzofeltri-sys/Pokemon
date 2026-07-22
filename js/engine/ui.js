@@ -305,6 +305,61 @@ PKMN.BagState = {
   }
 };
 
+// ---------- Poké Mart ----------
+PKMN.MartState = {
+  onEnter() { this.sel = 0; this.message = null; },
+  onKey(key) {
+    if (this.message) {
+      if (key === "Enter" || key === " ") this.message = null;
+      return;
+    }
+    const items = [...PKMN.MART_STOCK, "sortir"];
+    if (key === "ArrowDown") this.sel = (this.sel + 1) % items.length;
+    if (key === "ArrowUp") this.sel = (this.sel - 1 + items.length) % items.length;
+    if (key === "Escape") { PKMN.switchState("overworld"); return; }
+    if (key === "Enter" || key === " ") {
+      const choice = items[this.sel];
+      if (choice === "sortir") PKMN.switchState("overworld");
+      else this.buy(choice);
+    }
+  },
+  buy(itemKey) {
+    const item = PKMN.ITEMS[itemKey];
+    if (PKMN.Player.money < item.price) {
+      this.message = "Pas assez d'argent !";
+      return;
+    }
+    PKMN.Player.money -= item.price;
+    PKMN.Player.bag[itemKey] = (PKMN.Player.bag[itemKey] || 0) + 1;
+    PKMN.saveGame();
+    this.message = `${item.name} acheté !`;
+  },
+  render(ctx) {
+    ctx.fillStyle = "#1c2833";
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 20px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Poké Mart", 16, 30);
+    ctx.fillStyle = "#f4d03f";
+    ctx.font = "14px sans-serif";
+    ctx.fillText(`Argent: ${PKMN.Player.money}₽`, 16, 52);
+
+    const items = [...PKMN.MART_STOCK, "sortir"];
+    items.forEach((key, i) => {
+      const y = 74 + i * 36;
+      if (i === this.sel) { ctx.fillStyle = "#34495e"; ctx.fillRect(8, y - 4, CW - 16, 32); }
+      ctx.fillStyle = "#fff";
+      ctx.font = "15px sans-serif";
+      const label = key === "sortir" ? "Sortir" : `${PKMN.ITEMS[key].name} — ${PKMN.ITEMS[key].price}₽ (x${PKMN.Player.bag[key] || 0})`;
+      ctx.fillText(label, 16, y + 16);
+    });
+
+    if (this.message) PKMN.drawTextBox(ctx, this.message);
+    else PKMN.drawTextBox(ctx, "Entrée: acheter · Échap: sortir", { noPrompt: true });
+  }
+};
+
 // ---------- Pokédex ----------
 PKMN.PokedexState = {
   onEnter() { this.scroll = 0; },

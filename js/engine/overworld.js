@@ -97,6 +97,20 @@ function drawDoor(ctx, px, py, indoor) {
   ctx.beginPath(); ctx.arc(px + TILE - 12, py + TILE - 12, 1.6, 0, Math.PI * 2); ctx.fill();
 }
 
+function drawMart(ctx, px, py) {
+  drawPath(ctx, px, py, 0.3);
+  ctx.fillStyle = "#2d6ca1";
+  ctx.fillRect(px + 1, py, TILE - 2, 9);
+  ctx.fillStyle = "#1f4d78";
+  ctx.fillRect(px + 1, py + 7, TILE - 2, 3);
+  ctx.fillStyle = "#e8d3a2";
+  ctx.fillRect(px + 6, py + 11, TILE - 12, TILE - 13);
+  ctx.fillStyle = "#2d6ca1";
+  ctx.font = "bold 12px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("$", px + TILE / 2, py + TILE - 8);
+}
+
 function drawHeal(ctx, px, py) {
   ctx.fillStyle = "#eaf6ff";
   ctx.fillRect(px, py, TILE, TILE);
@@ -247,6 +261,10 @@ PKMN.OverworldState = {
       if (hurt) this.message = "Votre équipe est soignée !";
       return;
     }
+    if (info.mart) {
+      PKMN.switchState("mart");
+      return;
+    }
     if (info.grass && Math.random() < (map.encounterRate || 0)) {
       this.startEncounter(map);
     }
@@ -293,6 +311,7 @@ PKMN.OverworldState = {
         if (tile === "#") { map.indoor ? drawWallBrick(ctx, sx, sy) : drawTree(ctx, sx, sy); }
         else if (tile === '"') drawTallGrass(ctx, sx, sy, seed);
         else if (tile === "C" || tile === "D") drawDoor(ctx, sx, sy, map.indoor);
+        else if (tile === "M") drawMart(ctx, sx, sy);
         else if (tile === "H") drawHeal(ctx, sx, sy);
         else if (tile === "<" || tile === ">") drawWarp(ctx, sx, sy, tile);
         else if (map.indoor) drawFloor(ctx, sx, sy, tx, ty);
@@ -315,6 +334,12 @@ PKMN.OverworldState = {
 
     if (this.menuOpen) {
       PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, ["Équipe", "Sac", "Pokédex", "Sauvegarder", "Fermer"], this.menuSel);
+      ctx.fillStyle = "rgba(0,0,0,0.6)";
+      ctx.fillRect(PKMN.CANVAS_W - 160, 200, 150, 26);
+      ctx.fillStyle = "#f4d03f";
+      ctx.font = "13px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(`Argent: ${PKMN.Player.money}₽`, PKMN.CANVAS_W - 152, 217);
     }
     if (this.message) {
       PKMN.drawTextBox(ctx, this.message);

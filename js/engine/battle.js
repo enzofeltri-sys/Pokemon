@@ -26,6 +26,10 @@ function expReward(species, level) {
   return 20 + level * 4 + (species.stage || 1) * 10 + (species.legendary ? 200 : 0);
 }
 
+function moneyReward(level) {
+  return 15 + level * 3;
+}
+
 PKMN.BattleState = {
   startWild(speciesId, level) {
     this.wild = PKMN.createPokemon(speciesId, level);
@@ -88,17 +92,48 @@ PKMN.BattleState = {
       if (key === "Enter" || key === " ") this.choosePartySwitch(this.menuSel);
       return;
     }
+    if (this.phase === "bag_menu") {
+      const items = this.bagItems();
+      if (key === "ArrowDown") this.menuSel = (this.menuSel + 1) % items.length;
+      if (key === "ArrowUp") this.menuSel = (this.menuSel - 1 + items.length) % items.length;
+      if (key === "Escape") { this.phase = "main_menu"; this.menuSel = 0; }
+      if (key === "Enter" || key === " ") this.chooseBagItem(items[this.menuSel]);
+      return;
+    }
     if (this.phase === "end") {
       if (key === "Enter" || key === " ") PKMN.switchState("overworld");
       return;
     }
   },
 
+  bagItems() {
+    const items = ["pokeball", "potion"].filter((k) => (PKMN.Player.bag[k] || 0) > 0);
+    items.push("retour");
+    return items;
+  },
+
   chooseMainMenu(choice) {
     if (choice === "Attaque") { this.phase = "move_menu"; this.menuSel = 0; }
-    else if (choice === "Sac") this.throwBall();
+    else if (choice === "Sac") { this.phase = "bag_menu"; this.menuSel = 0; }
     else if (choice === "Pokémon") { this.forcedSwitch = false; this.phase = "party_menu"; this.menuSel = 0; }
     else if (choice === "Fuite") this.flee();
+  },
+
+  chooseBagItem(key) {
+    if (key === "retour") { this.phase = "main_menu"; this.menuSel = 0; return; }
+    if (key === "pokeball") this.throwBall();
+    else if (key === "potion") this.usePotion();
+  },
+
+  usePotion() {
+    if (this.active.hp >= this.active.maxHp) {
+      this.showMessages(["Les PV sont déjà au maximum !"], () => { this.phase = "bag_menu"; this.menuSel = 0; });
+      return;
+    }
+    PKMN.Player.bag.potion--;
+    this.active.hp = Math.min(this.active.maxHp, this.active.hp + PKMN.ITEMS.potion.healAmount);
+    const species = PKMN.speciesOf(this.active);
+    this.showMessages([`Tu utilises une Potion sur ${species.name} !`, `${species.name} récupère des PV !`], () => this.wildTurnOnly());
   },
 
   chooseMove(index) {
@@ -137,14 +172,16 @@ PKMN.BattleState = {
   },
 
   throwBall() {
-    if (PKMN.Player.party.length >= 6 && !PKMN.Player.party.includes(this.active)) {
-      // impossible en pratique, gardé par sécurité
+    if (!PKMN.Player.bag.pokeball) {
+      this.showMessages(["Tu n'as plus de Poké Ball !"], () => { this.phase = "bag_menu"; this.menuSel = 0; });
+      return;
     }
     const species = PKMN.speciesOf(this.wild);
     if (PKMN.Player.party.length >= 6) {
       this.showMessages(["Ton équipe est déjà complète !"], () => { this.phase = "main_menu"; this.menuSel = 0; });
       return;
     }
+    PKMN.Player.bag.pokeball--;
     const baseRate = species.legendary ? 25 : species.stage === 1 ? 190 : species.stage === 2 ? 120 : 70;
     const hpFactor = 0.2 + 0.8 * (1 - this.wild.hp / this.wild.maxHp);
     const chance = Math.max(0.03, Math.min(0.95, (baseRate / 255) * hpFactor));
@@ -287,9 +324,14 @@ PKMN.BattleState = {
     if (this.wild.hp <= 0) {
       const species = PKMN.speciesOf(this.wild);
       const exp = expReward(species, this.wild.level);
+      const money = moneyReward(this.wild.level);
       const lvlMsgs = PKMN.gainExp(this.active, exp);
+      PKMN.Player.money += money;
       PKMN.saveGame();
-      this.showMessages([`${PKMN.speciesOf(this.active).name} gagne ${exp} points d'expérience !`, ...lvlMsgs], () => { this.phase = "end"; });
+      this.showMessages(
+        [`${PKMN.speciesOf(this.active).name} gagne ${exp} points d'expérience !`, ...lvlMsgs, `Tu trouves ${money}₽ !`],
+        () => { this.phase = "end"; }
+      );
       return;
     }
     if (this.active.hp <= 0) {
@@ -355,6 +397,10 @@ PKMN.BattleState = {
     } else if (this.phase === "party_menu") {
       const items = PKMN.Player.party.map((m) => `${PKMN.speciesOf(m).name} Nv.${m.level} — PV ${Math.max(0, m.hp)}/${m.maxHp}${m.hp <= 0 ? " (K.O.)" : ""}`);
       PKMN.drawMenu(ctx, 10, H - 30 - items.length * 26 - 16, items, this.menuSel, { w: W - 20, lineH: 26 });
+    } else if (this.phase === "bag_menu") {
+      const keys = this.bagItems();
+      const labels = keys.map((k) => k === "retour" ? "Retour" : `${PKMN.ITEMS[k].name} (x${PKMN.Player.bag[k]})`);
+      PKMN.drawMenu(ctx, 10, H - 30 - labels.length * 26 - 16, labels, this.menuSel, { w: W - 20, lineH: 26 });
     } else if (this.phase === "end") {
       PKMN.drawTextBox(ctx, "Appuie sur Entrée pour continuer.");
     }

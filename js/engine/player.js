@@ -124,13 +124,15 @@ PKMN.Player = {
   pokedexSeen: new Set(),
   pokedexCaught: new Set(),
   bag: {},
+  money: 0,
   mapKey: null,
   x: 0,
   y: 0,
   facing: "down",
 
   initBag() {
-    this.bag = { pierre_feu: 2, pierre_eau: 2, pierre_foudre: 2, pierre_plante: 2, pierre_lune: 3 };
+    this.bag = { pierre_feu: 2, pierre_eau: 2, pierre_foudre: 2, pierre_plante: 2, pierre_lune: 3, pokeball: 5, potion: 3 };
+    this.money = 500;
   },
 
   addToParty(speciesId, level) {
