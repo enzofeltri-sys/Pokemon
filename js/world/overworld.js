@@ -35,7 +35,7 @@ function drawGrass(ctx, px, py, seed) {
   }
 }
 
-function drawTallGrass(ctx, px, py, seed) {
+function drawTallGrass(ctx, px, py, seed, time) {
   const P = PKMN.PALETTE;
   ctx.fillStyle = P.tallGrassDark;
   ctx.fillRect(px, py, TILE, TILE);
@@ -46,11 +46,13 @@ function drawTallGrass(ctx, px, py, seed) {
   ctx.lineCap = "round";
   const tufts = [[6, 22], [13, 18], [20, 24], [26, 16], [9, 10], [23, 8], [3, 6], [29, 26]];
   const n = 5 + Math.floor(seed * 3);
+  const t = time || 0;
   for (let i = 0; i < n; i++) {
     const [dx, dy] = tufts[i % tufts.length];
+    const sway = Math.sin(t * 2.2 + seed * 6.28 + i * 1.7) * 2.5;
     ctx.beginPath();
     ctx.moveTo(px + dx - 3, py + dy + 6);
-    ctx.lineTo(px + dx, py + dy - 3);
+    ctx.lineTo(px + dx + sway, py + dy - 3);
     ctx.lineTo(px + dx + 3, py + dy + 6);
     ctx.stroke();
   }
@@ -58,14 +60,15 @@ function drawTallGrass(ctx, px, py, seed) {
   ctx.lineWidth = 1.5;
   for (let i = 0; i < n; i += 2) {
     const [dx, dy] = tufts[i % tufts.length];
+    const sway = Math.sin(t * 2.2 + seed * 6.28 + i * 1.7) * 2.5;
     ctx.beginPath();
     ctx.moveTo(px + dx, py + dy + 5);
-    ctx.lineTo(px + dx, py + dy - 1);
+    ctx.lineTo(px + dx + sway, py + dy - 1);
     ctx.stroke();
   }
 }
 
-function drawTree(ctx, px, py) {
+function drawTree(ctx, px, py, seed, time) {
   const P = PKMN.PALETTE;
   ctx.fillStyle = P.grassMid;
   ctx.fillRect(px, py, TILE, TILE);
@@ -75,6 +78,16 @@ function drawTree(ctx, px, py) {
   ctx.fillRect(px + TILE / 2 - 3, py + TILE - 11, 6, 11);
   ctx.fillStyle = P.woodMid;
   ctx.fillRect(px + TILE / 2 - 3, py + TILE - 11, 2, 11);
+
+  // La ramure se balance doucement autour du sommet du tronc (le tronc, lui,
+  // ne bouge pas) — chaque arbre est déphasé via son seed pour ne pas onduler
+  // tous ensemble comme un seul bloc.
+  const pivotX = px + TILE * 0.5, pivotY = py + TILE - 11;
+  const sway = Math.sin((time || 0) * 1.4 + (seed || 0) * 6.28) * 0.05;
+  ctx.save();
+  ctx.translate(pivotX, pivotY);
+  ctx.rotate(sway);
+  ctx.translate(-pivotX, -pivotY);
   ctx.fillStyle = "#215c28";
   ctx.beginPath(); ctx.arc(px + TILE * 0.5, py + TILE * 0.36, TILE * 0.42, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#2d7a31";
@@ -84,6 +97,7 @@ function drawTree(ctx, px, py) {
   ctx.beginPath(); ctx.arc(px + TILE * 0.42, py + TILE * 0.20, TILE * 0.17, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "rgba(255,255,255,0.14)";
   ctx.beginPath(); ctx.arc(px + TILE * 0.36, py + TILE * 0.16, TILE * 0.09, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
 }
 
 function drawWater(ctx, px, py, seed) {
@@ -239,17 +253,25 @@ function drawWarp(ctx, px, py, dir) {
   ctx.fill();
 }
 
-function drawPlayerSprite(ctx, screenX, screenY, facing, bob) {
+function drawPlayerSprite(ctx, screenX, screenY, facing, bob, walkT, stepParity) {
   const cx = screenX + TILE / 2;
   const topY = screenY + bob;
-  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.save();
+  ctx.filter = "blur(1.2px)";
+  ctx.fillStyle = "rgba(0,0,0,0.3)";
   ctx.beginPath();
   ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2);
   ctx.fill();
+  ctx.restore();
 
+  // Cycle de marche à 2 temps: la jambe "en l'air" se raccourcit et remonte
+  // légèrement, l'autre reste plantée au sol — alterne à chaque pas complet.
+  const phase = Math.sin((walkT || 0) * Math.PI);
+  const liftA = stepParity === 0 ? 3 * phase : 0;
+  const liftB = stepParity === 0 ? 0 : 3 * phase;
   ctx.fillStyle = "#2c3e50";
-  ctx.fillRect(cx - 6, topY + TILE * 0.72, 5, 9);
-  ctx.fillRect(cx + 1, topY + TILE * 0.72, 5, 9);
+  ctx.fillRect(cx - 6, topY + TILE * 0.72 + liftA * 0.4, 5, 9 - liftA);
+  ctx.fillRect(cx + 1, topY + TILE * 0.72 + liftB * 0.4, 5, 9 - liftB);
 
   ctx.fillStyle = "#f2c29a";
   ctx.fillRect(cx - 11, topY + TILE * 0.46, 3, 11);
@@ -274,8 +296,11 @@ function drawPlayerSprite(ctx, screenX, screenY, facing, bob) {
 
 function drawNPCSprite(ctx, screenX, screenY, npc) {
   const cx = screenX + TILE / 2, cy = screenY + TILE / 2;
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
+  ctx.save();
+  ctx.filter = "blur(1.2px)";
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
   ctx.beginPath(); ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
   ctx.fillStyle = npc.color || "#7f8c8d";
   ctx.beginPath(); ctx.arc(cx, cy, TILE * 0.4, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "rgba(255,255,255,0.25)";
@@ -301,6 +326,8 @@ PKMN.OverworldState = {
     // d'un combat ou d'un menu faisait toujours regarder vers le bas, empêchant de
     // reparler tout de suite au PNJ qu'on avait pourtant en face de soi.
     if (!this.facing) this.facing = "down";
+    if (this.stepParity === undefined) this.stepParity = 0;
+    if (this.time === undefined) this.time = 0;
     this.menuOpen = false;
     this.menuSel = 0;
     this.quickMenuOpen = false;
@@ -460,11 +487,13 @@ PKMN.OverworldState = {
     PKMN.Player.x = nx; PKMN.Player.y = ny;
     this.moving = true;
     this.moveT = 0;
+    this.stepParity = 1 - this.stepParity;
     this._arrivalTile = tile;
     this._arrivalMap = map;
   },
 
   update(dt) {
+    this.time = (this.time || 0) + dt;
     if (this.moving) {
       this.moveT += dt / 0.14;
       if (this.moveT >= 1) {
@@ -472,6 +501,56 @@ PKMN.OverworldState = {
         this.moving = false;
         this.onArrive(this._arrivalMap, this._arrivalTile);
       }
+    }
+    this.updateNpcWander(dt);
+  },
+
+  // Petite vie ambiante: chaque PNJ erre au hasard à un pas de sa position de
+  // départ, avec un temps d'attente aléatoire entre deux pas, pour que le
+  // monde ne semble pas figé. Ne touche jamais aux tuiles bloquées, à la
+  // case du joueur, ni à celle visée par un autre PNJ.
+  updateNpcWander(dt) {
+    const map = this.currentMap();
+    const npcs = this.npcsHere();
+    for (const npc of npcs) {
+      if (npc.noWander) continue;
+      if (npc._homeX === undefined) {
+        npc._homeX = npc.x;
+        npc._homeY = npc.y;
+        npc._wanderT = 1.5 + Math.random() * 3;
+        npc._moving = false;
+        npc._moveT = 0;
+      }
+      if (npc._moving) {
+        npc._moveT += dt / 0.5;
+        if (npc._moveT >= 1) {
+          npc._moveT = 1;
+          npc._moving = false;
+          npc.x = npc._toX;
+          npc.y = npc._toY;
+        }
+        continue;
+      }
+      npc._wanderT -= dt;
+      if (npc._wanderT > 0) continue;
+      npc._wanderT = 2 + Math.random() * 3;
+      if (Math.random() < 0.5) continue; // reste immobile ce cycle-ci
+      const dirs = [[0, -1, "up"], [0, 1, "down"], [-1, 0, "left"], [1, 0, "right"]];
+      const [dx, dy, face] = dirs[Math.floor(Math.random() * 4)];
+      const nx = npc.x + dx, ny = npc.y + dy;
+      if (Math.abs(nx - npc._homeX) > 1 || Math.abs(ny - npc._homeY) > 1) continue;
+      const info = PKMN.TILE_INFO[this.tileAt(map, nx, ny)] || { blocked: true };
+      if (info.blocked) continue;
+      if (nx === PKMN.Player.x && ny === PKMN.Player.y) continue;
+      const occupied = npcs.some((o) => o !== npc && (
+        (o.x === nx && o.y === ny) || (o._moving && o._toX === nx && o._toY === ny)
+      ));
+      if (occupied) continue;
+      npc._fromX = npc.x; npc._fromY = npc.y;
+      npc._toX = nx; npc._toY = ny;
+      npc._facing = face;
+      npc._moving = true;
+      npc._moveT = 0;
     }
   },
 
@@ -551,8 +630,8 @@ PKMN.OverworldState = {
         const tile = map.tiles[ty][tx];
         const sx = tx * TILE - camX, sy = ty * TILE - camY;
         const seed = tileSeed(tx, ty);
-        if (tile === "#") { map.cave ? drawCaveWall(ctx, sx, sy) : map.indoor ? drawWallBrick(ctx, sx, sy) : drawTree(ctx, sx, sy); }
-        else if (tile === '"') drawTallGrass(ctx, sx, sy, seed);
+        if (tile === "#") { map.cave ? drawCaveWall(ctx, sx, sy) : map.indoor ? drawWallBrick(ctx, sx, sy) : drawTree(ctx, sx, sy, seed, this.time); }
+        else if (tile === '"') drawTallGrass(ctx, sx, sy, seed, this.time);
         else if (tile === "C" || tile === "D") drawDoor(ctx, sx, sy, map.indoor);
         else if (tile === "M") drawMart(ctx, sx, sy);
         else if (tile === "P") drawPC(ctx, sx, sy);
@@ -567,15 +646,18 @@ PKMN.OverworldState = {
 
     // PNJ
     for (const npc of this.npcsHere()) {
-      const sx = npc.x * TILE - camX, sy = npc.y * TILE - camY;
+      const nx = npc._moving ? npc._fromX + (npc._toX - npc._fromX) * npc._moveT : npc.x;
+      const ny = npc._moving ? npc._fromY + (npc._toY - npc._fromY) * npc._moveT : npc.y;
+      const sx = nx * TILE - camX, sy = ny * TILE - camY;
       if (sx < -TILE || sy < -TILE || sx > PKMN.CANVAS_W || sy > PKMN.CANVAS_H) continue;
-      drawNPCSprite(ctx, sx, sy, npc);
+      const npcBob = npc._moving ? -Math.abs(Math.sin(npc._moveT * Math.PI)) * 2 : 0;
+      drawNPCSprite(ctx, sx, sy + npcBob, npc);
     }
 
     // Joueur
     const screenX = px * TILE - camX, screenY = py * TILE - camY;
     const bob = this.moving ? -Math.abs(Math.sin(this.moveT * Math.PI)) * 3 : 0;
-    drawPlayerSprite(ctx, screenX, screenY, this.facing, bob);
+    drawPlayerSprite(ctx, screenX, screenY, this.facing, bob, this.moving ? this.moveT : 0, this.stepParity);
 
     // HUD nom de la zone
     PKMN.drawBorderedBox(ctx, 6, 6, Math.min(200, ctx.measureText(map.name).width + 40), 26, { r: 4 });
