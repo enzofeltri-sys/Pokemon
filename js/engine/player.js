@@ -257,10 +257,19 @@ PKMN.Player = {
   moral: { loyaute: 0, ambition: 0, methode: 0 },
   options: { multiExp: true },
   quickItem: null,
+  badges: new Set(),
 
   initBag() {
     this.bag = { pierre_feu: 2, pierre_eau: 2, pierre_foudre: 2, pierre_plante: 2, pierre_lune: 3, pokeball: 5, potion: 3 };
     this.money = 500;
+  },
+
+  addBadge(key) {
+    this.badges.add(key);
+  },
+
+  hasBadge(key) {
+    return this.badges.has(key);
   },
 
   getFlag(key) {
@@ -348,4 +357,39 @@ PKMN.Player = {
   isPartyWiped() {
     return this.party.every((m) => m.hp <= 0);
   }
+};
+
+// Starter "qui contre" celui du joueur (triangle des types classique), utilisé
+// par le premier combat du rival pour choisir son équipe dynamiquement.
+PKMN.RIVAL_STARTER_COUNTER = { 1: 4, 4: 7, 7: 1 };
+PKMN.rivalStarterId = function () {
+  const mine = PKMN.Player.party[0] ? PKMN.Player.party[0].species : 1;
+  return PKMN.RIVAL_STARTER_COUNTER[mine] || 4;
+};
+
+// Conditions/effets partagés entre les dialogues (js/engine/dialogue.js) et les
+// combats de Dresseur (récompenses de victoire) — un seul format de données pour
+// scénariser le jeu, quel que soit l'endroit qui le déclenche.
+PKMN.checkStoryCondition = function (cond) {
+  if (!cond) return true;
+  if (cond.flag !== undefined) return !!PKMN.Player.getFlag(cond.flag) === (cond.equals !== false);
+  if (cond.quest !== undefined) return PKMN.Player.questStatus(cond.quest) === cond.status;
+  if (cond.badge !== undefined) return PKMN.Player.hasBadge(cond.badge) === (cond.equals !== false);
+  return true;
+};
+
+PKMN.runStoryEffects = function (effects) {
+  if (!effects) return;
+  for (const eff of effects) {
+    if (eff.give) PKMN.Player.bag[eff.give.item] = (PKMN.Player.bag[eff.give.item] || 0) + (eff.give.amount || 1);
+    if (eff.money) PKMN.Player.money = Math.max(0, PKMN.Player.money + eff.money.delta);
+    if (eff.setFlag) PKMN.Player.setFlag(eff.setFlag, eff.value);
+    if (eff.startQuest) PKMN.Player.startQuest(eff.startQuest);
+    if (eff.advanceQuest) PKMN.Player.setQuestStep(eff.advanceQuest.id, eff.advanceQuest.step);
+    if (eff.completeQuest) PKMN.Player.completeQuest(eff.completeQuest);
+    if (eff.moral) PKMN.Player.adjustMoral(eff.moral.axis, eff.moral.delta);
+    if (eff.heal) PKMN.healParty(PKMN.Player.party);
+    if (eff.badge) PKMN.Player.addBadge(eff.badge);
+  }
+  PKMN.saveGame();
 };

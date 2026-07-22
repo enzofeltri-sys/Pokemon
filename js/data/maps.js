@@ -22,7 +22,7 @@ PKMN.MAPS = {
     tiles: [
       "##############",
       "#............#",
-      "#....C..M....#",
+      "#.D..C..M.D..#",
       "#............#",
       "#............>",
       "#............#",
@@ -33,6 +33,8 @@ PKMN.MAPS = {
     ],
     warps: {
       "5,2": { toMap: "center", x: 4, y: 4 },
+      "2,2": { toMap: "lab", x: 3, y: 4 },
+      "10,2": { toMap: "rivalhouse", x: 3, y: 4 },
       "13,4": { toMap: "route1", x: 1, y: 4 }
     },
     playerStart: { x: 6, y: 6 }
@@ -51,6 +53,38 @@ PKMN.MAPS = {
     ],
     warps: {
       "4,5": { toMap: "town", x: 5, y: 3 }
+    }
+  },
+
+  lab: {
+    name: "Laboratoire",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,5": { toMap: "town", x: 2, y: 3 }
+    }
+  },
+
+  rivalhouse: {
+    name: "Maison",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,5": { toMap: "town", x: 10, y: 3 }
     }
   },
 

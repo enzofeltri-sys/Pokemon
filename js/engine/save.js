@@ -21,7 +21,8 @@ PKMN.saveGame = function () {
     quests: P.quests,
     moral: P.moral,
     options: P.options,
-    quickItem: P.quickItem
+    quickItem: P.quickItem,
+    badges: [...P.badges]
   };
   try {
     localStorage.setItem(PKMN.SAVE_KEY, JSON.stringify(data));
@@ -54,6 +55,7 @@ PKMN.loadGame = function () {
     P.moral = data.moral || { loyaute: 0, ambition: 0, methode: 0 };
     P.options = Object.assign({ multiExp: true }, data.options || {});
     P.quickItem = data.quickItem || null;
+    P.badges = new Set(data.badges || []);
     return P.party.length > 0;
   } catch (e) {
     console.warn("Chargement impossible:", e);

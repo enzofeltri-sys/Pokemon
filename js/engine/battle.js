@@ -105,8 +105,23 @@ function statusTag(mon) {
 
 PKMN.BattleState = {
   startWild(speciesId, level) {
+    this.isTrainer = false;
+    this.trainer = null;
     this.wild = PKMN.createPokemon(speciesId, level);
     this.wildIsNew = !PKMN.Player.pokedexCaught.has(speciesId);
+  },
+
+  // Combat de Dresseur: `trainer` = { name, color, letter, team:[{species,level},...],
+  // reward, onWin (effets façon dialogue, optionnels) }. Contrairement à un combat
+  // sauvage, pas de capture, pas de fuite, et le dresseur enchaîne ses Pokémon.
+  startTrainer(trainer) {
+    this.isTrainer = true;
+    this.trainer = trainer;
+    const team = typeof trainer.team === "function" ? trainer.team() : trainer.team;
+    this.trainerTeam = team.map((t) => PKMN.createPokemon(t.species, t.level));
+    this.trainerIndex = 0;
+    this.wild = this.trainerTeam[0];
+    this.wildIsNew = false;
   },
 
   onEnter() {
@@ -118,7 +133,9 @@ PKMN.BattleState = {
     this.phase = "message";
     this.menuSel = 0;
     const wildSpecies = PKMN.speciesOf(this.wild);
-    const introMsgs = [`Un ${wildSpecies.name} sauvage apparaît !`];
+    const introMsgs = this.isTrainer
+      ? [`${this.trainer.name} veut se battre !`, `${this.trainer.name} envoie ${wildSpecies.name} !`]
+      : [`Un ${wildSpecies.name} sauvage apparaît !`];
     this.triggerSendOut(this.wild, this.active, introMsgs);
     this.triggerSendOut(this.active, this.wild, introMsgs);
     this.queue = introMsgs;
@@ -207,7 +224,8 @@ PKMN.BattleState = {
   },
 
   bagItems() {
-    const items = ["pokeball", "superball", "hyperball", "potion", "antidote"].filter((k) => (PKMN.Player.bag[k] || 0) > 0);
+    const ballKeys = this.isTrainer ? [] : ["pokeball", "superball", "hyperball"];
+    const items = [...ballKeys, "potion", "antidote"].filter((k) => (PKMN.Player.bag[k] || 0) > 0);
     items.push("retour");
     return items;
   },
@@ -216,7 +234,10 @@ PKMN.BattleState = {
     if (choice === "Attaque") { this.phase = "move_menu"; this.menuSel = 0; }
     else if (choice === "Sac") { this.phase = "bag_menu"; this.menuSel = 0; }
     else if (choice === "Pokémon") { this.forcedSwitch = false; this.phase = "party_menu"; this.menuSel = 0; }
-    else if (choice === "Fuite") this.flee();
+    else if (choice === "Fuite") {
+      if (this.isTrainer) this.showMessages(["Impossible de fuir un combat de Dresseur !"], () => { this.phase = "main_menu"; this.menuSel = 0; });
+      else this.flee();
+    }
   },
 
   chooseBagItem(key) {
@@ -605,7 +626,6 @@ PKMN.BattleState = {
     if (this.wild.hp <= 0) {
       const species = PKMN.speciesOf(this.wild);
       const exp = expReward(species, this.wild.level);
-      const money = moneyReward(this.wild.level);
       const msgs = [];
       for (const mon of PKMN.Player.party) {
         if (mon.hp <= 0) continue;
@@ -616,8 +636,29 @@ PKMN.BattleState = {
         const lvlMsgs = PKMN.gainExp(mon, amount);
         msgs.push(`${PKMN.speciesOf(mon).name} gagne ${amount} points d'expérience !`, ...lvlMsgs);
       }
-      PKMN.Player.money += money;
-      msgs.push(`Tu trouves ${money}₽ !`);
+
+      if (this.isTrainer && this.trainerIndex + 1 < this.trainerTeam.length) {
+        this.trainerIndex++;
+        this.wild = this.trainerTeam[this.trainerIndex];
+        const nextSpecies = PKMN.speciesOf(this.wild);
+        msgs.push(`${this.trainer.name} envoie ${nextSpecies.name} !`);
+        PKMN.saveGame();
+        this.showMessages(msgs, () => { this.phase = "main_menu"; this.menuSel = 0; });
+        return;
+      }
+
+      if (this.isTrainer) {
+        msgs.push(`Tu as battu ${this.trainer.name} !`);
+        if (this.trainer.reward) {
+          PKMN.Player.money += this.trainer.reward;
+          msgs.push(`Tu remportes ${this.trainer.reward}₽ !`);
+        }
+        PKMN.runStoryEffects(this.trainer.onWin);
+      } else {
+        const money = moneyReward(this.wild.level);
+        PKMN.Player.money += money;
+        msgs.push(`Tu trouves ${money}₽ !`);
+      }
       PKMN.saveGame();
       this.showMessages(msgs, () => { this.phase = "end"; });
       return;
@@ -657,6 +698,13 @@ PKMN.BattleState = {
     ctx.fillStyle = "#a9d17a";
     ctx.beginPath(); ctx.ellipse(W - 95, skyH + 30, 75, 18, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(120, H - 130, 85, 20, 0, 0, Math.PI * 2); ctx.fill();
+
+    if (this.isTrainer) {
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 13px sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(this.trainer.name, W - 20, 16);
+    }
 
     const wildSpecies = PKMN.speciesOf(this.wild);
     PKMN.drawPanel(ctx, 20, 20, 200, 46, { border: "#1c3f5f", fill: "#fdfefe", r: 8 });

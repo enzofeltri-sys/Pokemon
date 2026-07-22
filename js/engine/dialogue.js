@@ -8,10 +8,23 @@ PKMN.DialogueState = {
   startWith(npc) {
     this.npc = npc;
     PKMN.Player.incTalkCount(npc.id);
-    this.nodeId = npc.dialogue.start;
+    this.nodeId = this.resolveStart(npc.dialogue);
     this.choices = [];
     this.choiceSel = 0;
+    this._battleTriggered = false;
     this.loadNode();
+  },
+
+  // `dialogue.start` peut être soit un id de nœud fixe, soit une liste
+  // [{condition, node}, ...] évaluée dans l'ordre (le premier match gagne),
+  // avec `dialogue.default` comme repli — utile pour un PNJ dont le discours
+  // change une fois une condition remplie (dresseur déjà battu, quête finie...).
+  resolveStart(dialogueDef) {
+    if (typeof dialogueDef.start === "string") return dialogueDef.start;
+    for (const entry of dialogueDef.start) {
+      if (PKMN.checkStoryCondition(entry.condition)) return entry.node;
+    }
+    return dialogueDef.default || dialogueDef.start[0].node;
   },
 
   currentNode() {
@@ -27,30 +40,31 @@ PKMN.DialogueState = {
   },
 
   checkCondition(cond) {
-    if (!cond) return true;
-    if (cond.flag !== undefined) return !!PKMN.Player.getFlag(cond.flag) === (cond.equals !== false);
-    if (cond.quest !== undefined) return PKMN.Player.questStatus(cond.quest) === cond.status;
-    return true;
+    return PKMN.checkStoryCondition(cond);
   },
 
+  // Sépare l'effet spécial `startTrainerBattle` (qui bascule vers l'écran de
+  // combat) des effets "standards" délégués à PKMN.runStoryEffects.
   runEffects(effects) {
     if (!effects) return;
+    const standard = [];
     for (const eff of effects) {
-      if (eff.give) PKMN.Player.bag[eff.give.item] = (PKMN.Player.bag[eff.give.item] || 0) + (eff.give.amount || 1);
-      if (eff.money) PKMN.Player.money = Math.max(0, PKMN.Player.money + eff.money.delta);
-      if (eff.setFlag) PKMN.Player.setFlag(eff.setFlag, eff.value);
-      if (eff.startQuest) PKMN.Player.startQuest(eff.startQuest);
-      if (eff.advanceQuest) PKMN.Player.setQuestStep(eff.advanceQuest.id, eff.advanceQuest.step);
-      if (eff.completeQuest) PKMN.Player.completeQuest(eff.completeQuest);
-      if (eff.moral) PKMN.Player.adjustMoral(eff.moral.axis, eff.moral.delta);
-      if (eff.heal) PKMN.healParty(PKMN.Player.party);
+      if (eff.startTrainerBattle) {
+        const trainer = PKMN.TRAINERS[eff.startTrainerBattle];
+        PKMN.BattleState.startTrainer(trainer);
+        PKMN.switchState("battle");
+        this._battleTriggered = true;
+      } else {
+        standard.push(eff);
+      }
     }
-    PKMN.saveGame();
+    PKMN.runStoryEffects(standard);
   },
 
   afterText() {
     const node = this.currentNode();
     this.runEffects(node.effects);
+    if (this._battleTriggered) { this._battleTriggered = false; return; }
     const choices = (node.choices || []).filter((c) => this.checkCondition(c.condition));
     if (choices.length) {
       this.choices = choices;
@@ -95,6 +109,7 @@ PKMN.DialogueState = {
       if (key === "Enter" || key === " ") {
         const choice = this.choices[this.choiceSel];
         this.runEffects(choice.effects);
+        if (this._battleTriggered) { this._battleTriggered = false; return; }
         if (choice.next) {
           this.nodeId = choice.next;
           this.loadNode();
