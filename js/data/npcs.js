@@ -209,5 +209,125 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  route3: [
+    {
+      id: "rival_kian_route3",
+      name: "Kian",
+      x: 10, y: 7, facing: "up",
+      color: "#e67e22", letter: "K",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_rival2" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Tiens, je m'attendais bien à te croiser par ici.",
+              "Voyons si l'écart entre nous s'est vraiment creusé !"
+            ],
+            effects: [{ startTrainerBattle: "rival2" }]
+          },
+          apres_defaite: {
+            text: ["Toujours devant... pour l'instant.", "Je ne compte pas en rester là."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym2: [
+    {
+      id: "gym2_trainer",
+      name: "Recrue Ardente",
+      x: 4, y: 4, facing: "down",
+      color: "#d35400", letter: "R",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym2_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Sens la chaleur monter !"],
+            effects: [{ startTrainerBattle: "gym2_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Ignis t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym2_leader",
+      name: "Ignis",
+      x: 4, y: 2, facing: "down",
+      color: "#e74c3c", letter: "I",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym2" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Ignis, Champion de l'Arène du Feu.",
+              "Espérons que tu tiennes la chaleur du combat !"
+            ],
+            effects: [{ startTrainerBattle: "gym2_leader" }]
+          },
+          apres_defaite: {
+            text: ["Ce badge est mérité.", "La suite de la route ne sera pas plus tendre."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town3: [
+    {
+      id: "badaud_braseforge",
+      name: "Forgeron",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "F",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Ici, la chaleur des forges ne s'éteint jamais.", "Ça forge le caractère, à ce qu'on dit."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_braseforge",
+      name: "Passant inquiet",
+      x: 10, y: 7, facing: "left",
+      color: "#34495e", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint2" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "Ces gens en noir dont on parlait à Sylverive... on les a revus par ici.",
+              "Ils posaient des questions étranges près de l'Arène.",
+              "Tiens, ça pourra t'être utile si tu croises des ennuis."
+            ],
+            effects: [{ give: { item: "antidote", amount: 2 } }, { setFlag: "heard_main_noire_hint2", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Reste sur tes gardes."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };

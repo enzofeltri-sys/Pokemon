@@ -30,5 +30,30 @@ PKMN.TRAINERS = {
     team: [{ species: 17, level: 11 }, { species: 22, level: 13 }],
     reward: 500,
     onWin: [{ badge: "badge1" }, { setFlag: "beat_gym1", value: true }]
+  },
+
+  rival2: {
+    name: "Kian",
+    team() {
+      const baseId = PKMN.rivalStarterId();
+      const evoId = PKMN.POKEDEX[baseId].evoId || baseId;
+      return [{ species: evoId, level: 16 }];
+    },
+    reward: 400,
+    onWin: [{ setFlag: "beat_rival2", value: true }]
+  },
+
+  gym2_trainer: {
+    name: "Recrue Ardente",
+    team: [{ species: 58, level: 14 }],
+    reward: 250,
+    onWin: [{ setFlag: "beat_gym2_trainer", value: true }]
+  },
+
+  gym2_leader: {
+    name: "Ignis",
+    team: [{ species: 77, level: 16 }, { species: 59, level: 18 }],
+    reward: 800,
+    onWin: [{ badge: "badge2" }, { setFlag: "beat_gym2", value: true }]
   }
 };
