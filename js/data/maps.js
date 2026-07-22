@@ -18,7 +18,7 @@ PKMN.TILE_INFO = {
 
 PKMN.MAPS = {
   town: {
-    name: "Bourg Origine",
+    name: "Val Brumeux",
     tiles: [
       "##############",
       "#............#",
@@ -147,7 +147,7 @@ PKMN.MAPS = {
   },
 
   town2: {
-    name: "Ville Prisma",
+    name: "Sylverive",
     tiles: [
       "##############",
       "#............#",
@@ -184,7 +184,7 @@ PKMN.MAPS = {
   },
 
   gym1: {
-    name: "Arène Prisma",
+    name: "Arène du Vent",
     indoor: true,
     tiles: [
       "########",

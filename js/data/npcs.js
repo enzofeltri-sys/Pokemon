@@ -126,7 +126,7 @@ PKMN.NPCS = {
   gym1: [
     {
       id: "gym1_trainer",
-      name: "Junior Prisma",
+      name: "Novice des Vents",
       x: 4, y: 4, facing: "down",
       color: "#2980b9", letter: "J",
       type: "utile",
@@ -157,7 +157,7 @@ PKMN.NPCS = {
         nodes: {
           avant_combat: {
             text: [
-              "Je suis Aoede, Championne de l'Arène Prisma.",
+              "Je suis Aoede, Championne de l'Arène du Vent.",
               "Montre-moi ce que tu vaux !"
             ],
             effects: [{ startTrainerBattle: "gym1_leader" }]
@@ -173,7 +173,7 @@ PKMN.NPCS = {
 
   town2: [
     {
-      id: "badaud_prisma",
+      id: "badaud_sylverive",
       name: "Badaud",
       x: 5, y: 6, facing: "down",
       color: "#7f8c8d", letter: "B",
@@ -182,14 +182,14 @@ PKMN.NPCS = {
         start: "a",
         nodes: {
           a: {
-            text: ["Ville Prisma, la fierté de la région !", "Enfin... quand tout va bien."],
+            text: ["Sylverive, la fierté de la région d'Elyndor !", "Enfin... quand tout va bien."],
             next: null
           }
         }
       }
     },
     {
-      id: "informateur_prisma",
+      id: "informateur_sylverive",
       name: "Passant nerveux",
       x: 10, y: 7, facing: "left",
       color: "#34495e", letter: "?",
