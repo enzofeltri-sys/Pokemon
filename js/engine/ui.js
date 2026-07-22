@@ -779,17 +779,34 @@ PKMN.QuestState = {
 
 // ---------- Options ----------
 PKMN.OptionsState = {
-  onEnter() { this.sel = 0; },
+  onEnter() { this.sel = 0; this.confirmingRefresh = false; this.refreshing = false; },
   items() {
-    return [`Multi Exp : ${PKMN.Player.options.multiExp ? "Activé" : "Désactivé"}`, "Retour"];
+    return [
+      `Multi Exp : ${PKMN.Player.options.multiExp ? "Activé" : "Désactivé"}`,
+      "Vider le cache et recharger",
+      "Retour"
+    ];
   },
   onKey(key) {
+    if (this.refreshing) return;
+    if (this.confirmingRefresh) {
+      if (key === "Enter" || key === " ") {
+        this.confirmingRefresh = false;
+        this.refreshing = true;
+        PKMN.hardRefresh();
+      } else if (key === "Escape") {
+        this.confirmingRefresh = false;
+      }
+      return;
+    }
     const items = this.items();
     if (key === "ArrowDown") this.sel = (this.sel + 1) % items.length;
     if (key === "ArrowUp") this.sel = (this.sel - 1 + items.length) % items.length;
     if (key === "Escape") { PKMN.switchState("overworld"); return; }
     if (key === "Enter" || key === " ") {
-      if (this.sel === 0) { PKMN.Player.options.multiExp = !PKMN.Player.options.multiExp; PKMN.saveGame(); }
+      const choice = items[this.sel];
+      if (choice.startsWith("Multi Exp")) { PKMN.Player.options.multiExp = !PKMN.Player.options.multiExp; PKMN.saveGame(); }
+      else if (choice === "Vider le cache et recharger") { this.confirmingRefresh = true; }
       else PKMN.switchState("overworld");
     }
   },
@@ -801,6 +818,12 @@ PKMN.OptionsState = {
     ctx.textAlign = "left";
     ctx.fillText("Options", 16, 30);
     PKMN.drawMenu(ctx, 16, 50, this.items(), this.sel, { w: 260 });
-    PKMN.drawTextBox(ctx, "Entrée: changer/valider · Échap: revenir", { noPrompt: true });
+    if (this.refreshing) {
+      PKMN.drawTextBox(ctx, "Nettoyage du cache et rechargement...", { noPrompt: true });
+    } else if (this.confirmingRefresh) {
+      PKMN.drawTextBox(ctx, "Vider le cache et recharger maintenant ? Ta sauvegarde est conservée. (Entrée = oui, Échap = non)");
+    } else {
+      PKMN.drawTextBox(ctx, "Entrée: changer/valider · Échap: revenir", { noPrompt: true });
+    }
   }
 };
