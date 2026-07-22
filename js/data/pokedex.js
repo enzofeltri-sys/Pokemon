@@ -1,0 +1,215 @@
+// Pokédex Génération 1 (151 Pokémon) - noms, types et statistiques officiels.
+// Simplification volontaire: toutes les évolutions se déclenchent par niveau
+// (les évolutions par pierre/échange du jeu original sont converties en paliers de niveau).
+window.PKMN = window.PKMN || {};
+
+// [id, nom, type1, type2, hp, atk, def, spa, spd, vit, niveauEvo, idEvo, stade, legendaire]
+PKMN.POKEDEX_RAW = [
+  [1,"Bulbizarre","plante","poison",45,49,49,65,65,45,16,2,1,false],
+  [2,"Herbizarre","plante","poison",60,62,63,80,80,60,32,3,2,false],
+  [3,"Florizarre","plante","poison",80,82,83,100,100,80,null,null,3,false],
+  [4,"Salamèche","feu",null,39,52,43,60,50,65,16,5,1,false],
+  [5,"Reptincel","feu",null,58,64,58,80,65,80,36,6,2,false],
+  [6,"Dracaufeu","feu","vol",78,84,78,109,85,100,null,null,3,false],
+  [7,"Carapuce","eau",null,44,48,65,50,64,43,16,8,1,false],
+  [8,"Carabaffe","eau",null,59,63,80,65,80,58,36,9,2,false],
+  [9,"Tortank","eau",null,79,83,100,85,105,78,null,null,3,false],
+  [10,"Chenipan","insecte",null,45,30,35,20,20,45,7,11,1,false],
+  [11,"Chrysacier","insecte",null,50,20,55,25,25,30,10,12,2,false],
+  [12,"Papilusion","insecte","vol",60,45,50,90,80,70,null,null,3,false],
+  [13,"Aspicot","insecte","poison",40,35,30,20,20,50,7,14,1,false],
+  [14,"Coconfort","insecte","poison",45,25,50,25,25,35,10,15,2,false],
+  [15,"Dardargnan","insecte","poison",65,90,40,45,80,75,null,null,3,false],
+  [16,"Roucool","normal","vol",40,45,40,35,35,56,18,17,1,false],
+  [17,"Roucoups","normal","vol",63,60,55,50,50,71,36,18,2,false],
+  [18,"Roucarnage","normal","vol",83,80,75,70,70,101,null,null,3,false],
+  [19,"Rattata","normal",null,30,56,35,25,35,72,20,20,1,false],
+  [20,"Rattatac","normal",null,55,81,60,50,70,97,null,null,2,false],
+  [21,"Piafabec","normal","vol",40,60,30,31,31,70,20,22,1,false],
+  [22,"Rapasdepic","normal","vol",65,90,65,61,61,100,null,null,2,false],
+  [23,"Abo","poison",null,35,60,44,40,54,55,22,24,1,false],
+  [24,"Arbok","poison",null,60,85,69,65,79,80,null,null,2,false],
+  [25,"Pikachu","electrik",null,35,55,40,50,50,90,20,26,1,false],
+  [26,"Raichu","electrik",null,60,90,55,90,80,110,null,null,2,false],
+  [27,"Sabelette","sol",null,50,75,85,20,30,40,22,28,1,false],
+  [28,"Sablaireau","sol",null,75,100,110,45,55,65,null,null,2,false],
+  [29,"Nidoran♀","poison",null,55,47,52,40,40,41,16,30,1,false],
+  [30,"Nidorina","poison",null,70,62,67,55,55,56,32,31,2,false],
+  [31,"Nidoqueen","poison","sol",90,92,87,75,85,76,null,null,3,false],
+  [32,"Nidoran♂","poison",null,46,57,40,40,40,50,16,33,1,false],
+  [33,"Nidorino","poison",null,61,72,57,55,55,65,32,34,2,false],
+  [34,"Nidoking","poison","sol",81,102,77,85,75,85,null,null,3,false],
+  [35,"Mélofée","normal",null,70,45,48,60,65,35,25,36,1,false],
+  [36,"Mélodelfe","normal",null,95,70,73,95,90,60,null,null,2,false],
+  [37,"Goupix","feu",null,38,41,40,50,65,65,25,38,1,false],
+  [38,"Feunard","feu",null,73,76,75,81,100,100,null,null,2,false],
+  [39,"Rondoudou","normal",null,115,45,20,45,25,20,20,40,1,false],
+  [40,"Grodoudou","normal",null,140,70,45,85,50,45,null,null,2,false],
+  [41,"Nosferapti","poison","vol",40,45,35,30,40,55,22,42,1,false],
+  [42,"Nosferalto","poison","vol",75,80,70,65,75,90,null,null,2,false],
+  [43,"Mystherbe","plante","poison",45,50,55,75,65,30,21,44,1,false],
+  [44,"Ortide","plante","poison",65,65,70,85,75,40,32,45,2,false],
+  [45,"Rafflesia","plante","poison",75,80,85,110,90,50,null,null,3,false],
+  [46,"Paras","insecte","plante",35,70,55,45,55,25,24,47,1,false],
+  [47,"Parasect","insecte","plante",60,95,80,60,80,30,null,null,2,false],
+  [48,"Mimitoss","insecte","poison",60,55,50,40,55,45,31,49,1,false],
+  [49,"Aéromite","insecte","poison",70,65,60,90,75,90,null,null,2,false],
+  [50,"Taupiqueur","sol",null,10,55,25,35,45,95,26,51,1,false],
+  [51,"Triopikeur","sol",null,35,100,50,50,70,120,null,null,2,false],
+  [52,"Miaouss","normal",null,40,45,35,40,40,90,28,53,1,false],
+  [53,"Persian","normal",null,65,70,60,65,65,115,null,null,2,false],
+  [54,"Psykokwak","eau",null,50,52,48,65,50,55,33,55,1,false],
+  [55,"Akwakwak","eau",null,80,82,78,95,80,85,null,null,2,false],
+  [56,"Férosinge","combat",null,65,80,35,35,45,70,28,57,1,false],
+  [57,"Colossinge","combat",null,90,105,60,60,70,95,null,null,2,false],
+  [58,"Caninos","feu",null,55,70,45,70,50,60,30,59,1,false],
+  [59,"Arcanin","feu",null,90,110,80,100,80,95,null,null,2,false],
+  [60,"Ptitard","eau",null,40,50,40,40,40,90,25,61,1,false],
+  [61,"Têtarte","eau",null,65,65,65,50,50,90,36,62,2,false],
+  [62,"Tartard","eau","combat",90,95,95,70,90,70,null,null,3,false],
+  [63,"Abra","psy",null,25,20,15,105,55,90,16,64,1,false],
+  [64,"Kadabra","psy",null,40,35,30,120,70,105,36,65,2,false],
+  [65,"Alakazam","psy",null,55,50,45,135,95,120,null,null,3,false],
+  [66,"Machoc","combat",null,70,80,50,35,35,35,28,67,1,false],
+  [67,"Machopeur","combat",null,80,100,70,50,60,45,40,68,2,false],
+  [68,"Mackogneur","combat",null,90,130,80,65,85,55,null,null,3,false],
+  [69,"Chétiflor","plante","poison",50,75,35,70,30,40,21,70,1,false],
+  [70,"Boustiflor","plante","poison",65,90,50,85,45,55,32,71,2,false],
+  [71,"Empiflor","plante","poison",80,105,65,100,70,70,null,null,3,false],
+  [72,"Tentacool","eau","poison",40,40,35,50,100,70,30,73,1,false],
+  [73,"Tentacruel","eau","poison",80,70,65,80,120,100,null,null,2,false],
+  [74,"Racaillou","roche","sol",40,80,100,30,30,20,25,75,1,false],
+  [75,"Gravalanch","roche","sol",55,95,115,45,45,35,40,76,2,false],
+  [76,"Grolem","roche","sol",80,120,130,55,65,45,null,null,3,false],
+  [77,"Ponyta","feu",null,50,85,55,65,65,90,40,78,1,false],
+  [78,"Galopa","feu",null,65,100,70,80,80,105,null,null,2,false],
+  [79,"Ramoloss","eau","psy",90,65,65,40,40,15,37,80,1,false],
+  [80,"Flagadoss","eau","psy",95,75,110,100,80,30,null,null,2,false],
+  [81,"Magnéti","electrik","acier",25,35,70,95,55,45,30,82,1,false],
+  [82,"Magnéton","electrik","acier",50,60,95,120,70,70,null,null,2,false],
+  [83,"Canarticho","normal","vol",52,65,55,58,62,60,null,null,2,false],
+  [84,"Doduo","normal","vol",35,85,45,35,35,75,31,85,1,false],
+  [85,"Dodrio","normal","vol",60,110,70,60,60,110,null,null,2,false],
+  [86,"Otaria","eau","glace",65,45,55,45,70,45,34,87,1,false],
+  [87,"Lamantine","eau","glace",90,70,80,70,95,70,null,null,2,false],
+  [88,"Tadmorv","poison",null,80,80,50,40,50,25,38,89,1,false],
+  [89,"Grotadmorv","poison",null,105,105,75,65,100,50,null,null,2,false],
+  [90,"Kokiyas","eau",null,30,65,100,45,25,40,30,91,1,false],
+  [91,"Crustabri","eau","glace",50,95,180,85,45,70,null,null,2,false],
+  [92,"Fantominus","spectre","poison",30,35,30,100,35,80,25,93,1,false],
+  [93,"Spectrum","spectre","poison",45,50,45,115,55,95,40,94,2,false],
+  [94,"Ectoplasma","spectre","poison",60,65,60,130,75,110,null,null,3,false],
+  [95,"Onix","roche","sol",35,45,160,30,45,70,null,null,2,false],
+  [96,"Soporifik","psy",null,60,48,45,43,90,42,26,97,1,false],
+  [97,"Hypnomade","psy",null,85,73,70,73,115,67,null,null,2,false],
+  [98,"Krabby","eau",null,30,105,90,25,25,50,28,99,1,false],
+  [99,"Krabboss","eau",null,55,130,115,50,50,75,null,null,2,false],
+  [100,"Voltorbe","electrik",null,40,30,50,55,55,100,30,101,1,false],
+  [101,"Électrode","electrik",null,60,50,70,80,80,150,null,null,2,false],
+  [102,"Noeunoeuf","plante","psy",60,40,80,60,45,40,32,103,1,false],
+  [103,"Noadkoko","plante","psy",95,55,105,105,65,65,null,null,2,false],
+  [104,"Osselait","sol",null,50,50,95,40,50,35,28,105,1,false],
+  [105,"Ossatueur","sol",null,60,80,125,50,80,55,null,null,2,false],
+  [106,"Kicklee","combat",null,50,120,53,35,110,87,null,null,2,false],
+  [107,"Tygnon","combat",null,50,105,79,35,110,76,null,null,2,false],
+  [108,"Excelangue","normal",null,90,55,75,60,75,30,null,null,2,false],
+  [109,"Smogo","poison",null,40,65,95,60,45,35,35,110,1,false],
+  [110,"Smogogo","poison",null,65,90,120,85,70,60,null,null,2,false],
+  [111,"Rhinocorne","sol","roche",80,85,95,30,30,25,42,112,1,false],
+  [112,"Rhinoféros","sol","roche",105,130,120,45,45,40,null,null,2,false],
+  [113,"Leveinard","normal",null,250,5,5,35,105,50,null,null,2,false],
+  [114,"Saquedeneu","plante",null,65,55,115,100,40,60,null,null,2,false],
+  [115,"Kangourex","normal",null,105,95,80,40,80,90,null,null,2,false],
+  [116,"Hypotrempe","eau",null,30,40,70,70,25,60,32,117,1,false],
+  [117,"Hypocéan","eau",null,55,65,95,95,45,85,null,null,2,false],
+  [118,"Poissirène","eau",null,45,67,60,35,50,63,33,119,1,false],
+  [119,"Poissoroy","eau",null,80,92,65,65,80,68,null,null,2,false],
+  [120,"Stari","eau",null,30,45,55,70,55,85,30,121,1,false],
+  [121,"Staross","eau","psy",60,75,85,100,85,115,null,null,2,false],
+  [122,"M. Mime","psy",null,40,45,65,100,120,90,null,null,2,false],
+  [123,"Insécateur","insecte","vol",70,110,80,55,80,105,null,null,2,false],
+  [124,"Lippoutou","glace","psy",65,50,35,115,95,95,null,null,2,false],
+  [125,"Élektek","electrik",null,65,83,57,95,85,105,null,null,2,false],
+  [126,"Magmar","feu",null,65,95,57,100,85,93,null,null,2,false],
+  [127,"Scarabrute","insecte",null,65,125,100,55,70,85,null,null,2,false],
+  [128,"Tauros","normal",null,75,100,95,40,70,110,null,null,2,false],
+  [129,"Magicarpe","eau",null,20,10,55,15,20,80,20,130,1,false],
+  [130,"Léviator","eau","vol",95,125,79,60,100,81,null,null,2,false],
+  [131,"Lokhlass","eau","glace",130,85,80,85,95,60,null,null,3,false],
+  [132,"Métamorph","normal",null,48,48,48,48,48,48,null,null,2,false],
+  [133,"Évoli","normal",null,55,55,50,45,65,55,null,null,1,false],
+  [134,"Aquali","eau",null,130,65,60,110,95,65,null,null,2,false],
+  [135,"Voltali","electrik",null,65,65,60,110,95,130,null,null,2,false],
+  [136,"Pyroli","feu",null,65,130,60,95,110,65,null,null,2,false],
+  [137,"Porygon","normal",null,65,60,70,85,75,40,null,null,2,false],
+  [138,"Amonita","roche","eau",35,40,100,90,55,35,40,139,1,false],
+  [139,"Amonistar","roche","eau",70,60,125,115,70,55,null,null,2,false],
+  [140,"Kabuto","roche","eau",30,80,90,55,45,55,40,141,1,false],
+  [141,"Kabutops","roche","eau",60,115,105,65,70,80,null,null,2,false],
+  [142,"Ptéra","roche","vol",80,105,65,60,75,130,null,null,3,false],
+  [143,"Ronflex","normal",null,160,110,65,65,110,30,null,null,2,false],
+  [144,"Artikodin","glace","vol",90,85,100,95,125,85,null,null,4,true],
+  [145,"Électhor","electrik","vol",90,90,85,125,90,100,null,null,4,true],
+  [146,"Sulfura","feu","vol",90,100,90,125,85,90,null,null,4,true],
+  [147,"Minidraco","dragon",null,41,64,45,50,50,50,30,148,1,false],
+  [148,"Draco","dragon",null,61,84,65,70,70,70,55,149,2,false],
+  [149,"Dracolosse","dragon","vol",91,134,95,100,100,80,null,null,3,false],
+  [150,"Mewtwo","psy",null,106,110,90,154,90,130,null,null,4,true],
+  [151,"Mew","psy",null,100,100,100,100,100,100,null,null,4,true]
+];
+
+// Pools de capacités par type, pour construire un moveset thématique automatiquement.
+PKMN.TYPE_MOVES = {
+  normal:   ["charge","griffe","vive_attaque","rugissement","hurlement","mimi_queue","cognobscur","ecrasface","danse_lames","rapidite"],
+  feu:      ["flammeche","lance_flammes","deflagration","tourbillon_feu"],
+  eau:      ["pistolet_a_o","bulles_d_o","cascade","surf","hydrocanon"],
+  electrik: ["tonnelectrik","cage_eclair","eclair","tonnerre"],
+  plante:   ["fouet_lianes","draine","tranch_herbe","mega_sangsue","synthese","lance_soleil"],
+  glace:    ["poudreuse","huile_glacee"],
+  combat:   ["poing_karate","double_pied"],
+  poison:   ["dard_venin","poudre_toxik","sombre_toxine"],
+  sol:      ["seisme","ball_seisme"],
+  vol:      ["cyclone","attak_air","cru_aile","pika_pika"],
+  psy:      ["choc_mental","lueur","psyko","repos"],
+  insecte:  ["ligotage","dard_pin","megacorne"],
+  roche:    ["jet_pierres","eboulement"],
+  spectre:  ["moukill","ball_ombre"],
+  dragon:   ["rage_dragon","draco_rage"],
+  tenebres: ["morsure"],
+  acier:    ["boul_armure","tete_de_fer"]
+};
+
+PKMN.buildMoveset = function (type1, type2) {
+  const pool1 = PKMN.TYPE_MOVES[type1] || [];
+  const pool2 = type2 ? (PKMN.TYPE_MOVES[type2] || []) : [];
+  const moves = [];
+  const take = (pool, n) => {
+    for (const m of pool) {
+      if (moves.length >= 4) break;
+      if (!moves.includes(m) && n-- > 0) moves.push(m);
+    }
+  };
+  if (type2) {
+    take(pool1, 2);
+    take(pool2, 2);
+  } else {
+    take(pool1, 4);
+  }
+  // Complète avec des capacités Normal universelles si besoin
+  if (moves.length < 4) take(PKMN.TYPE_MOVES.normal, 4 - moves.length);
+  return moves.slice(0, 4);
+};
+
+PKMN.POKEDEX = {};
+for (const row of PKMN.POKEDEX_RAW) {
+  const [id, name, type1, type2, hp, atk, def, spa, spd, spe, evoLevel, evoId, stage, legendary] = row;
+  PKMN.POKEDEX[id] = {
+    id, name,
+    types: type2 ? [type1, type2] : [type1],
+    baseStats: { hp, atk, def, spa, spd, spe },
+    evoLevel, evoId, stage, legendary,
+    moves: PKMN.buildMoveset(type1, type2),
+    spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+    spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`
+  };
+}

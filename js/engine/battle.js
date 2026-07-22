@@ -1,0 +1,357 @@
+// Combat au tour par tour contre un Pokémon sauvage.
+window.PKMN = window.PKMN || {};
+
+function stageMul(stage) {
+  return stage >= 0 ? (2 + stage) / 2 : 2 / (2 - stage);
+}
+
+function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) {
+  const physical = move.cat === "physique";
+  const atkBase = physical ? attacker.stats.atk : attacker.stats.spa;
+  const defBase = physical ? defender.stats.def : defender.stats.spd;
+  const atkStage = physical ? attacker.statStages.atk : attacker.statStages.spa;
+  const defStage = physical ? defender.statStages.def : defender.statStages.spd;
+  const atk = atkBase * stageMul(atkStage);
+  const def = Math.max(1, defBase * stageMul(defStage));
+  const level = attacker.level;
+  const base = ((2 * level) / 5 + 2) * move.power * (atk / def) / 50 + 2;
+  const stab = attackerSpecies.types.includes(move.type) ? 1.5 : 1;
+  const eff = PKMN.getEffectiveness(move.type, defenderSpecies.types);
+  const rand = 0.85 + Math.random() * 0.15;
+  const dmg = Math.max(1, Math.floor(base * stab * eff * rand));
+  return { dmg, eff };
+}
+
+function expReward(species, level) {
+  return 20 + level * 4 + (species.stage || 1) * 10 + (species.legendary ? 200 : 0);
+}
+
+PKMN.BattleState = {
+  startWild(speciesId, level) {
+    this.wild = PKMN.createPokemon(speciesId, level);
+    this.wildIsNew = !PKMN.Player.pokedexCaught.has(speciesId);
+  },
+
+  onEnter() {
+    this.active = PKMN.Player.firstAlive();
+    for (const mon of PKMN.Player.party) { mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; }
+    this.wild.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+    this.phase = "message";
+    this.menuSel = 0;
+    const wildSpecies = PKMN.speciesOf(this.wild);
+    this.queue = [`Un ${wildSpecies.name} sauvage apparaît !`];
+    this.onQueueDone = () => { this.phase = "main_menu"; this.menuSel = 0; };
+  },
+
+  showMessages(list, cb) {
+    this.queue = list.slice();
+    this.onQueueDone = cb || (() => { this.phase = "main_menu"; this.menuSel = 0; });
+    this.phase = "message";
+  },
+
+  advance() {
+    if (this.queue.length > 0) {
+      this.queue.shift();
+    }
+    if (this.queue.length === 0) {
+      const cb = this.onQueueDone;
+      this.onQueueDone = null;
+      if (cb) cb();
+    }
+  },
+
+  onKey(key) {
+    if (this.phase === "message") {
+      if (key === "Enter" || key === " ") this.advance();
+      return;
+    }
+    if (this.phase === "main_menu") {
+      const items = ["Attaque", "Sac", "Pokémon", "Fuite"];
+      if (key === "ArrowDown" || key === "ArrowRight") this.menuSel = (this.menuSel + 1) % items.length;
+      if (key === "ArrowUp" || key === "ArrowLeft") this.menuSel = (this.menuSel - 1 + items.length) % items.length;
+      if (key === "Enter" || key === " ") this.chooseMainMenu(items[this.menuSel]);
+      return;
+    }
+    if (this.phase === "move_menu") {
+      const n = this.active.moves.length;
+      if (key === "ArrowDown" || key === "ArrowRight") this.menuSel = (this.menuSel + 1) % n;
+      if (key === "ArrowUp" || key === "ArrowLeft") this.menuSel = (this.menuSel - 1 + n) % n;
+      if (key === "Escape") { this.phase = "main_menu"; this.menuSel = 0; }
+      if (key === "Enter" || key === " ") this.chooseMove(this.menuSel);
+      return;
+    }
+    if (this.phase === "party_menu") {
+      const list = PKMN.Player.party;
+      if (key === "ArrowDown") this.menuSel = (this.menuSel + 1) % list.length;
+      if (key === "ArrowUp") this.menuSel = (this.menuSel - 1 + list.length) % list.length;
+      if (key === "Escape" && !this.forcedSwitch) { this.phase = "main_menu"; this.menuSel = 0; }
+      if (key === "Enter" || key === " ") this.choosePartySwitch(this.menuSel);
+      return;
+    }
+    if (this.phase === "end") {
+      if (key === "Enter" || key === " ") PKMN.switchState("overworld");
+      return;
+    }
+  },
+
+  chooseMainMenu(choice) {
+    if (choice === "Attaque") { this.phase = "move_menu"; this.menuSel = 0; }
+    else if (choice === "Sac") this.throwBall();
+    else if (choice === "Pokémon") { this.forcedSwitch = false; this.phase = "party_menu"; this.menuSel = 0; }
+    else if (choice === "Fuite") this.flee();
+  },
+
+  chooseMove(index) {
+    const moveSlot = this.active.moves[index];
+    if (moveSlot.pp <= 0) {
+      this.showMessages(["Plus de PP pour cette capacité !"], () => { this.phase = "main_menu"; this.menuSel = 0; });
+      return;
+    }
+    this.pendingPlayerMove = moveSlot;
+    this.resolveTurn();
+  },
+
+  choosePartySwitch(index) {
+    const mon = PKMN.Player.party[index];
+    if (mon.hp <= 0) {
+      this.showMessages(["Ce Pokémon est K.O. !"], () => { this.phase = "party_menu"; });
+      return;
+    }
+    if (mon === this.active) {
+      this.phase = "main_menu"; this.menuSel = 0;
+      return;
+    }
+    const was_forced = this.forcedSwitch;
+    this.active = mon;
+    const species = PKMN.speciesOf(mon);
+    if (was_forced) {
+      this.showMessages([`Tu envoies ${species.name} !`], () => { this.phase = "main_menu"; this.menuSel = 0; });
+    } else {
+      this.pendingPlayerMove = null; // switch consomme le tour
+      this.showMessages([`Tu rappelles ton Pokémon.`, `Tu envoies ${species.name} !`], () => this.wildTurnOnly());
+    }
+  },
+
+  flee() {
+    this.showMessages(["Tu prends la fuite !"], () => PKMN.switchState("overworld"));
+  },
+
+  throwBall() {
+    if (PKMN.Player.party.length >= 6 && !PKMN.Player.party.includes(this.active)) {
+      // impossible en pratique, gardé par sécurité
+    }
+    const species = PKMN.speciesOf(this.wild);
+    if (PKMN.Player.party.length >= 6) {
+      this.showMessages(["Ton équipe est déjà complète !"], () => { this.phase = "main_menu"; this.menuSel = 0; });
+      return;
+    }
+    const baseRate = species.legendary ? 25 : species.stage === 1 ? 190 : species.stage === 2 ? 120 : 70;
+    const hpFactor = 0.2 + 0.8 * (1 - this.wild.hp / this.wild.maxHp);
+    const chance = Math.max(0.03, Math.min(0.95, (baseRate / 255) * hpFactor));
+    this.showMessages([`Tu lances une Poké Ball sur ${species.name} !`], () => {
+      if (Math.random() < chance) {
+        PKMN.Player.party.push(this.wild);
+        PKMN.Player.pokedexCaught.add(this.wild.species);
+        PKMN.Player.pokedexSeen.add(this.wild.species);
+        PKMN.saveGame();
+        this.showMessages([`${species.name} est capturé !`, "Ajouté à ton équipe."], () => { this.phase = "end"; });
+      } else {
+        this.showMessages(["Oh non ! Le Pokémon s'est échappé !"], () => this.wildTurnOnly());
+      }
+    });
+  },
+
+  wildTurnOnly() {
+    const msgs = [];
+    this.doMoveAction(this.wild, this.active, this.pickWildMove(), msgs, true);
+    this.finishTurnMessages(msgs);
+  },
+
+  pickWildMove() {
+    const usable = this.wild.moves.filter((m) => m.pp > 0);
+    const pool = usable.length ? usable : this.wild.moves;
+    return pool[Math.floor(Math.random() * pool.length)];
+  },
+
+  resolveTurn() {
+    const msgs = [];
+    const playerMove = this.pendingPlayerMove;
+    const wildMove = this.pickWildMove();
+    const playerFirst = this.active.stats.spe * stageMul(this.active.statStages.spe) >=
+      this.wild.stats.spe * stageMul(this.wild.statStages.spe);
+
+    const order = playerFirst
+      ? [[this.active, this.wild, playerMove, false], [this.wild, this.active, wildMove, true]]
+      : [[this.wild, this.active, wildMove, true], [this.active, this.wild, playerMove, false]];
+
+    for (const [attacker, defender, move, isWild] of order) {
+      if (attacker.hp <= 0) continue;
+      if (defender === this.active && this.active.hp <= 0) continue;
+      if (defender === this.wild && this.wild.hp <= 0) continue;
+      this.doMoveAction(attacker, defender, move, msgs, isWild);
+    }
+    this.finishTurnMessages(msgs);
+  },
+
+  doMoveAction(attacker, defender, moveSlot, msgs, attackerIsWild) {
+    const move = PKMN.MOVES[moveSlot.key];
+    const atkSpecies = PKMN.speciesOf(attacker);
+    const defSpecies = PKMN.speciesOf(defender);
+    moveSlot.pp = Math.max(0, moveSlot.pp - 1);
+    msgs.push(`${atkSpecies.name} utilise ${move.name} !`);
+
+    if (Math.random() * 100 > move.acc) {
+      msgs.push("Mais l'attaque échoue !");
+      return;
+    }
+
+    if (move.power == null) {
+      this.applyStatusMove(attacker, defender, move, msgs);
+      return;
+    }
+
+    const hits = move.hits || 1;
+    let totalDmg = 0, lastEff = 1;
+    for (let i = 0; i < hits; i++) {
+      if (defender.hp <= 0) break;
+      const { dmg, eff } = calcDamage(attacker, atkSpecies, defender, defSpecies, move);
+      defender.hp = Math.max(0, defender.hp - dmg);
+      totalDmg += dmg;
+      lastEff = eff;
+    }
+    if (hits > 1) msgs.push(`${hits} coups portés !`);
+    if (lastEff > 1) msgs.push("C'est super efficace !");
+    else if (lastEff > 0 && lastEff < 1) msgs.push("Ce n'est pas très efficace...");
+    else if (lastEff === 0) msgs.push(`Ça n'affecte pas ${defSpecies.name} !`);
+
+    if (move.drain && totalDmg > 0) {
+      const heal = Math.max(1, Math.floor(totalDmg * move.drain));
+      attacker.hp = Math.min(attacker.maxHp, attacker.hp + heal);
+      msgs.push(`${atkSpecies.name} récupère des PV !`);
+    }
+
+    if (defender.hp <= 0) {
+      msgs.push(`${defSpecies.name} est mis K.O. !`);
+    }
+  },
+
+  applyStatusMove(attacker, defender, move, msgs) {
+    const eff = move.effect;
+    if (!eff) return;
+    if (eff.heal) {
+      const before = attacker.hp;
+      attacker.hp = Math.min(attacker.maxHp, attacker.hp + Math.floor(attacker.maxHp * eff.heal));
+      if (attacker.hp > before) msgs.push(`${PKMN.speciesOf(attacker).name} récupère des PV !`);
+      return;
+    }
+    if (eff.status) {
+      const target = eff.target === "self" ? attacker : defender;
+      if (target.status) {
+        msgs.push("Mais ça échoue !");
+      } else {
+        target.status = eff.status;
+        msgs.push(`${PKMN.speciesOf(target).name} est empoisonné !`);
+      }
+      return;
+    }
+    if (eff.stat) {
+      const target = eff.target === "self" ? attacker : defender;
+      const cur = target.statStages[eff.stat];
+      const next = Math.max(-6, Math.min(6, cur + eff.stages));
+      if (next === cur) {
+        msgs.push("Mais ça n'a aucun effet !");
+      } else {
+        target.statStages[eff.stat] = next;
+        const dir = eff.stages > 0 ? "augmente" : "baisse";
+        msgs.push(`${eff.stat.toUpperCase()} de ${PKMN.speciesOf(target).name} ${dir} !`);
+      }
+    }
+  },
+
+  finishTurnMessages(msgs) {
+    // Dégâts de poison en fin de tour
+    for (const mon of [this.active, this.wild]) {
+      if (mon.hp > 0 && mon.status === "poison") {
+        const dmg = Math.max(1, Math.floor(mon.maxHp / 8));
+        mon.hp = Math.max(0, mon.hp - dmg);
+        msgs.push(`${PKMN.speciesOf(mon).name} souffre du poison !`);
+        if (mon.hp <= 0) msgs.push(`${PKMN.speciesOf(mon).name} est mis K.O. !`);
+      }
+    }
+
+    this.pendingPlayerMove = null;
+    this.showMessages(msgs, () => this.afterTurn());
+  },
+
+  afterTurn() {
+    if (this.wild.hp <= 0) {
+      const species = PKMN.speciesOf(this.wild);
+      const exp = expReward(species, this.wild.level);
+      const lvlMsgs = PKMN.gainExp(this.active, exp);
+      PKMN.saveGame();
+      this.showMessages([`${PKMN.speciesOf(this.active).name} gagne ${exp} points d'expérience !`, ...lvlMsgs], () => { this.phase = "end"; });
+      return;
+    }
+    if (this.active.hp <= 0) {
+      const alive = PKMN.Player.party.some((m) => m.hp > 0);
+      if (!alive) {
+        this.showMessages(["Tu n'as plus de Pokémon en état de combattre...", "Tu cours au centre Pokémon le plus proche."], () => {
+          PKMN.healParty(PKMN.Player.party);
+          PKMN.Player.mapKey = "town";
+          PKMN.Player.x = PKMN.MAPS.town.playerStart.x;
+          PKMN.Player.y = PKMN.MAPS.town.playerStart.y;
+          PKMN.saveGame();
+          PKMN.switchState("overworld");
+        });
+        return;
+      }
+      this.forcedSwitch = true;
+      this.showMessages([`${PKMN.speciesOf(this.active).name} est K.O. ! Choisis un autre Pokémon.`], () => { this.phase = "party_menu"; this.menuSel = 0; });
+      return;
+    }
+    this.phase = "main_menu";
+    this.menuSel = 0;
+  },
+
+  render(ctx) {
+    const W = PKMN.CANVAS_W, H = PKMN.CANVAS_H;
+    ctx.fillStyle = "#cfe8cf";
+    ctx.fillRect(0, 0, W, H);
+
+    const wildSpecies = PKMN.speciesOf(this.wild);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(20, 20, 200, 46);
+    ctx.strokeStyle = "#333"; ctx.lineWidth = 2; ctx.strokeRect(20, 20, 200, 46);
+    ctx.fillStyle = "#111"; ctx.font = "14px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(`${wildSpecies.name}  Nv.${this.wild.level}`, 28, 38);
+    PKMN.drawHpBar(ctx, 28, 46, 130, 10, Math.max(0, this.wild.hp) / this.wild.maxHp);
+    PKMN.drawPokemonSprite(ctx, this.wild.species, W - 150, 30, 120, false);
+
+    if (this.active) {
+      const activeSpecies = PKMN.speciesOf(this.active);
+      PKMN.drawPokemonSprite(ctx, this.active.species, 30, H - 220, 120, true);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(W - 220, H - 190, 200, 50);
+      ctx.strokeStyle = "#333"; ctx.strokeRect(W - 220, H - 190, 200, 50);
+      ctx.fillStyle = "#111"; ctx.font = "14px sans-serif";
+      ctx.fillText(`${activeSpecies.name}  Nv.${this.active.level}`, W - 212, H - 172);
+      ctx.fillText(`PV ${Math.max(0, this.active.hp)}/${this.active.maxHp}`, W - 212, H - 155);
+      PKMN.drawHpBar(ctx, W - 212, H - 148, 130, 10, Math.max(0, this.active.hp) / this.active.maxHp);
+    }
+
+    if (this.phase === "message") {
+      PKMN.drawTextBox(ctx, this.queue[0] || "");
+    } else if (this.phase === "main_menu") {
+      PKMN.drawTextBox(ctx, `Que doit faire ${PKMN.speciesOf(this.active).name} ?`, { noPrompt: true });
+      PKMN.drawMenu(ctx, W - 180, H - 100, ["Attaque", "Sac", "Pokémon", "Fuite"], this.menuSel, { w: 170 });
+    } else if (this.phase === "move_menu") {
+      const items = this.active.moves.map((m) => `${PKMN.MOVES[m.key].name} (${m.pp}/${m.maxPp})`);
+      PKMN.drawMenu(ctx, 10, H - 130, items, this.menuSel, { w: W - 20, lineH: 24 });
+    } else if (this.phase === "party_menu") {
+      const items = PKMN.Player.party.map((m) => `${PKMN.speciesOf(m).name} Nv.${m.level} — PV ${Math.max(0, m.hp)}/${m.maxHp}${m.hp <= 0 ? " (K.O.)" : ""}`);
+      PKMN.drawMenu(ctx, 10, H - 30 - items.length * 26 - 16, items, this.menuSel, { w: W - 20, lineH: 26 });
+    } else if (this.phase === "end") {
+      PKMN.drawTextBox(ctx, "Appuie sur Entrée pour continuer.");
+    }
+  }
+};

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Pokémon — Édition Perso</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="game-wrap">
+    <h1>Pokémon — Édition Perso</h1>
+    <canvas id="game" width="480" height="400"></canvas>
+    <p class="hint">
+      Flèches directionnelles pour te déplacer · Entrée / Espace pour valider ou ouvrir le menu · Échap pour revenir
+    </p>
+    <p class="disclaimer">
+      Projet fan réalisé pour un usage strictement personnel. Pokémon et les noms associés sont
+      la propriété de Nintendo / Game Freak / The Pokémon Company.
+    </p>
+  </div>
+
+  <script src="js/data/types.js"></script>
+  <script src="js/data/moves.js"></script>
+  <script src="js/data/pokedex.js"></script>
+  <script src="js/data/maps.js"></script>
+  <script src="js/engine/sprites.js"></script>
+  <script src="js/engine/player.js"></script>
+  <script src="js/engine/save.js"></script>
+  <script src="js/engine/ui.js"></script>
+  <script src="js/engine/overworld.js"></script>
+  <script src="js/engine/battle.js"></script>
+  <script src="js/engine/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
