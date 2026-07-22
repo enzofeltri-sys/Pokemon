@@ -28,8 +28,8 @@ PKMN.LEARNSETS = {
   17: [[1, "charge"], [1, "cyclone"], [1, "vive_attaque"], [9, "cru_aile"], [25, "attak_air"]],
   18: [[1, "charge"], [1, "vive_attaque"], [1, "cru_aile"], [9, "attak_air"], [32, "pika_pika"]],
 
-  19: [[1, "charge"], [1, "vive_attaque"], [7, "morsure"], [16, "cognobscur"]],
-  20: [[1, "charge"], [1, "vive_attaque"], [1, "morsure"], [20, "cognobscur"], [32, "frappe_atlas"]],
+  19: [[1, "charge"], [1, "vive_attaque"], [7, "morsure"], [13, "amplification"], [16, "cognobscur"]],
+  20: [[1, "charge"], [1, "vive_attaque"], [1, "morsure"], [1, "amplification"], [20, "cognobscur"], [32, "frappe_atlas"]],
 
   21: [[1, "charge"], [1, "cyclone"], [9, "vive_attaque"], [19, "cru_aile"]],
   22: [[1, "charge"], [1, "cyclone"], [1, "vive_attaque"], [9, "cru_aile"], [25, "pika_pika"]],
@@ -160,8 +160,8 @@ PKMN.LEARNSETS = {
 
   108: [[1, "charge"], [1, "rugissement"], [15, "cognobscur"], [28, "repos"]],
 
-  109: [[1, "dard_venin"], [1, "sombre_toxine"], [18, "ecrasface"], [28, "frappe_atlas"]],
-  110: [[1, "dard_venin"], [1, "sombre_toxine"], [1, "ecrasface"], [28, "frappe_atlas"], [40, "ultralaser"]],
+  109: [[1, "dard_venin"], [1, "voile_fumee"], [18, "ecrasface"], [28, "frappe_atlas"]],
+  110: [[1, "dard_venin"], [1, "voile_fumee"], [1, "ecrasface"], [28, "frappe_atlas"], [40, "ultralaser"]],
 
   111: [[1, "charge"], [1, "jet_pierres"], [15, "seisme"], [30, "eboulement"]],
   112: [[1, "charge"], [1, "jet_pierres"], [1, "seisme"], [1, "eboulement"], [30, "ball_seisme"], [42, "frappe_atlas"]],

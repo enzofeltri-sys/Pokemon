@@ -5,14 +5,32 @@ function stageMul(stage) {
   return stage >= 0 ? (2 + stage) / 2 : 2 / (2 - stage);
 }
 
+// Table Précision/Esquive: progression différente des autres stats (paliers de /3).
+function accEvaMul(stage) {
+  return stage >= 0 ? (3 + stage) / 3 : 3 / (3 - stage);
+}
+
+function checkAccuracy(move, attacker, defender) {
+  const stage = Math.max(-6, Math.min(6, attacker.statStages.acc - defender.statStages.eva));
+  const effAcc = move.acc * accEvaMul(stage);
+  return Math.random() * 100 < effAcc;
+}
+
 function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) {
-  if (move.fixedDamage) return { dmg: move.fixedDamage, eff: 1 };
+  if (move.fixedDamage) return { dmg: move.fixedDamage, eff: 1, crit: false };
   const physical = move.cat === "physique";
+  const critChance = move.highCrit ? 1 / 8 : 1 / 16;
+  const isCrit = Math.random() < critChance;
+
   let atkBase = physical ? attacker.stats.atk : attacker.stats.spa;
   if (physical && attacker.status === "burn") atkBase = Math.floor(atkBase / 2);
   const defBase = physical ? defender.stats.def : defender.stats.spd;
-  const atkStage = physical ? attacker.statStages.atk : attacker.statStages.spa;
-  const defStage = physical ? defender.statStages.def : defender.statStages.spd;
+  // Un coup critique ignore les baisses d'attaque de l'attaquant et les hausses
+  // de défense du défenseur (jamais défavorable à l'attaquant).
+  let atkStage = physical ? attacker.statStages.atk : attacker.statStages.spa;
+  let defStage = physical ? defender.statStages.def : defender.statStages.spd;
+  if (isCrit) { atkStage = Math.max(atkStage, 0); defStage = Math.min(defStage, 0); }
+
   const atk = atkBase * stageMul(atkStage);
   const def = Math.max(1, defBase * stageMul(defStage));
   const level = attacker.level;
@@ -20,8 +38,9 @@ function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) 
   const stab = attackerSpecies.types.includes(move.type) ? 1.5 : 1;
   const eff = PKMN.getEffectiveness(move.type, defenderSpecies.types);
   const rand = 0.85 + Math.random() * 0.15;
-  const dmg = Math.max(1, Math.floor(base * stab * eff * rand));
-  return { dmg, eff };
+  const critMul = isCrit ? 1.5 : 1;
+  const dmg = Math.max(1, Math.floor(base * stab * eff * rand * critMul));
+  return { dmg, eff, crit: isCrit };
 }
 
 // Formule des jeux originaux: XP de base de l'espèce × son niveau / 7.
@@ -47,8 +66,9 @@ PKMN.BattleState = {
 
   onEnter() {
     this.active = PKMN.Player.firstAlive();
-    for (const mon of PKMN.Player.party) { mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; }
-    this.wild.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
+    for (const mon of PKMN.Player.party) { mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 }; mon.flinched = false; }
+    this.wild.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 };
+    this.wild.flinched = false;
     this.phase = "message";
     this.menuSel = 0;
     const wildSpecies = PKMN.speciesOf(this.wild);
@@ -116,7 +136,7 @@ PKMN.BattleState = {
   },
 
   bagItems() {
-    const items = ["pokeball", "potion", "antidote"].filter((k) => (PKMN.Player.bag[k] || 0) > 0);
+    const items = ["pokeball", "superball", "hyperball", "potion", "antidote"].filter((k) => (PKMN.Player.bag[k] || 0) > 0);
     items.push("retour");
     return items;
   },
@@ -130,7 +150,7 @@ PKMN.BattleState = {
 
   chooseBagItem(key) {
     if (key === "retour") { this.phase = "main_menu"; this.menuSel = 0; return; }
-    if (key === "pokeball") this.throwBall();
+    if (PKMN.ITEMS[key] && PKMN.ITEMS[key].category === "ball") this.throwBall(key);
     else if (key === "potion") this.usePotion();
     else if (key === "antidote") this.useAntidote();
   },
@@ -193,17 +213,21 @@ PKMN.BattleState = {
     this.showMessages(["Tu prends la fuite !"], () => PKMN.switchState("overworld"));
   },
 
-  throwBall() {
-    if (!PKMN.Player.bag.pokeball) {
-      this.showMessages(["Tu n'as plus de Poké Ball !"], () => { this.phase = "bag_menu"; this.menuSel = 0; });
+  throwBall(ballKey) {
+    ballKey = ballKey || "pokeball";
+    if (!PKMN.Player.bag[ballKey]) {
+      this.showMessages([`Tu n'as plus de ${PKMN.ITEMS[ballKey].name} !`], () => { this.phase = "bag_menu"; this.menuSel = 0; });
       return;
     }
     const species = PKMN.speciesOf(this.wild);
-    PKMN.Player.bag.pokeball--;
+    PKMN.Player.bag[ballKey]--;
     const baseRate = species.legendary ? 25 : species.stage === 1 ? 190 : species.stage === 2 ? 120 : 70;
     const hpFactor = 0.2 + 0.8 * (1 - this.wild.hp / this.wild.maxHp);
-    const chance = Math.max(0.03, Math.min(0.95, (baseRate / 255) * hpFactor));
-    this.showMessages([`Tu lances une Poké Ball sur ${species.name} !`], () => {
+    const statusFactor = (this.wild.status === "sleep" || this.wild.status === "freeze") ? 2
+      : this.wild.status ? 1.5 : 1;
+    const ballMul = PKMN.ITEMS[ballKey].ballMultiplier;
+    const chance = Math.max(0.03, Math.min(0.95, (baseRate / 255) * hpFactor * statusFactor * ballMul));
+    this.showMessages([`Tu lances ${PKMN.ITEMS[ballKey].name === "Poké Ball" ? "une" : "un"} ${PKMN.ITEMS[ballKey].name} sur ${species.name} !`], () => {
       if (Math.random() < chance) {
         const toBox = PKMN.Player.addCaught(this.wild);
         PKMN.saveGame();
@@ -217,6 +241,8 @@ PKMN.BattleState = {
 
   wildTurnOnly() {
     const msgs = [];
+    this.active.flinched = false;
+    this.wild.flinched = false;
     this.doMoveAction(this.wild, this.active, this.pickWildMove(), msgs, true);
     this.finishTurnMessages(msgs);
   },
@@ -246,6 +272,8 @@ PKMN.BattleState = {
 
   resolveTurn() {
     const msgs = [];
+    this.active.flinched = false;
+    this.wild.flinched = false;
     const playerMove = this.pendingPlayerMove;
     const wildMove = this.pickWildMove();
     const playerFirst = this.turnOrder(this.active, playerMove, this.wild, wildMove);
@@ -278,6 +306,10 @@ PKMN.BattleState = {
 
   applySecondary(target, secondary, msgs) {
     if (target.hp <= 0) return;
+    if (secondary.flinch) {
+      target.flinched = true;
+      return;
+    }
     if (secondary.confuse) {
       if (target.confused > 0) return;
       target.confused = 2 + Math.floor(Math.random() * 2);
@@ -322,6 +354,12 @@ PKMN.BattleState = {
       msgs.push(`${atkSpecies.name} se réveille !`);
     }
 
+    if (attacker.flinched) {
+      attacker.flinched = false;
+      msgs.push(`${atkSpecies.name} hésite et ne peut pas attaquer !`);
+      return;
+    }
+
     if (attacker.status === "paralysis" && Math.random() < 0.25) {
       msgs.push(`${atkSpecies.name} est paralysé ! Il ne peut pas bouger !`);
       return;
@@ -344,7 +382,7 @@ PKMN.BattleState = {
     moveSlot.pp = Math.max(0, moveSlot.pp - 1);
     msgs.push(`${atkSpecies.name} utilise ${move.name} !`);
 
-    if (Math.random() * 100 > move.acc) {
+    if (!checkAccuracy(move, attacker, defender)) {
       msgs.push("Mais l'attaque échoue !");
       return;
     }
@@ -355,20 +393,29 @@ PKMN.BattleState = {
     }
 
     const hits = move.hits || 1;
-    let totalDmg = 0, lastEff = 1;
+    let totalDmg = 0, lastEff = 1, anyCrit = false;
     for (let i = 0; i < hits; i++) {
       if (defender.hp <= 0) break;
-      const { dmg, eff } = calcDamage(attacker, atkSpecies, defender, defSpecies, move);
+      const { dmg, eff, crit } = calcDamage(attacker, atkSpecies, defender, defSpecies, move);
       defender.hp = Math.max(0, defender.hp - dmg);
       totalDmg += dmg;
       lastEff = eff;
+      if (crit) anyCrit = true;
     }
     if (hits > 1) msgs.push(`${hits} coups portés !`);
+    if (anyCrit) msgs.push("Coup critique !");
     if (lastEff > 1) msgs.push("C'est super efficace !");
     else if (lastEff > 0 && lastEff < 1) msgs.push("Ce n'est pas très efficace...");
     else if (lastEff === 0) msgs.push(`Ça n'affecte pas ${defSpecies.name} !`);
 
     if (move.recharge) attacker.mustRecharge = true;
+
+    if (move.recoil && totalDmg > 0) {
+      const recoilDmg = Math.max(1, Math.floor(totalDmg * move.recoil));
+      attacker.hp = Math.max(0, attacker.hp - recoilDmg);
+      msgs.push(`${atkSpecies.name} est blessé par le contrecoup !`);
+      if (attacker.hp <= 0) msgs.push(`${atkSpecies.name} est mis K.O. !`);
+    }
 
     if (move.secondary && defender.hp > 0 && Math.random() * 100 < move.secondary.chance) {
       this.applySecondary(defender, move.secondary, msgs);

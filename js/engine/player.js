@@ -62,11 +62,12 @@ PKMN.createPokemon = function (speciesId, level) {
     ivs,
     evs,
     moves: PKMN.movesAtLevel(speciesId, level).map((key) => ({ key, pp: PKMN.MOVES[key].pp, maxPp: PKMN.MOVES[key].pp })),
-    statStages: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
+    statStages: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 },
     status: null,
     statusCounter: 0,
     confused: 0,
     mustRecharge: false,
+    flinched: false,
     caughtWith: "Poké Ball"
   };
 };

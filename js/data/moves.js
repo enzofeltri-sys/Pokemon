@@ -10,9 +10,11 @@ PKMN.MOVES = {
   mimi_queue:   { name: "Mimi-Queue",     type: "normal",   power: null, acc: 100, pp: 30, cat: "statut", effect: { stat: "def", target: "foe", stages: -1 } },
   cage_eclair:  { name: "Cage-Éclair",    type: "electrik", power: null, acc: 100, pp: 20, cat: "statut", effect: { stat: "spe", target: "foe", stages: -1 } },
   ultralaser:   { name: "Ultralaser",     type: "normal",   power: 150, acc: 90,  pp: 5,  cat: "physique", recharge: true },
-  cognobscur:   { name: "Cogn'Obscur",    type: "normal",   power: 130, acc: 100, pp: 10, cat: "physique" },
-  frappe_atlas: { name: "Frappe Atlas",   type: "normal",   power: 130, acc: 100, pp: 10, cat: "physique" },
+  cognobscur:   { name: "Cogn'Obscur",    type: "normal",   power: 130, acc: 100, pp: 10, cat: "physique", secondary: { chance: 20, flinch: true } },
+  frappe_atlas: { name: "Frappe Atlas",   type: "normal",   power: 130, acc: 100, pp: 10, cat: "physique", recoil: 0.25 },
   ecrasface:    { name: "Écras'Face",     type: "normal",   power: 80,  acc: 100, pp: 15, cat: "physique" },
+  voile_fumee:  { name: "Voile Fumée",    type: "normal",   power: null, acc: 100, pp: 20, cat: "statut", effect: { stat: "acc", target: "foe", stages: -1 } },
+  amplification:{ name: "Amplification", type: "normal",   power: null, acc: 100, pp: 20, cat: "statut", effect: { stat: "eva", target: "self", stages: 1 } },
 
   flammeche:    { name: "Flammèche",      type: "feu",     power: 40,  acc: 100, pp: 25, cat: "special", secondary: { chance: 10, status: "burn" } },
   lance_flammes: { name: "Lance-Flammes",  type: "feu",     power: 90,  acc: 100, pp: 15, cat: "special", secondary: { chance: 10, status: "burn" } },
@@ -23,7 +25,7 @@ PKMN.MOVES = {
   bulles_d_o:   { name: "Bulles d'O",     type: "eau",     power: 65,  acc: 100, pp: 20, cat: "special" },
   hydrocanon:   { name: "Hydrocanon",     type: "eau",     power: 110, acc: 80,  pp: 5,  cat: "special" },
   surf:         { name: "Surf",           type: "eau",     power: 95,  acc: 100, pp: 15, cat: "special" },
-  cascade:      { name: "Cascade",        type: "eau",     power: 80,  acc: 100, pp: 15, cat: "physique" },
+  cascade:      { name: "Cascade",        type: "eau",     power: 80,  acc: 100, pp: 15, cat: "physique", highCrit: true },
 
   tonnelectrik: { name: "Tonnelectrik",   type: "electrik", power: 40,  acc: 100, pp: 30, cat: "special", secondary: { chance: 10, status: "paralysis" } },
   eclair:       { name: "Éclair",         type: "electrik", power: 90,  acc: 100, pp: 15, cat: "special", secondary: { chance: 10, status: "paralysis" } },
@@ -38,7 +40,7 @@ PKMN.MOVES = {
   poudreuse:    { name: "Poudreuse",      type: "glace",   power: 40,  acc: 100, pp: 25, cat: "special", secondary: { chance: 10, status: "freeze" } },
   huile_glacee: { name: "Huile Glacée",   type: "glace",   power: 95,  acc: 100, pp: 10, cat: "special", secondary: { chance: 10, status: "freeze" } },
 
-  poing_karate: { name: "Poing Karaté",   type: "combat",  power: 50,  acc: 100, pp: 25, cat: "physique" },
+  poing_karate: { name: "Poing Karaté",   type: "combat",  power: 50,  acc: 100, pp: 25, cat: "physique", highCrit: true },
   double_pied:  { name: "Double Pied",    type: "combat",  power: 30,  acc: 100, pp: 30, cat: "physique", hits: 2 },
 
   dard_venin:   { name: "Dard-Venin",     type: "poison",  power: 15,  acc: 100, pp: 35, cat: "physique" },
@@ -71,7 +73,7 @@ PKMN.MOVES = {
   rage_dragon:  { name: "Rage Dragon",    type: "dragon",  power: 40,  acc: 100, pp: 10, cat: "special", fixedDamage: 40 },
   draco_rage:   { name: "Draco-Rage",     type: "dragon",  power: 100, acc: 100, pp: 10, cat: "special" },
 
-  morsure:      { name: "Morsure",        type: "tenebres", power: 60, acc: 100, pp: 25, cat: "physique" },
+  morsure:      { name: "Morsure",        type: "tenebres", power: 60, acc: 100, pp: 25, cat: "physique", secondary: { chance: 30, flinch: true } },
 
   boul_armure:  { name: "Boul'Armure",    type: "acier",   power: 40,  acc: 100, pp: 20, cat: "physique" },
   tete_de_fer:  { name: "Tête de Fer",    type: "acier",   power: 80,  acc: 100, pp: 15, cat: "physique" },
