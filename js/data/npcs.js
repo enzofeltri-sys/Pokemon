@@ -1152,5 +1152,98 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town11: [
+    {
+      id: "badaud_cendrelune",
+      name: "Habitant",
+      x: 9, y: 5, facing: "down",
+      color: "#95a5a6", letter: "H",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Cendrelune... on l'appelle comme ça à cause des cendres qui recouvrent la terre, par ici.", "Rien ne pousse, mais les Pokémon Sol adorent ça."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_cendrelune",
+      name: "Vieille femme",
+      x: 12, y: 6, facing: "left",
+      color: "#8e44ad", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint7" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "La Main Noire ? Ils sont passés par ici, il y a des années.",
+              "Ils cherchaient quelque chose sous la cendre. Ils ne l'ont jamais trouvé, à ma connaissance.",
+              "Mais j'ai entendu dire qu'ils avaient repris leurs recherches, ailleurs dans la région."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint7", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Fais attention à toi, sur les routes."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym9: [
+    {
+      id: "gym9_trainer",
+      name: "Fossoyeur",
+      x: 4, y: 4, facing: "down",
+      color: "#6e2c00", letter: "F",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym9_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Sous la cendre, tout finit enterré."],
+            effects: [{ startTrainerBattle: "gym9_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Cendra t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym9_leader",
+      name: "Cendra",
+      x: 4, y: 2, facing: "down",
+      color: "#4a2c17", letter: "C",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym9" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Cendra, Championne de l'Arène des Cendres.",
+              "Cette terre a enseveli bien des choses. Voyons si tu tiens le choc."
+            ],
+            effects: [{ startTrainerBattle: "gym9_leader" }]
+          },
+          apres_defaite: {
+            text: ["Un badge de plus. La suite ne sera pas plus douce."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
