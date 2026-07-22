@@ -121,5 +121,93 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  gym1: [
+    {
+      id: "gym1_trainer",
+      name: "Junior Prisma",
+      x: 4, y: 4, facing: "down",
+      color: "#2980b9", letter: "J",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym1_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Tu ne passeras pas si facilement !"],
+            effects: [{ startTrainerBattle: "gym1_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Vas-y, la Championne t'attend."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym1_leader",
+      name: "Aoede",
+      x: 4, y: 2, facing: "down",
+      color: "#c0392b", letter: "A",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym1" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Aoede, Championne de l'Arène Prisma.",
+              "Montre-moi ce que tu vaux !"
+            ],
+            effects: [{ startTrainerBattle: "gym1_leader" }]
+          },
+          apres_defaite: {
+            text: ["Ce badge est à toi. Tu as du potentiel.", "Continue ta route, d'autres défis t'attendent."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town2: [
+    {
+      id: "badaud_prisma",
+      name: "Badaud",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "B",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Ville Prisma, la fierté de la région !", "Enfin... quand tout va bien."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_prisma",
+      name: "Passant nerveux",
+      x: 10, y: 7, facing: "left",
+      color: "#34495e", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: [
+              "Psst... tu as entendu parler de ces gens habillés en noir qui rôdent près des routes ?",
+              "Je ne sais pas ce qu'ils cherchent, mais ça ne me dit rien qui vaille.",
+              "Fais attention à toi."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint", value: true }],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };

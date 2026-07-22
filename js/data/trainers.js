@@ -16,5 +16,19 @@ PKMN.TRAINERS = {
     },
     reward: 200,
     onWin: [{ setFlag: "beat_rival1", value: true }]
+  },
+
+  gym1_trainer: {
+    name: "Junior Prisma",
+    team: [{ species: 27, level: 9 }],
+    reward: 150,
+    onWin: [{ setFlag: "beat_gym1_trainer", value: true }]
+  },
+
+  gym1_leader: {
+    name: "Aoede",
+    team: [{ species: 27, level: 12 }, { species: 52, level: 13 }],
+    reward: 500,
+    onWin: [{ badge: "badge1" }, { setFlag: "beat_gym1", value: true }]
   }
 };

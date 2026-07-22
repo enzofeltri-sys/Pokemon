@@ -199,7 +199,10 @@ PKMN.OverworldState = {
     this.moveT = 0;
     this.fromX = PKMN.Player.x;
     this.fromY = PKMN.Player.y;
-    this.facing = "down";
+    // Ne réinitialise l'orientation qu'à la toute première entrée: sinon, revenir
+    // d'un combat ou d'un menu faisait toujours regarder vers le bas, empêchant de
+    // reparler tout de suite au PNJ qu'on avait pourtant en face de soi.
+    if (!this.facing) this.facing = "down";
     this.menuOpen = false;
     this.menuSel = 0;
     this.quickMenuOpen = false;
