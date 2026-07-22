@@ -516,5 +516,268 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  route6: [
+    {
+      id: "silhouette_impasse",
+      name: "Silhouette",
+      x: 10, y: 8, facing: "down",
+      color: "#95a5a6", letter: "?",
+      type: "cache",
+      dialogue: {
+        start: [{ condition: { flag: "quete_collier_recuperee" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "Tiens, qu'est-ce que c'est que ça, à moitié enterré ici ?",
+              "Un collier... Ça doit appartenir à quelqu'un. Prends-le, toi qui voyages."
+            ],
+            effects: [{ setFlag: "quete_collier_recuperee", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Cette impasse ne cache plus rien d'autre, on dirait."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym5: [
+    {
+      id: "gym5_trainer",
+      name: "Occultiste",
+      x: 4, y: 4, facing: "down",
+      color: "#5b2c6f", letter: "O",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym5_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Les ombres vont t'engloutir !"],
+            effects: [{ startTrainerBattle: "gym5_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Ombrine t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym5_leader",
+      name: "Ombrine",
+      x: 4, y: 2, facing: "down",
+      color: "#4a235a", letter: "O",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym5" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Ombrine, Championne de l'Arène de l'Ombre.",
+              "Ceux qui craignent le noir n'ont rien à faire ici."
+            ],
+            effects: [{ startTrainerBattle: "gym5_leader" }]
+          },
+          apres_defaite: {
+            text: ["Ce badge est le tien.", "Ce que tu affronteras ensuite ne recule devant rien."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town6: [
+    {
+      id: "badaud_nocterme",
+      name: "Veilleur",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "V",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Nocterme ne dort jamais vraiment.", "Ça a son charme... ou pas."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "villageoise_collier",
+      name: "Villageoise inquiète",
+      x: 9, y: 6, facing: "down",
+      color: "#af7ac5", letter: "V",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_collier_remerciee" }, node: "final" },
+          { condition: { flag: "quete_collier_recuperee" }, node: "remerciement" },
+          { condition: { flag: "quete_collier_active" }, node: "en_attente" }
+        ],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "Oh... j'ai perdu un collier auquel je tiens beaucoup, quelque part sur la route en arrivant ici.",
+              "Il y a une impasse le long du chemin. Si jamais tu le retrouves..."
+            ],
+            effects: [{ startQuest: "collier_perdu" }, { setFlag: "quete_collier_active", value: true }],
+            next: null
+          },
+          en_attente: {
+            text: ["Toujours aucune trace de mon collier ?"],
+            next: null
+          },
+          remerciement: {
+            text: ["Mon collier ! Tu l'as retrouvé !", "Merci mille fois, tiens, prends ceci en retour."],
+            effects: [
+              { give: { item: "superball", amount: 2 } },
+              { money: { delta: 300 } },
+              { completeQuest: "collier_perdu" },
+              { setFlag: "quete_collier_remerciee", value: true }
+            ],
+            next: null
+          },
+          final: {
+            text: ["Encore merci pour tout à l'heure."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_nocterme",
+      name: "Passant méfiant",
+      x: 12, y: 7, facing: "left",
+      color: "#34495e", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: [
+              "On raconte que la Ligue elle-même s'inquiète de ces gens en noir, maintenant.",
+              "Si même eux s'en préoccupent, ça ne doit pas être bon signe."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint4", value: true }],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  maison_inutile1: [
+    {
+      id: "habitant_maison1",
+      name: "Habitant",
+      x: 3, y: 2, facing: "down",
+      color: "#7f8c8d", letter: "H",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Cette maison ? Rien de spécial, j'y habite juste.", "Tu peux repartir, tu sais."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym6: [
+    {
+      id: "gym6_trainer",
+      name: "Électricien",
+      x: 4, y: 4, facing: "down",
+      color: "#d4ac0d", letter: "É",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym6_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Ça va décoiffer !"],
+            effects: [{ startTrainerBattle: "gym6_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Zapholt t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym6_leader",
+      name: "Zapholt",
+      x: 4, y: 2, facing: "down",
+      color: "#b7950b", letter: "Z",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym6" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Zapholt, Champion de l'Arène de l'Éclair.",
+              "J'espère que ton équipe tient le choc !"
+            ],
+            effects: [{ startTrainerBattle: "gym6_leader" }]
+          },
+          apres_defaite: {
+            text: ["Un badge à la hauteur de tes efforts.", "La suite du voyage s'annonce électrique, dans tous les sens du terme."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town7: [
+    {
+      id: "badaud_voltis",
+      name: "Ingénieur",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "I",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Voltis alimente toute la région, ou presque.", "Ne touche pas aux câbles, par contre."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  maison_inutile2: [
+    {
+      id: "habitant_maison2",
+      name: "Habitante",
+      x: 3, y: 2, facing: "down",
+      color: "#7f8c8d", letter: "H",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Ah, un visiteur ! Enfin non, je n'ai rien à te proposer.", "Bonne route quand même."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };

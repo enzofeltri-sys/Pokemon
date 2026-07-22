@@ -1,6 +1,7 @@
 // Cartes en tuiles (grille de caractères). Chaque caractère = un type de tuile.
 // Légende: '#' mur/arbre (bloqué) | '.' chemin | '"' herbe haute (rencontre) |
-// 'C'/'D' porte (téléportation) | 'H' tuile de soin | 'M' Poké Mart | 'P' Boîte PC | '<'/'>' sortie de route
+// 'C'/'D' porte (téléportation) | 'H' tuile de soin | 'M' Poké Mart | 'P' Boîte PC |
+// '<'/'>' sortie de route | '~' eau (bloquée, décor de bord de mer)
 window.PKMN = window.PKMN || {};
 
 PKMN.TILE_INFO = {
@@ -13,7 +14,8 @@ PKMN.TILE_INFO = {
   "M": { blocked: false, mart: true },
   "P": { blocked: false, pc: true },
   "<": { blocked: false, warp: true },
-  ">": { blocked: false, warp: true }
+  ">": { blocked: false, warp: true },
+  "~": { blocked: true, water: true }
 };
 
 PKMN.MAPS = {
@@ -405,7 +407,7 @@ PKMN.MAPS = {
       "#............#",
       "#..D..C..M...#",
       "#............#",
-      "<............#",
+      "<............>",
       "#............#",
       "#............#",
       "#............#",
@@ -415,7 +417,8 @@ PKMN.MAPS = {
     warps: {
       "0,4": { toMap: "route5", x: 18, y: 4 },
       "3,2": { toMap: "gym4", x: 4, y: 6 },
-      "6,2": { toMap: "center5", x: 4, y: 4 }
+      "6,2": { toMap: "center5", x: 4, y: 4 },
+      "13,4": { toMap: "route6", x: 1, y: 4 }
     }
   },
 
@@ -450,6 +453,265 @@ PKMN.MAPS = {
     ],
     warps: {
       "4,7": { toMap: "town5", x: 3, y: 3 }
+    }
+  },
+
+  // Route à embranchement: le couloir principal (rangée y=4) mène à la grotte,
+  // mais une brèche dans le mur du bas (x=10,y=7) ouvre sur une impasse isolée.
+  route6: {
+    name: "Route 6",
+    tiles: [
+      "####################",
+      "#..................#",
+      '#.""""......""""...#',
+      '#.""""......""""...#',
+      "<..................D",
+      '#.""""......""""...#',
+      '#.""""......""""...#',
+      "##########.#########",
+      "#..................#",
+      "####################"
+    ],
+    warps: {
+      "0,4": { toMap: "town5", x: 13, y: 4 },
+      "19,4": { toMap: "cave1", x: 1, y: 4 }
+    },
+    encounterRate: 0.15,
+    encounterTable: [
+      { id: 95, weight: 15, min: 20, max: 23 },  // Onix
+      { id: 66, weight: 20, min: 19, max: 22 },  // Machoc
+      { id: 74, weight: 20, min: 19, max: 22 },  // Racaillou
+      { id: 19, weight: 25, min: 17, max: 20 },  // Rattata
+      { id: 16, weight: 20, min: 17, max: 20 }   // Roucool
+    ]
+  },
+
+  cave1: {
+    name: "Grotte Sombre",
+    indoor: true,
+    cave: true,
+    tiles: [
+      "############",
+      "#..........#",
+      "#..........#",
+      "#..........#",
+      "D..........D",
+      "#..........#",
+      "#..........#",
+      "############"
+    ],
+    warps: {
+      "0,4": { toMap: "route6", x: 18, y: 4 },
+      "11,4": { toMap: "route7", x: 1, y: 4 }
+    },
+    encounterRate: 0.18,
+    encounterTable: [
+      { id: 95,  weight: 25, min: 20, max: 24 },  // Onix
+      { id: 41,  weight: 30, min: 19, max: 22 },  // Nosferapti
+      { id: 66,  weight: 25, min: 19, max: 23 },  // Machoc
+      { id: 74,  weight: 20, min: 18, max: 22 }   // Racaillou
+    ]
+  },
+
+  route7: {
+    name: "Route 7",
+    tiles: [
+      "####################",
+      "#..................#",
+      '#.""""......""""...#',
+      '#.""""......""""...#',
+      "<..................>",
+      '#.""""......""""...#',
+      '#.""""......""""...#',
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+    warps: {
+      "0,4": { toMap: "cave1", x: 10, y: 4 },
+      "19,4": { toMap: "town6", x: 1, y: 4 }
+    },
+    encounterRate: 0.15,
+    encounterTable: [
+      { id: 92,  weight: 22, min: 22, max: 25 },  // Fantominus
+      { id: 41,  weight: 22, min: 21, max: 24 },  // Nosferapti
+      { id: 19,  weight: 25, min: 19, max: 22 },  // Rattata
+      { id: 16,  weight: 20, min: 19, max: 22 },  // Roucool
+      { id: 27,  weight: 11, min: 19, max: 22 }   // Sabelette
+    ]
+  },
+
+  town6: {
+    name: "Nocterme",
+    tiles: [
+      "##################",
+      "#................#",
+      "#..D..C..M..D....#",
+      "#................#",
+      "<................>",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "##################"
+    ],
+    warps: {
+      "0,4": { toMap: "route7", x: 18, y: 4 },
+      "3,2": { toMap: "gym5", x: 4, y: 6 },
+      "6,2": { toMap: "center6", x: 4, y: 4 },
+      "12,2": { toMap: "maison_inutile1", x: 3, y: 4 },
+      "17,4": { toMap: "route8", x: 1, y: 4 }
+    }
+  },
+
+  center6: {
+    name: "Centre Pokémon",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#..H.P.#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,5": { toMap: "town6", x: 6, y: 3 }
+    }
+  },
+
+  gym5: {
+    name: "Arène de l'Ombre",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,7": { toMap: "town6", x: 3, y: 3 }
+    }
+  },
+
+  maison_inutile1: {
+    name: "Maison",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,5": { toMap: "town6", x: 12, y: 3 }
+    }
+  },
+
+  // Route côtière: bordée d'eau (bloquée, purement décorative) au lieu d'arbres.
+  route8: {
+    name: "Route Côtière",
+    tiles: [
+      "~~~~~~~~~~~~~~~~~~~~",
+      "~..................~",
+      "~..................~",
+      "~..................~",
+      "<..................>",
+      "~..................~",
+      "~..................~",
+      "~..................~",
+      "~..................~",
+      "~~~~~~~~~~~~~~~~~~~~"
+    ],
+    warps: {
+      "0,4": { toMap: "town6", x: 17, y: 4 },
+      "19,4": { toMap: "town7", x: 1, y: 4 }
+    },
+    encounterRate: 0.15,
+    encounterTable: [
+      { id: 118, weight: 25, min: 24, max: 27 },  // Poissirène
+      { id: 79,  weight: 20, min: 24, max: 27 },  // Ramoloss
+      { id: 60,  weight: 20, min: 23, max: 26 },  // Ptitard
+      { id: 41,  weight: 20, min: 23, max: 26 },  // Nosferapti
+      { id: 19,  weight: 15, min: 21, max: 24 }   // Rattata
+    ]
+  },
+
+  town7: {
+    name: "Voltis",
+    tiles: [
+      "##################",
+      "#................#",
+      "#..D..C..M..D....#",
+      "#................#",
+      "<................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "##################"
+    ],
+    warps: {
+      "0,4": { toMap: "route8", x: 18, y: 4 },
+      "3,2": { toMap: "gym6", x: 4, y: 6 },
+      "6,2": { toMap: "center7", x: 4, y: 4 },
+      "12,2": { toMap: "maison_inutile2", x: 3, y: 4 }
+    }
+  },
+
+  center7: {
+    name: "Centre Pokémon",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#..H.P.#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,5": { toMap: "town7", x: 6, y: 3 }
+    }
+  },
+
+  gym6: {
+    name: "Arène de l'Éclair",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,7": { toMap: "town7", x: 3, y: 3 }
+    }
+  },
+
+  maison_inutile2: {
+    name: "Maison",
+    indoor: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,5": { toMap: "town7", x: 12, y: 3 }
     }
   }
 };

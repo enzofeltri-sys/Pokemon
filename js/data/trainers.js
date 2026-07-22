@@ -95,5 +95,33 @@ PKMN.TRAINERS = {
     team: [{ species: 44, level: 24 }, { species: 71, level: 26 }],
     reward: 1200,
     onWin: [{ badge: "badge4" }, { setFlag: "beat_gym4", value: true }]
+  },
+
+  gym5_trainer: {
+    name: "Occultiste",
+    team: [{ species: 92, level: 28 }],
+    reward: 400,
+    onWin: [{ setFlag: "beat_gym5_trainer", value: true }]
+  },
+
+  gym5_leader: {
+    name: "Ombrine",
+    team: [{ species: 93, level: 30 }, { species: 94, level: 32 }],
+    reward: 1400,
+    onWin: [{ badge: "badge5" }, { setFlag: "beat_gym5", value: true }]
+  },
+
+  gym6_trainer: {
+    name: "Électricien",
+    team: [{ species: 100, level: 33 }],
+    reward: 450,
+    onWin: [{ setFlag: "beat_gym6_trainer", value: true }]
+  },
+
+  gym6_leader: {
+    name: "Zapholt",
+    team: [{ species: 101, level: 35 }, { species: 125, level: 37 }],
+    reward: 1600,
+    onWin: [{ badge: "badge6" }, { setFlag: "beat_gym6", value: true }]
   }
 };

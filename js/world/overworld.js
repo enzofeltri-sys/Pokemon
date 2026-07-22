@@ -56,6 +56,23 @@ function drawTree(ctx, px, py) {
   ctx.beginPath(); ctx.arc(px + TILE * 0.5, py + TILE * 0.20, TILE * 0.2, 0, Math.PI * 2); ctx.fill();
 }
 
+function drawWater(ctx, px, py, seed) {
+  ctx.fillStyle = "#3d7dc9";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.strokeStyle = "#6fa8e0";
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  const waves = [[6, 10], [18, 8], [10, 20], [22, 18], [4, 26]];
+  const n = 2 + Math.floor(seed * 3);
+  for (let i = 0; i < n; i++) {
+    const [dx, dy] = waves[i % waves.length];
+    ctx.beginPath();
+    ctx.moveTo(px + dx, py + dy);
+    ctx.quadraticCurveTo(px + dx + 4, py + dy - 3, px + dx + 8, py + dy);
+    ctx.stroke();
+  }
+}
+
 function drawWallBrick(ctx, px, py) {
   ctx.fillStyle = "#aab4bd";
   ctx.fillRect(px, py, TILE, TILE);
@@ -81,6 +98,23 @@ function drawFloor(ctx, px, py, tx, ty) {
   const light = (tx + ty) % 2 === 0;
   ctx.fillStyle = light ? "#f2f2f2" : "#e2e6ea";
   ctx.fillRect(px, py, TILE, TILE);
+}
+
+function drawCaveFloor(ctx, px, py, tx, ty) {
+  const light = (tx + ty) % 2 === 0;
+  ctx.fillStyle = light ? "#4a4458" : "#3c384a";
+  ctx.fillRect(px, py, TILE, TILE);
+}
+
+function drawCaveWall(ctx, px, py) {
+  ctx.fillStyle = "#2b2733";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.strokeStyle = "#1a1720";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+  ctx.fillStyle = "#3a3546";
+  ctx.beginPath(); ctx.arc(px + TILE * 0.3, py + TILE * 0.4, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px + TILE * 0.65, py + TILE * 0.6, 5, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawDoor(ctx, px, py, indoor) {
@@ -453,13 +487,15 @@ PKMN.OverworldState = {
         const tile = map.tiles[ty][tx];
         const sx = tx * TILE - camX, sy = ty * TILE - camY;
         const seed = tileSeed(tx, ty);
-        if (tile === "#") { map.indoor ? drawWallBrick(ctx, sx, sy) : drawTree(ctx, sx, sy); }
+        if (tile === "#") { map.cave ? drawCaveWall(ctx, sx, sy) : map.indoor ? drawWallBrick(ctx, sx, sy) : drawTree(ctx, sx, sy); }
         else if (tile === '"') drawTallGrass(ctx, sx, sy, seed);
         else if (tile === "C" || tile === "D") drawDoor(ctx, sx, sy, map.indoor);
         else if (tile === "M") drawMart(ctx, sx, sy);
         else if (tile === "P") drawPC(ctx, sx, sy);
         else if (tile === "H") drawHeal(ctx, sx, sy);
         else if (tile === "<" || tile === ">") drawWarp(ctx, sx, sy, tile);
+        else if (tile === "~") drawWater(ctx, sx, sy, seed);
+        else if (map.cave) drawCaveFloor(ctx, sx, sy, tx, ty);
         else if (map.indoor) drawFloor(ctx, sx, sy, tx, ty);
         else drawGrass(ctx, sx, sy, seed);
       }
