@@ -13,10 +13,14 @@ PKMN.ITEMS = {
   potion: { name: "Potion", price: 300, category: "heal", healAmount: 20 },
   antidote: { name: "Antidote", price: 100, category: "cure" },
   revive: { name: "Rappel", price: 1500, category: "revive" },
-  repel: { name: "Répulsif", price: 350, category: "repel", steps: 100 }
+  repel: { name: "Répulsif", price: 350, category: "repel", steps: 100 },
+  baie_oran: { name: "Baie Oran", price: 250, category: "heldberry", cures: "hp", healAmount: 20 },
+  baie_pecha: { name: "Baie Pecha", price: 150, category: "heldberry", cures: "poison" },
+  baie_chesto: { name: "Baie Chesto", price: 150, category: "heldberry", cures: "sleep" },
+  baie_persil: { name: "Baie Persil", price: 150, category: "heldberry", cures: "paralysis" }
 };
 
-PKMN.MART_STOCK = ["pokeball", "superball", "hyperball", "potion", "antidote", "revive", "repel"];
+PKMN.MART_STOCK = ["pokeball", "superball", "hyperball", "potion", "antidote", "revive", "repel", "baie_oran", "baie_pecha", "baie_chesto", "baie_persil"];
 
 // Évoli est un cas particulier: une même espèce évolue différemment
 // selon la pierre utilisée.

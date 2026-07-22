@@ -209,10 +209,18 @@ PKMN.PartyState = {
       if (key === "Escape" || key === "Enter" || key === " ") this.phase = "list";
       return;
     }
+    if (this.phase === "held") {
+      const items = this.heldChoices();
+      if (key === "ArrowDown") this.heldSel = (this.heldSel + 1) % items.length;
+      if (key === "ArrowUp") this.heldSel = (this.heldSel - 1 + items.length) % items.length;
+      if (key === "Escape") this.phase = "action";
+      if (key === "Enter" || key === " ") this.chooseHeld(items[this.heldSel]);
+      return;
+    }
   },
   actionItems() {
     const n = PKMN.Player.party.length;
-    const items = ["Infos"];
+    const items = ["Infos", "Objet tenu"];
     if (this.sel > 0) items.push("Monter");
     if (this.sel < n - 1) items.push("Descendre");
     items.push("Retour");
@@ -221,10 +229,33 @@ PKMN.PartyState = {
   chooseAction(choice) {
     const party = PKMN.Player.party;
     if (choice === "Infos") { this.phase = "info"; return; }
+    if (choice === "Objet tenu") { this.phase = "held"; this.heldSel = 0; return; }
     if (choice === "Monter") { [party[this.sel - 1], party[this.sel]] = [party[this.sel], party[this.sel - 1]]; this.sel--; }
     if (choice === "Descendre") { [party[this.sel + 1], party[this.sel]] = [party[this.sel], party[this.sel + 1]]; this.sel++; }
     PKMN.saveGame();
     this.phase = "list";
+  },
+  heldChoices() {
+    const mon = PKMN.Player.party[this.sel];
+    const items = Object.keys(PKMN.Player.bag).filter((k) => PKMN.ITEMS[k].category === "heldberry" && PKMN.Player.bag[k] > 0);
+    if (mon.heldItem) items.push("retirer");
+    items.push("retour");
+    return items;
+  },
+  chooseHeld(key) {
+    const mon = PKMN.Player.party[this.sel];
+    if (key === "retour") { this.phase = "action"; return; }
+    if (key === "retirer") {
+      PKMN.Player.bag[mon.heldItem] = (PKMN.Player.bag[mon.heldItem] || 0) + 1;
+      mon.heldItem = null;
+    } else {
+      if (mon.heldItem) PKMN.Player.bag[mon.heldItem] = (PKMN.Player.bag[mon.heldItem] || 0) + 1;
+      PKMN.Player.bag[key]--;
+      mon.heldItem = key;
+    }
+    PKMN.saveGame();
+    this.heldSel = 0;
+    this.phase = "action";
   },
   render(ctx) {
     ctx.fillStyle = "#1c2833";
@@ -256,10 +287,13 @@ PKMN.PartyState = {
 
     if (this.phase === "action") {
       const items = this.actionItems();
-      PKMN.drawMenu(ctx, CW - 160, 50 + this.sel * 55, items, this.actionSel, { w: 150 });
+      PKMN.drawMenu(ctx, CW - 170, 50 + this.sel * 55, items, this.actionSel, { w: 160 });
     } else if (this.phase === "info") {
       this.renderInfo(ctx);
       return;
+    } else if (this.phase === "held") {
+      const items = this.heldChoices().map((k) => k === "retour" ? "Retour" : k === "retirer" ? "Retirer" : PKMN.ITEMS[k].name);
+      PKMN.drawMenu(ctx, CW - 170, 50 + this.sel * 55, items, this.heldSel, { w: 160 });
     }
 
     PKMN.drawTextBox(ctx, this.phase === "list" ? "Entrée: options · Échap: revenir" : "Entrée: choisir · Échap: retour", { noPrompt: true });
@@ -287,7 +321,13 @@ PKMN.PartyState = {
 
     ctx.fillText(`XP: ${mon.xp}/${PKMN.xpToNextLevel(mon.level)}`, 116, y + 4);
 
-    y += 24;
+    y += 20;
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#2c3e50";
+    const heldName = mon.heldItem ? PKMN.ITEMS[mon.heldItem].name : "aucun";
+    ctx.fillText(`Talent: ${PKMN.ABILITIES[species.ability].name}  ·  Objet: ${heldName}`, 16, y);
+
+    y += 16;
     ctx.font = "bold 13px sans-serif";
     ctx.fillStyle = "#2c3e50";
     ctx.fillText("Capacités:", 16, y);

@@ -16,6 +16,42 @@ function checkAccuracy(move, attacker, defender) {
   return Math.random() * 100 < effAcc;
 }
 
+const LOW_HP_ABILITY_TYPE = { brasier: "feu", torrent: "eau", engrais: "plante" };
+
+// Baie Oran: se déclenche automatiquement sous 1/4 des PV max.
+function checkHeldBerryHeal(mon, msgs) {
+  if (mon.heldItem === "baie_oran" && mon.hp > 0 && mon.hp <= Math.floor(mon.maxHp / 4)) {
+    mon.heldItem = null;
+    mon.hp = Math.min(mon.maxHp, mon.hp + PKMN.ITEMS.baie_oran.healAmount);
+    msgs.push(`${PKMN.speciesOf(mon).name} utilise sa Baie Oran et récupère des PV !`);
+  }
+}
+
+// Baies Pecha/Chesto/Persil: soignent automatiquement le statut correspondant.
+function checkHeldBerryCure(mon, msgs) {
+  const item = mon.heldItem;
+  if (!item || !mon.status) return;
+  const species = PKMN.speciesOf(mon);
+  if (item === "baie_pecha" && (mon.status === "poison" || mon.status === "toxic")) {
+    mon.heldItem = null; mon.status = null; mon.statusCounter = 0;
+    msgs.push(`${species.name} utilise sa Baie Pecha et se soigne du poison !`);
+  } else if (item === "baie_chesto" && mon.status === "sleep") {
+    mon.heldItem = null; mon.status = null; mon.statusCounter = 0;
+    msgs.push(`${species.name} utilise sa Baie Chesto et se réveille !`);
+  } else if (item === "baie_persil" && mon.status === "paralysis") {
+    mon.heldItem = null; mon.status = null;
+    msgs.push(`${species.name} utilise sa Baie Persil et n'est plus paralysé !`);
+  }
+}
+
+function abilityBlocksStatus(target, status) {
+  const ability = PKMN.speciesOf(target).ability;
+  if (status === "sleep" && ability === "insomniaque") return true;
+  if ((status === "poison" || status === "toxic") && ability === "immunite") return true;
+  if (status === "confuse" && ability === "tempo_perso") return true;
+  return false;
+}
+
 function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) {
   if (move.fixedDamage) return { dmg: move.fixedDamage, eff: 1, crit: false };
   const physical = move.cat === "physique";
@@ -23,7 +59,13 @@ function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) 
   const isCrit = Math.random() < critChance;
 
   let atkBase = physical ? attacker.stats.atk : attacker.stats.spa;
-  if (physical && attacker.status === "burn") atkBase = Math.floor(atkBase / 2);
+  if (physical) {
+    if (attackerSpecies.ability === "abnegation" && attacker.status) {
+      atkBase = Math.floor(atkBase * 1.5); // Abnégation: ignore la brûlure, bonus si statut
+    } else if (attacker.status === "burn") {
+      atkBase = Math.floor(atkBase / 2);
+    }
+  }
   const defBase = physical ? defender.stats.def : defender.stats.spd;
   // Un coup critique ignore les baisses d'attaque de l'attaquant et les hausses
   // de défense du défenseur (jamais défavorable à l'attaquant).
@@ -36,10 +78,13 @@ function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) 
   const level = attacker.level;
   const base = ((2 * level) / 5 + 2) * move.power * (atk / def) / 50 + 2;
   const stab = attackerSpecies.types.includes(move.type) ? 1.5 : 1;
-  const eff = PKMN.getEffectiveness(move.type, defenderSpecies.types);
+  let eff = PKMN.getEffectiveness(move.type, defenderSpecies.types);
+  if (move.type === "sol" && defenderSpecies.ability === "levitation") eff = 0;
   const rand = 0.85 + Math.random() * 0.15;
   const critMul = isCrit ? 1.5 : 1;
-  const dmg = Math.max(1, Math.floor(base * stab * eff * rand * critMul));
+  const lowHpType = LOW_HP_ABILITY_TYPE[attackerSpecies.ability];
+  const abilityMul = (lowHpType === move.type && attacker.hp <= attacker.maxHp / 3) ? 1.5 : 1;
+  const dmg = eff === 0 ? 0 : Math.max(1, Math.floor(base * stab * eff * rand * critMul * abilityMul));
   return { dmg, eff, crit: isCrit };
 }
 
@@ -72,8 +117,24 @@ PKMN.BattleState = {
     this.phase = "message";
     this.menuSel = 0;
     const wildSpecies = PKMN.speciesOf(this.wild);
-    this.queue = [`Un ${wildSpecies.name} sauvage apparaît !`];
+    const introMsgs = [`Un ${wildSpecies.name} sauvage apparaît !`];
+    this.triggerSendOut(this.wild, this.active, introMsgs);
+    this.triggerSendOut(this.active, this.wild, introMsgs);
+    this.queue = introMsgs;
     this.onQueueDone = () => { this.phase = "main_menu"; this.menuSel = 0; };
+  },
+
+  triggerSendOut(mon, opponent, msgs) {
+    if (!mon || !opponent || opponent.hp <= 0) return;
+    const ability = PKMN.speciesOf(mon).ability;
+    if (ability === "intimidation") {
+      const cur = opponent.statStages.atk;
+      const next = Math.max(-6, cur - 1);
+      if (next !== cur) {
+        opponent.statStages.atk = next;
+        msgs.push(`${PKMN.speciesOf(mon).name} intimide ${PKMN.speciesOf(opponent).name} ! Son Attaque baisse !`);
+      }
+    }
   },
 
   showMessages(list, cb) {
@@ -200,12 +261,15 @@ PKMN.BattleState = {
     }
     const was_forced = this.forcedSwitch;
     this.active = mon;
+    mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 };
     const species = PKMN.speciesOf(mon);
+    const sendOutMsgs = [`Tu envoies ${species.name} !`];
+    this.triggerSendOut(mon, this.wild, sendOutMsgs);
     if (was_forced) {
-      this.showMessages([`Tu envoies ${species.name} !`], () => { this.phase = "main_menu"; this.menuSel = 0; });
+      this.showMessages(sendOutMsgs, () => { this.phase = "main_menu"; this.menuSel = 0; });
     } else {
       this.pendingPlayerMove = null; // switch consomme le tour
-      this.showMessages([`Tu rappelles ton Pokémon.`, `Tu envoies ${species.name} !`], () => this.wildTurnOnly());
+      this.showMessages([`Tu rappelles ton Pokémon.`, ...sendOutMsgs], () => this.wildTurnOnly());
     }
   },
 
@@ -311,17 +375,18 @@ PKMN.BattleState = {
       return;
     }
     if (secondary.confuse) {
-      if (target.confused > 0) return;
+      if (target.confused > 0 || abilityBlocksStatus(target, "confuse")) return;
       target.confused = 2 + Math.floor(Math.random() * 2);
       msgs.push(`${PKMN.speciesOf(target).name} devient confus !`);
       return;
     }
     if (secondary.status) {
-      if (target.status) return;
+      if (target.status || abilityBlocksStatus(target, secondary.status)) return;
       target.status = secondary.status;
       if (secondary.status === "sleep") target.statusCounter = 1 + Math.floor(Math.random() * 3);
       if (secondary.status === "toxic") target.statusCounter = 1;
       msgs.push(this.statusMessage(target, secondary.status));
+      checkHeldBerryCure(target, msgs);
     }
   },
 
@@ -372,6 +437,7 @@ PKMN.BattleState = {
         const selfDmg = Math.max(1, Math.floor(attacker.stats.atk * 0.4));
         attacker.hp = Math.max(0, attacker.hp - selfDmg);
         if (attacker.hp <= 0) msgs.push(`${atkSpecies.name} est mis K.O. !`);
+        checkHeldBerryHeal(attacker, msgs);
         return;
       }
       msgs.push(`${atkSpecies.name} est confus...`);
@@ -379,7 +445,7 @@ PKMN.BattleState = {
 
     const move = PKMN.MOVES[moveSlot.key];
     const defSpecies = PKMN.speciesOf(defender);
-    moveSlot.pp = Math.max(0, moveSlot.pp - 1);
+    moveSlot.pp = Math.max(0, moveSlot.pp - (defSpecies.ability === "pression" ? 2 : 1));
     msgs.push(`${atkSpecies.name} utilise ${move.name} !`);
 
     if (!checkAccuracy(move, attacker, defender)) {
@@ -396,8 +462,13 @@ PKMN.BattleState = {
     let totalDmg = 0, lastEff = 1, anyCrit = false;
     for (let i = 0; i < hits; i++) {
       if (defender.hp <= 0) break;
+      const wasFull = defender.hp === defender.maxHp;
       const { dmg, eff, crit } = calcDamage(attacker, atkSpecies, defender, defSpecies, move);
       defender.hp = Math.max(0, defender.hp - dmg);
+      if (defender.hp <= 0 && wasFull && defSpecies.ability === "fermete") {
+        defender.hp = 1;
+        msgs.push(`${defSpecies.name} tient bon grâce à Fermeté !`);
+      }
       totalDmg += dmg;
       lastEff = eff;
       if (crit) anyCrit = true;
@@ -407,6 +478,7 @@ PKMN.BattleState = {
     if (lastEff > 1) msgs.push("C'est super efficace !");
     else if (lastEff > 0 && lastEff < 1) msgs.push("Ce n'est pas très efficace...");
     else if (lastEff === 0) msgs.push(`Ça n'affecte pas ${defSpecies.name} !`);
+    checkHeldBerryHeal(defender, msgs);
 
     if (move.recharge) attacker.mustRecharge = true;
 
@@ -415,10 +487,23 @@ PKMN.BattleState = {
       attacker.hp = Math.max(0, attacker.hp - recoilDmg);
       msgs.push(`${atkSpecies.name} est blessé par le contrecoup !`);
       if (attacker.hp <= 0) msgs.push(`${atkSpecies.name} est mis K.O. !`);
+      checkHeldBerryHeal(attacker, msgs);
     }
 
     if (move.secondary && defender.hp > 0 && Math.random() * 100 < move.secondary.chance) {
       this.applySecondary(defender, move.secondary, msgs);
+    }
+
+    if (totalDmg > 0 && attacker.hp > 0 && !attacker.status && Math.random() < 0.3) {
+      if (defSpecies.ability === "statik") {
+        attacker.status = "paralysis";
+        msgs.push(`${atkSpecies.name} est paralysé par Statik !`);
+        checkHeldBerryCure(attacker, msgs);
+      } else if (defSpecies.ability === "point_poison") {
+        attacker.status = "poison";
+        msgs.push(`${atkSpecies.name} est empoisonné par Point Poison !`);
+        checkHeldBerryCure(attacker, msgs);
+      }
     }
 
     if (move.drain && totalDmg > 0) {
@@ -443,7 +528,7 @@ PKMN.BattleState = {
     }
     if (eff.confuse) {
       const target = eff.target === "self" ? attacker : defender;
-      if (target.confused > 0) {
+      if (target.confused > 0 || abilityBlocksStatus(target, "confuse")) {
         msgs.push("Mais ça échoue !");
       } else {
         target.confused = 2 + Math.floor(Math.random() * 2);
@@ -453,13 +538,14 @@ PKMN.BattleState = {
     }
     if (eff.status) {
       const target = eff.target === "self" ? attacker : defender;
-      if (target.status) {
+      if (target.status || abilityBlocksStatus(target, eff.status)) {
         msgs.push("Mais ça échoue !");
       } else {
         target.status = eff.status;
         if (eff.status === "sleep") target.statusCounter = 1 + Math.floor(Math.random() * 3);
         if (eff.status === "toxic") target.statusCounter = 1;
         msgs.push(this.statusMessage(target, eff.status));
+        checkHeldBerryCure(target, msgs);
       }
       return;
     }
@@ -497,6 +583,7 @@ PKMN.BattleState = {
         msgs.push(`${name} souffre de sa brûlure !`);
       }
       if (mon.hp <= 0) msgs.push(`${name} est mis K.O. !`);
+      else checkHeldBerryHeal(mon, msgs);
     }
 
     this.pendingPlayerMove = null;

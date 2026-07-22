@@ -173,6 +173,7 @@ for (const row of PKMN.POKEDEX_RAW) {
   // avec un bonus pour les légendaires (ils rapportent proportionnellement plus).
   let baseExp = 8 + Math.floor(statTotal / 4);
   if (legendary) baseExp = Math.floor(baseExp * 1.4);
+  const ability = PKMN.ABILITY_OVERRIDES[id] || PKMN.TYPE_DEFAULT_ABILITY[type1] || "tempo_perso";
   PKMN.POKEDEX[id] = {
     id, name,
     types: type2 ? [type1, type2] : [type1],
@@ -180,6 +181,7 @@ for (const row of PKMN.POKEDEX_RAW) {
     evoLevel, evoId, stage, legendary,
     evYield: { [topStat]: legendary ? 2 : 1 },
     baseExp,
+    ability,
     spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
     spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`
   };

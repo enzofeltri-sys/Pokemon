@@ -68,6 +68,7 @@ PKMN.createPokemon = function (speciesId, level) {
     confused: 0,
     mustRecharge: false,
     flinched: false,
+    heldItem: null,
     caughtWith: "Poké Ball"
   };
 };
