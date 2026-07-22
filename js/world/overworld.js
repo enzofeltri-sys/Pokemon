@@ -13,57 +13,91 @@ function tileSeed(tx, ty) {
 }
 
 function drawGrass(ctx, px, py, seed) {
-  ctx.fillStyle = "#7cb342";
+  const P = PKMN.PALETTE;
+  ctx.fillStyle = P.grassMid;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.fillStyle = "#69a032";
-  const spots = [[6, 8], [20, 5], [11, 22], [24, 18], [16, 12], [4, 24]];
-  const n = 2 + Math.floor(seed * 4);
+  // Bande d'ombre en haut de la tuile pour casser le plat, façon dénivelé léger.
+  ctx.fillStyle = P.grassDark;
+  ctx.fillRect(px, py, TILE, 4);
+  ctx.fillStyle = P.grassLight;
+  const spots = [[6, 8], [20, 5], [11, 22], [24, 18], [16, 12], [4, 24], [27, 9], [9, 27]];
+  const n = 3 + Math.floor(seed * 4);
   for (let i = 0; i < n; i++) {
     const [dx, dy] = spots[i % spots.length];
-    ctx.fillRect(px + dx, py + dy, 2, 3);
+    ctx.fillRect(px + dx, py + dy, 3, 2);
+  }
+  ctx.fillStyle = P.grassDark;
+  const shadows = [[14, 6], [3, 16], [22, 24]];
+  const ns = 1 + Math.floor(seed * 2);
+  for (let i = 0; i < ns; i++) {
+    const [dx, dy] = shadows[i % shadows.length];
+    ctx.fillRect(px + dx, py + dy, 2, 2);
   }
 }
 
 function drawTallGrass(ctx, px, py, seed) {
-  ctx.fillStyle = "#4c8c3f";
+  const P = PKMN.PALETTE;
+  ctx.fillStyle = P.tallGrassDark;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.strokeStyle = "#2e5f27";
-  ctx.lineWidth = 2;
+  ctx.fillStyle = P.tallGrassLight;
+  ctx.fillRect(px, py, TILE, TILE - 6);
+  ctx.strokeStyle = P.tallGrassDark;
+  ctx.lineWidth = 2.5;
   ctx.lineCap = "round";
-  const tufts = [[6, 22], [13, 18], [20, 24], [26, 16], [9, 10], [23, 8]];
-  const n = 4 + Math.floor(seed * 2);
+  const tufts = [[6, 22], [13, 18], [20, 24], [26, 16], [9, 10], [23, 8], [3, 6], [29, 26]];
+  const n = 5 + Math.floor(seed * 3);
   for (let i = 0; i < n; i++) {
     const [dx, dy] = tufts[i % tufts.length];
     ctx.beginPath();
     ctx.moveTo(px + dx - 3, py + dy + 6);
-    ctx.lineTo(px + dx, py + dy - 2);
+    ctx.lineTo(px + dx, py + dy - 3);
     ctx.lineTo(px + dx + 3, py + dy + 6);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = "#6bab52";
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < n; i += 2) {
+    const [dx, dy] = tufts[i % tufts.length];
+    ctx.beginPath();
+    ctx.moveTo(px + dx, py + dy + 5);
+    ctx.lineTo(px + dx, py + dy - 1);
     ctx.stroke();
   }
 }
 
 function drawTree(ctx, px, py) {
-  ctx.fillStyle = "#5a8f3c";
+  const P = PKMN.PALETTE;
+  ctx.fillStyle = P.grassMid;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.fillStyle = "#5d4529";
+  ctx.fillStyle = "rgba(0,0,0,0.18)";
+  ctx.beginPath(); ctx.ellipse(px + TILE * 0.5, py + TILE - 6, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = P.woodDark;
   ctx.fillRect(px + TILE / 2 - 3, py + TILE - 11, 6, 11);
-  ctx.fillStyle = "#1b5e20";
+  ctx.fillStyle = P.woodMid;
+  ctx.fillRect(px + TILE / 2 - 3, py + TILE - 11, 2, 11);
+  ctx.fillStyle = "#215c28";
   ctx.beginPath(); ctx.arc(px + TILE * 0.5, py + TILE * 0.36, TILE * 0.42, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#2d7a31";
   ctx.beginPath(); ctx.arc(px + TILE * 0.32, py + TILE * 0.28, TILE * 0.24, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(px + TILE * 0.68, py + TILE * 0.30, TILE * 0.22, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#388e3c";
-  ctx.beginPath(); ctx.arc(px + TILE * 0.5, py + TILE * 0.20, TILE * 0.2, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#42975f";
+  ctx.beginPath(); ctx.arc(px + TILE * 0.42, py + TILE * 0.20, TILE * 0.17, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.14)";
+  ctx.beginPath(); ctx.arc(px + TILE * 0.36, py + TILE * 0.16, TILE * 0.09, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawWater(ctx, px, py, seed) {
-  ctx.fillStyle = "#3d7dc9";
+  const P = PKMN.PALETTE;
+  const grad = ctx.createLinearGradient(px, py, px, py + TILE);
+  grad.addColorStop(0, P.waterMid);
+  grad.addColorStop(1, P.waterDark);
+  ctx.fillStyle = grad;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.strokeStyle = "#6fa8e0";
+  ctx.strokeStyle = P.waterLight;
   ctx.lineWidth = 2;
   ctx.lineCap = "round";
-  const waves = [[6, 10], [18, 8], [10, 20], [22, 18], [4, 26]];
-  const n = 2 + Math.floor(seed * 3);
+  const waves = [[6, 10], [18, 8], [10, 20], [22, 18], [4, 26], [26, 27]];
+  const n = 3 + Math.floor(seed * 3);
   for (let i = 0; i < n; i++) {
     const [dx, dy] = waves[i % waves.length];
     ctx.beginPath();
@@ -71,50 +105,75 @@ function drawWater(ctx, px, py, seed) {
     ctx.quadraticCurveTo(px + dx + 4, py + dy - 3, px + dx + 8, py + dy);
     ctx.stroke();
   }
+  ctx.fillStyle = "rgba(255,255,255,0.2)";
+  ctx.fillRect(px + 4, py + 4, 3, 3);
 }
 
 function drawWallBrick(ctx, px, py) {
-  ctx.fillStyle = "#aab4bd";
+  const P = PKMN.PALETTE;
+  ctx.fillStyle = P.wallMid;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.strokeStyle = "#7d8894";
+  ctx.fillStyle = P.roofRed;
+  ctx.fillRect(px, py, TILE, 6);
+  ctx.fillStyle = P.roofRedDark;
+  ctx.fillRect(px, py + 5, TILE, 2);
+  ctx.strokeStyle = P.wallDark;
   ctx.lineWidth = 1;
-  ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+  ctx.strokeRect(px + 0.5, py + 8.5, TILE - 1, TILE - 9);
   ctx.beginPath();
-  ctx.moveTo(px, py + TILE / 2); ctx.lineTo(px + TILE, py + TILE / 2);
-  ctx.moveTo(px + TILE / 2, py); ctx.lineTo(px + TILE / 2, py + TILE / 2);
+  ctx.moveTo(px, py + TILE * 0.62); ctx.lineTo(px + TILE, py + TILE * 0.62);
+  ctx.moveTo(px + TILE / 2, py + 8); ctx.lineTo(px + TILE / 2, py + TILE * 0.62);
   ctx.stroke();
+  ctx.fillStyle = P.wallLight;
+  ctx.fillRect(px + 2, py + 10, TILE - 4, 2);
 }
 
 function drawPath(ctx, px, py, seed) {
-  ctx.fillStyle = "#dcc190";
+  const P = PKMN.PALETTE;
+  ctx.fillStyle = P.pathMid;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.fillStyle = "#cdae7a";
-  const spots = [[8, 8], [20, 18], [14, 26], [24, 6]];
-  const n = 1 + Math.floor(seed * 2);
+  ctx.fillStyle = P.pathDark;
+  const spots = [[8, 8], [20, 18], [14, 26], [24, 6], [3, 20], [27, 24]];
+  const n = 2 + Math.floor(seed * 3);
   for (let i = 0; i < n; i++) { const [dx, dy] = spots[i % spots.length]; ctx.fillRect(px + dx, py + dy, 2, 2); }
+  ctx.fillStyle = P.pathLight;
+  const hi = [[12, 12], [22, 22], [5, 6]];
+  const nh = 1 + Math.floor(seed * 2);
+  for (let i = 0; i < nh; i++) { const [dx, dy] = hi[i % hi.length]; ctx.fillRect(px + dx, py + dy, 2, 2); }
 }
 
 function drawFloor(ctx, px, py, tx, ty) {
+  const P = PKMN.PALETTE;
   const light = (tx + ty) % 2 === 0;
-  ctx.fillStyle = light ? "#f2f2f2" : "#e2e6ea";
+  ctx.fillStyle = light ? P.floorLight : P.floorDark;
   ctx.fillRect(px, py, TILE, TILE);
+  ctx.strokeStyle = "rgba(0,0,0,0.05)";
+  ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
 }
 
 function drawCaveFloor(ctx, px, py, tx, ty) {
+  const P = PKMN.PALETTE;
   const light = (tx + ty) % 2 === 0;
-  ctx.fillStyle = light ? "#4a4458" : "#3c384a";
+  ctx.fillStyle = light ? P.caveFloorLight : P.caveFloorDark;
   ctx.fillRect(px, py, TILE, TILE);
+  ctx.strokeStyle = "rgba(0,0,0,0.15)";
+  ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
 }
 
 function drawCaveWall(ctx, px, py) {
-  ctx.fillStyle = "#2b2733";
+  const P = PKMN.PALETTE;
+  ctx.fillStyle = P.caveWallDark;
   ctx.fillRect(px, py, TILE, TILE);
-  ctx.strokeStyle = "#1a1720";
+  ctx.fillStyle = P.caveWallLight;
+  ctx.fillRect(px, py, TILE, TILE * 0.6);
+  ctx.strokeStyle = "#161320";
   ctx.lineWidth = 1;
   ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
-  ctx.fillStyle = "#3a3546";
+  ctx.fillStyle = "#463c5c";
   ctx.beginPath(); ctx.arc(px + TILE * 0.3, py + TILE * 0.4, 4, 0, Math.PI * 2); ctx.fill();
   ctx.beginPath(); ctx.arc(px + TILE * 0.65, py + TILE * 0.6, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#1a1626";
+  ctx.beginPath(); ctx.arc(px + TILE * 0.7, py + TILE * 0.25, 3, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawDoor(ctx, px, py, indoor) {
@@ -219,8 +278,13 @@ function drawNPCSprite(ctx, screenX, screenY, npc) {
   ctx.beginPath(); ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = npc.color || "#7f8c8d";
   ctx.beginPath(); ctx.arc(cx, cy, TILE * 0.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.25)";
+  ctx.beginPath(); ctx.arc(cx - 4, cy - 5, TILE * 0.14, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "rgba(0,0,0,0.25)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, TILE * 0.4, 0, Math.PI * 2); ctx.stroke();
   ctx.fillStyle = "#fff";
-  ctx.font = "bold 14px sans-serif";
+  ctx.font = "bold 14px Silkscreen, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(npc.letter || npc.name[0], cx, cy + 1);
@@ -476,7 +540,7 @@ PKMN.OverworldState = {
     camX = Math.max(0, Math.min(camX, Math.max(0, mapW * TILE - PKMN.CANVAS_W)));
     camY = Math.max(0, Math.min(camY, Math.max(0, mapH * TILE - PKMN.CANVAS_H)));
 
-    ctx.fillStyle = map.indoor ? "#e2e6ea" : "#5a8f3c";
+    ctx.fillStyle = map.indoor ? PKMN.PALETTE.floorDark : PKMN.PALETTE.grassMid;
     ctx.fillRect(0, 0, PKMN.CANVAS_W, PKMN.CANVAS_H);
 
     const startCol = Math.floor(camX / TILE), startRow = Math.floor(camY / TILE);
@@ -514,23 +578,21 @@ PKMN.OverworldState = {
     drawPlayerSprite(ctx, screenX, screenY, this.facing, bob);
 
     // HUD nom de la zone
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.fillRect(0, 0, 160, 24);
-    ctx.fillStyle = "#fff";
-    ctx.font = "13px sans-serif";
+    PKMN.drawBorderedBox(ctx, 6, 6, Math.min(200, ctx.measureText(map.name).width + 40), 26, { r: 4 });
+    ctx.fillStyle = PKMN.PALETTE.ink;
+    ctx.font = "13px Silkscreen, sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(map.name, 8, 16);
+    ctx.fillText(map.name, 16, 24);
 
     if (this.menuOpen) {
       const items = this.pauseMenuItems();
       PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, items, this.menuSel);
       const moneyY = 10 + items.length * 26 + 16 + 6;
-      ctx.fillStyle = "rgba(0,0,0,0.6)";
-      ctx.fillRect(PKMN.CANVAS_W - 160, moneyY, 150, 26);
-      ctx.fillStyle = "#f4d03f";
-      ctx.font = "13px sans-serif";
+      PKMN.drawBorderedBox(ctx, PKMN.CANVAS_W - 160, moneyY, 150, 30, { r: 4 });
+      ctx.fillStyle = PKMN.PALETTE.uiAccentDark;
+      ctx.font = "13px Silkscreen, sans-serif";
       ctx.textAlign = "left";
-      ctx.fillText(`Argent: ${PKMN.Player.money}₽`, PKMN.CANVAS_W - 152, moneyY + 17);
+      ctx.fillText(`Argent: ${PKMN.Player.money}₽`, PKMN.CANVAS_W - 150, moneyY + 20);
     }
     if (this.quickMenuOpen) {
       if (this.quickMenuPhase === "list") {

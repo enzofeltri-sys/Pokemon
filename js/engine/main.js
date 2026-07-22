@@ -1,5 +1,17 @@
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   const canvas = document.getElementById("game");
+  // Le canvas n'attend pas tout seul le chargement des polices @font-face:
+  // sans ça, les premières images (voire toutes, si le navigateur ne les
+  // recharge jamais) s'affichent avec la police de repli.
+  try {
+    await Promise.all([
+      document.fonts.load("16px Silkscreen"),
+      document.fonts.load("bold 16px Silkscreen"),
+      document.fonts.load("16px 'Press Start 2P'")
+    ]);
+  } catch (e) {
+    // Pas grave si une police ne charge pas: le jeu utilisera la police de repli.
+  }
   PKMN.initGame(canvas);
 });
 

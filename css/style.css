@@ -1,3 +1,22 @@
+@font-face {
+  font-family: "Silkscreen";
+  src: url("fonts/Silkscreen-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("fonts/Silkscreen-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: block;
+}
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: block;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -6,9 +25,9 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background: #111;
+  background: #14131c;
   color: #eee;
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Silkscreen", "Segoe UI", sans-serif;
   display: flex;
   justify-content: center;
 }
@@ -19,8 +38,12 @@ html, body {
 }
 
 h1 {
-  font-size: 20px;
-  margin: 4px 0 12px;
+  font-family: "Press Start 2P", "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 4px 0 16px;
+  color: #f4c542;
+  text-shadow: 2px 2px 0 #20263a;
 }
 
 canvas {

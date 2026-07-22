@@ -34,31 +34,25 @@ PKMN.roundRectPath = function (ctx, x, y, w, h, r) {
 
 PKMN.drawPanel = function (ctx, x, y, w, h, opts) {
   opts = opts || {};
-  const r = opts.r ?? 10;
-  PKMN.roundRectPath(ctx, x, y, w, h, r);
-  ctx.fillStyle = opts.border || "#2c3e50";
-  ctx.fill();
-  const pad = opts.pad ?? 4;
-  PKMN.roundRectPath(ctx, x + pad, y + pad, w - pad * 2, h - pad * 2, Math.max(2, r - pad));
-  ctx.fillStyle = opts.fill || "#fff";
-  ctx.fill();
+  PKMN.drawBorderedBox(ctx, x, y, w, h, {
+    r: opts.r,
+    outer: opts.border,
+    fill: opts.fill
+  });
 };
 
 PKMN.drawTextBox = function (ctx, text, opts) {
   opts = opts || {};
   const x = 10, y = CH - 100, w = CW - 20, h = 90;
-  PKMN.drawPanel(ctx, x, y, w, h, { border: "#1c3f5f", fill: "#fdfefe" });
-  ctx.fillStyle = "#111";
-  ctx.font = "16px 'Segoe UI', sans-serif";
+  PKMN.drawBorderedBox(ctx, x, y, w, h);
+  ctx.fillStyle = PKMN.PALETTE.ink;
+  ctx.font = "14px Silkscreen, 'Segoe UI', sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
-  const lines = PKMN.wrapText(ctx, text, w - 24);
-  lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, x + 12, y + 12 + i * 22));
+  const lines = PKMN.wrapText(ctx, text, w - 28);
+  lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, x + 14, y + 14 + i * 22));
   if (!opts.noPrompt) {
-    ctx.fillStyle = "#888";
-    ctx.font = "12px sans-serif";
-    ctx.textAlign = "right";
-    ctx.fillText("▶ Entrée / Espace", x + w - 10, y + h - 18);
+    PKMN.drawAdvanceIndicator(ctx, x + w - 16, y + h - 14, (opts.t || Date.now() / 1000));
   }
 };
 
@@ -67,30 +61,34 @@ PKMN.drawMenu = function (ctx, x, y, items, selectedIndex, opts) {
   const lineH = opts.lineH || 26;
   const w = opts.w || 180;
   const h = items.length * lineH + 16;
-  PKMN.drawPanel(ctx, x, y, w, h, { border: "#1c3f5f", fill: "#fdfefe" });
-  ctx.font = "16px 'Segoe UI', sans-serif";
+  PKMN.drawBorderedBox(ctx, x, y, w, h);
+  ctx.font = "13px Silkscreen, 'Segoe UI', sans-serif";
   ctx.textBaseline = "middle";
   items.forEach((item, i) => {
     const ly = y + 8 + i * lineH + lineH / 2;
     if (i === selectedIndex) {
-      ctx.fillStyle = "#f4d03f";
-      ctx.fillRect(x + 4, y + 4 + i * lineH, w - 8, lineH);
+      ctx.fillStyle = "rgba(244,197,66,0.35)";
+      ctx.fillRect(x + 7, y + 7 + i * lineH, w - 14, lineH - 2);
+      PKMN.drawCursorTriangle(ctx, x + 12, ly, PKMN.PALETTE.uiAccentDark);
     }
-    ctx.fillStyle = "#111";
+    ctx.fillStyle = PKMN.PALETTE.ink;
     ctx.textAlign = "left";
-    ctx.fillText((i === selectedIndex ? "➤ " : "   ") + item, x + 10, ly);
+    ctx.fillText(item, x + (i === selectedIndex ? 24 : 14), ly);
   });
 };
 
 PKMN.drawHpBar = function (ctx, x, y, w, h, ratio) {
-  ctx.fillStyle = "#444";
+  ctx.fillStyle = PKMN.PALETTE.uiBorderDark;
+  ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+  ctx.fillStyle = "#2b2f42";
   ctx.fillRect(x, y, w, h);
-  const color = ratio > 0.5 ? "#4caf50" : ratio > 0.2 ? "#f39c12" : "#e74c3c";
+  const color = ratio > 0.5 ? "#5fbf4a" : ratio > 0.2 ? "#f0a530" : "#e6483f";
+  const shade = ratio > 0.5 ? "#4a9c39" : ratio > 0.2 ? "#c9821f" : "#b83128";
+  const barW = Math.max(0, w * ratio);
+  ctx.fillStyle = shade;
+  ctx.fillRect(x, y, barW, h);
   ctx.fillStyle = color;
-  ctx.fillRect(x, y, Math.max(0, w * ratio), h);
-  ctx.strokeStyle = "#222";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, w, h);
+  ctx.fillRect(x, y, barW, Math.max(1, h - 2));
 };
 
 // ---------- Écran titre ----------
@@ -128,23 +126,39 @@ PKMN.TitleState = {
     }
   },
   render(ctx) {
-    ctx.fillStyle = "#2c3e50";
+    const sky = ctx.createLinearGradient(0, 0, 0, CH);
+    sky.addColorStop(0, "#2a3b6b");
+    sky.addColorStop(1, "#14131c");
+    ctx.fillStyle = sky;
     ctx.fillRect(0, 0, CW, CH);
-    ctx.fillStyle = "#f4d03f";
-    ctx.font = "bold 36px 'Segoe UI', sans-serif";
+
+    // Bordure décorative façon écran-titre, avec petits accents aux coins.
+    ctx.strokeStyle = PKMN.PALETTE.uiAccent;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(14, 14, CW - 28, CH - 28);
+    ctx.fillStyle = PKMN.PALETTE.uiAccent;
+    [[14, 14], [CW - 14, 14], [14, CH - 14], [CW - 14, CH - 14]].forEach(([cx, cy]) => {
+      ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
+    });
+
     ctx.textAlign = "center";
-    ctx.fillText("Pokémon", CW / 2, 120);
+    ctx.font = "26px 'Press Start 2P', sans-serif";
+    ctx.fillStyle = PKMN.PALETTE.uiBorderDark;
+    ctx.fillText("POKÉMON", CW / 2 + 3, 103);
+    ctx.fillStyle = PKMN.PALETTE.uiAccent;
+    ctx.fillText("POKÉMON", CW / 2, 100);
+
+    ctx.font = "13px Silkscreen, sans-serif";
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 22px sans-serif";
-    ctx.fillText("Édition Perso", CW / 2, 155);
+    ctx.fillText("— ÉDITION PERSO —", CW / 2, 138);
 
     const items = this.items();
-    PKMN.drawMenu(ctx, CW / 2 - 100, 200, items, this.sel, { w: 200 });
+    PKMN.drawMenu(ctx, CW / 2 - 100, 210, items, this.sel, { w: 200 });
 
-    ctx.font = "12px sans-serif";
-    ctx.fillStyle = "#bbb";
+    ctx.font = "11px Silkscreen, sans-serif";
+    ctx.fillStyle = "#9aa3c7";
     ctx.textAlign = "center";
-    ctx.fillText("Projet fan perso — Pokémon © Nintendo/Game Freak", CW / 2, CH - 20);
+    ctx.fillText("Projet fan perso — Pokémon © Nintendo/Game Freak", CW / 2, CH - 24);
 
     if (this.confirmingNewGame) {
       PKMN.drawTextBox(ctx, "Supprimer la sauvegarde et recommencer ? (Entrée = oui, Échap = non)");

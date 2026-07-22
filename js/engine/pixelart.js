@@ -1,0 +1,99 @@
+// Palette et petites aides de rendu partagées par tous les écrans, pour un
+// look pixel-art cohérent (façon jeux Pokémon portables) au lieu d'aplats de
+// couleur isolés dans chaque fichier.
+window.PKMN = window.PKMN || {};
+
+PKMN.PALETTE = {
+  grassLight: "#8bc24a",
+  grassMid: "#74ad3c",
+  grassDark: "#5c9130",
+  tallGrassLight: "#4f8f42",
+  tallGrassDark: "#356027",
+  waterLight: "#6db8f2",
+  waterMid: "#3d84cf",
+  waterDark: "#285f9e",
+  pathLight: "#e6cd9a",
+  pathMid: "#d4b378",
+  pathDark: "#b6935a",
+  wallLight: "#c3cdd6",
+  wallMid: "#a3aeb8",
+  wallDark: "#7c8794",
+  floorLight: "#f4f2ea",
+  floorDark: "#e3e1d6",
+  caveFloorLight: "#544c68",
+  caveFloorDark: "#423a56",
+  caveWallLight: "#332c44",
+  caveWallDark: "#241f30",
+  woodDark: "#5d4025",
+  woodMid: "#7a5632",
+  roofRed: "#b5453a",
+  roofRedDark: "#8c332a",
+
+  ink: "#1c2030",
+  paper: "#fbf7ea",
+  uiBorderDark: "#20263a",
+  uiBorderAccent: "#4d78c9",
+  uiFill: "#fbf7ea",
+  uiAccent: "#f4c542",
+  uiAccentDark: "#c99a1f"
+};
+
+// Boîte façon jeux portables: bord sombre épais + liseré coloré + fond clair.
+// Remplace le simple panneau arrondi générique par quelque chose de plus
+// proche d'une vraie interface de jeu.
+PKMN.drawBorderedBox = function (ctx, x, y, w, h, opts) {
+  opts = opts || {};
+  const r = opts.r ?? 5;
+  const outer = opts.outer || PKMN.PALETTE.uiBorderDark;
+  const accent = opts.accent || PKMN.PALETTE.uiBorderAccent;
+  const fill = opts.fill || PKMN.PALETTE.uiFill;
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.35)";
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 3;
+  ctx.shadowOffsetY = 3;
+  PKMN.roundRectPath(ctx, x, y, w, h, r);
+  ctx.fillStyle = outer;
+  ctx.fill();
+  ctx.restore();
+  PKMN.roundRectPath(ctx, x + 3, y + 3, w - 6, h - 6, Math.max(2, r - 2));
+  ctx.fillStyle = accent;
+  ctx.fill();
+  PKMN.roundRectPath(ctx, x + 5, y + 5, w - 10, h - 10, Math.max(1, r - 3));
+  ctx.fillStyle = fill;
+  ctx.fill();
+};
+
+// Petit triangle de curseur (remplace le "➤ " textuel) — plus net à l'échelle pixel.
+PKMN.drawCursorTriangle = function (ctx, x, y, color) {
+  ctx.fillStyle = color || PKMN.PALETTE.ink;
+  ctx.beginPath();
+  ctx.moveTo(x, y - 5);
+  ctx.lineTo(x + 8, y);
+  ctx.lineTo(x, y + 5);
+  ctx.closePath();
+  ctx.fill();
+};
+
+// Triangle clignotant en bas d'une boîte de texte, pour indiquer qu'on peut continuer.
+PKMN.drawAdvanceIndicator = function (ctx, x, y, t) {
+  const bob = Math.sin((t || 0) * 6) * 2;
+  ctx.fillStyle = PKMN.PALETTE.ink;
+  ctx.beginPath();
+  ctx.moveTo(x - 5, y + bob - 3);
+  ctx.lineTo(x + 5, y + bob - 3);
+  ctx.lineTo(x, y + bob + 3);
+  ctx.closePath();
+  ctx.fill();
+};
+
+// Semis de petits pixels déterministes (même seed = mêmes points), pour
+// texturer une tuile sans qu'elle scintille d'une image à l'autre.
+PKMN.speckle = function (ctx, px, py, seed, spots, count, color, size) {
+  ctx.fillStyle = color;
+  const n = Math.min(spots.length, count);
+  for (let i = 0; i < n; i++) {
+    const [dx, dy] = spots[(i + Math.floor(seed * 97)) % spots.length];
+    ctx.fillRect(px + dx, py + dy, size, size);
+  }
+};

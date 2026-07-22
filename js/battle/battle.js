@@ -502,6 +502,7 @@ PKMN.BattleState = {
       const wasFull = defender.hp === defender.maxHp;
       const { dmg, eff, crit } = calcDamage(attacker, atkSpecies, defender, defSpecies, move);
       defender.hp = Math.max(0, defender.hp - dmg);
+      if (dmg > 0) this.triggerHitEffect(defender);
       if (defender.hp <= 0 && wasFull && defSpecies.ability === "fermete") {
         defender.hp = 1;
         msgs.push(`${defSpecies.name} tient bon grâce à Fermeté !`);
@@ -703,39 +704,72 @@ PKMN.BattleState = {
     });
   },
 
+  // Décroît les effets d'impact (tremblement d'écran + flash blanc) au fil du temps.
+  update(dt) {
+    if (this.shakeT > 0) this.shakeT = Math.max(0, this.shakeT - dt);
+    if (this.flashT > 0) this.flashT = Math.max(0, this.flashT - dt);
+  },
+
+  // Déclenché à chaque coup qui porte: petit tremblement d'écran + flash blanc
+  // sur le Pokémon touché, pour donner un peu d'impact aux dégâts.
+  triggerHitEffect(defender) {
+    this.shakeT = 0.22;
+    this.shakeSeed = Math.random() * 1000;
+    this.flashMon = defender;
+    this.flashT = 0.22;
+  },
+
   render(ctx) {
     const W = PKMN.CANVAS_W, H = PKMN.CANVAS_H;
+    ctx.save();
+    if (this.shakeT > 0) {
+      const mag = this.shakeT / 0.22;
+      const s = (this.shakeSeed || 0) + this.shakeT * 40;
+      ctx.translate(Math.sin(s) * 6 * mag, Math.cos(s * 1.3) * 4 * mag);
+    }
+
     const skyH = H * 0.55;
     const sky = ctx.createLinearGradient(0, 0, 0, skyH);
-    sky.addColorStop(0, "#79c6f2");
-    sky.addColorStop(1, "#eaf7ff");
+    sky.addColorStop(0, "#4f7fc9");
+    sky.addColorStop(1, "#bfe0f5");
     ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, W, skyH);
-    ctx.fillStyle = "#cfe6a0";
-    ctx.fillRect(0, skyH, W, H - skyH);
-    ctx.fillStyle = "#a9d17a";
-    ctx.beginPath(); ctx.ellipse(W - 95, skyH + 30, 75, 18, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(120, H - 130, 85, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(-10, -10, W + 20, skyH + 10);
+    ctx.fillStyle = PKMN.PALETTE.grassMid;
+    ctx.fillRect(-10, skyH, W + 20, H - skyH + 10);
+    ctx.fillStyle = PKMN.PALETTE.grassDark;
+    ctx.beginPath(); ctx.ellipse(W - 95, skyH + 32, 78, 20, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = PKMN.PALETTE.grassLight;
+    ctx.beginPath(); ctx.ellipse(W - 95, skyH + 28, 72, 16, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = PKMN.PALETTE.grassDark;
+    ctx.beginPath(); ctx.ellipse(120, H - 128, 88, 22, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = PKMN.PALETTE.grassLight;
+    ctx.beginPath(); ctx.ellipse(120, H - 132, 80, 18, 0, 0, Math.PI * 2); ctx.fill();
 
     if (this.isTrainer) {
       ctx.fillStyle = "#fff";
-      ctx.font = "bold 13px sans-serif";
+      ctx.font = "12px Silkscreen, sans-serif";
       ctx.textAlign = "right";
       ctx.fillText(this.trainer.name, W - 20, 16);
     }
 
+    const flashOn = (mon) => this.flashT > 0 && this.flashMon === mon && Math.floor(this.flashT * 18) % 2 === 0;
+
     const wildSpecies = PKMN.speciesOf(this.wild);
-    PKMN.drawPanel(ctx, 20, 20, 200, 46, { border: "#1c3f5f", fill: "#fdfefe", r: 8 });
-    ctx.fillStyle = "#111"; ctx.font = "14px sans-serif"; ctx.textAlign = "left";
+    PKMN.drawPanel(ctx, 20, 20, 200, 46, { r: 6 });
+    ctx.fillStyle = PKMN.PALETTE.ink; ctx.font = "13px Silkscreen, sans-serif"; ctx.textAlign = "left";
     ctx.fillText(`${wildSpecies.name}  Nv.${this.wild.level}${statusTag(this.wild)}`, 28, 38);
     PKMN.drawHpBar(ctx, 28, 46, 130, 10, Math.max(0, this.wild.hp) / this.wild.maxHp);
+    if (flashOn(this.wild)) ctx.filter = "brightness(2.4) saturate(0)";
     PKMN.drawPokemonSprite(ctx, this.wild.species, W - 150, 30, 120, false);
+    ctx.filter = "none";
 
     if (this.active) {
       const activeSpecies = PKMN.speciesOf(this.active);
+      if (flashOn(this.active)) ctx.filter = "brightness(2.4) saturate(0)";
       PKMN.drawPokemonSprite(ctx, this.active.species, 30, H - 220, 120, true);
-      PKMN.drawPanel(ctx, W - 220, H - 190, 200, 50, { border: "#1c3f5f", fill: "#fdfefe", r: 8 });
-      ctx.fillStyle = "#111"; ctx.font = "14px sans-serif";
+      ctx.filter = "none";
+      PKMN.drawPanel(ctx, W - 220, H - 190, 200, 50, { r: 6 });
+      ctx.fillStyle = PKMN.PALETTE.ink; ctx.font = "13px Silkscreen, sans-serif";
       ctx.fillText(`${activeSpecies.name}  Nv.${this.active.level}${statusTag(this.active)}`, W - 212, H - 172);
       ctx.fillText(`PV ${Math.max(0, this.active.hp)}/${this.active.maxHp}`, W - 212, H - 155);
       PKMN.drawHpBar(ctx, W - 212, H - 148, 130, 10, Math.max(0, this.active.hp) / this.active.maxHp);
@@ -759,5 +793,6 @@ PKMN.BattleState = {
     } else if (this.phase === "end") {
       PKMN.drawTextBox(ctx, "Appuie sur Entrée pour continuer.");
     }
+    ctx.restore();
   }
 };

@@ -1,6 +1,6 @@
 // Service worker: met le jeu en cache pour qu'il fonctionne hors-ligne,
 // et garde les sprites Pokémon déjà chargés pour les revoir sans internet.
-const CACHE_NAME = "pkmn-perso-v27";
+const CACHE_NAME = "pkmn-perso-v28";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -17,6 +17,7 @@ const APP_SHELL = [
   "./js/data/quests.js",
   "./js/data/npcs.js",
   "./js/data/trainers.js",
+  "./js/engine/pixelart.js",
   "./js/engine/sprites.js",
   "./js/party/player.js",
   "./js/engine/save.js",
@@ -30,7 +31,10 @@ const APP_SHELL = [
   "./js/engine/main.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icons/apple-touch-icon.png",
+  "./fonts/Silkscreen-Regular.ttf",
+  "./fonts/Silkscreen-Bold.ttf",
+  "./fonts/PressStart2P-Regular.ttf"
 ];
 
 self.addEventListener("install", (event) => {
