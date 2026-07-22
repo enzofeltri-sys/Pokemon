@@ -16,6 +16,7 @@ PKMN.initGame = function (canvas) {
     overworld: PKMN.OverworldState,
     battle: PKMN.BattleState,
     party: PKMN.PartyState,
+    bag: PKMN.BagState,
     pokedex: PKMN.PokedexState
   };
 

@@ -9,6 +9,8 @@ const APP_SHELL = [
   "./js/main.js",
   "./js/data/types.js",
   "./js/data/moves.js",
+  "./js/data/learnsets.js",
+  "./js/data/items.js",
   "./js/data/pokedex.js",
   "./js/data/maps.js",
   "./js/engine/sprites.js",

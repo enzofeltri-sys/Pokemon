@@ -137,6 +137,7 @@ PKMN.StarterState = {
         const speciesId = this.starters[this.sel];
         PKMN.Player.party = [];
         PKMN.Player.addToParty(speciesId, 5);
+        PKMN.Player.initBag();
         PKMN.Player.mapKey = PKMN.START_MAP;
         const start = PKMN.MAPS[PKMN.START_MAP].playerStart;
         PKMN.Player.x = start.x;
@@ -221,6 +222,86 @@ PKMN.PartyState = {
     });
 
     PKMN.drawTextBox(ctx, "Échap pour revenir.", { noPrompt: true });
+  }
+};
+
+// ---------- Sac (objets, pierres d'évolution) ----------
+PKMN.BagState = {
+  onEnter() { this.phase = "items"; this.sel = 0; this.targetSel = 0; this.message = null; this.pendingItem = null; },
+  itemList() { return Object.keys(PKMN.Player.bag).filter((k) => PKMN.Player.bag[k] > 0); },
+  onKey(key) {
+    if (this.message) {
+      if (key === "Enter" || key === " ") this.message = null;
+      return;
+    }
+    if (this.phase === "items") {
+      const items = this.itemList();
+      if (key === "Escape" || (!items.length && (key === "Enter" || key === " "))) { PKMN.switchState("overworld"); return; }
+      if (!items.length) return;
+      if (key === "ArrowDown") this.sel = (this.sel + 1) % items.length;
+      if (key === "ArrowUp") this.sel = (this.sel - 1 + items.length) % items.length;
+      if (key === "Enter" || key === " ") { this.pendingItem = items[this.sel]; this.phase = "target"; this.targetSel = 0; }
+      return;
+    }
+    if (this.phase === "target") {
+      const party = PKMN.Player.party;
+      if (key === "ArrowDown") this.targetSel = (this.targetSel + 1) % party.length;
+      if (key === "ArrowUp") this.targetSel = (this.targetSel - 1 + party.length) % party.length;
+      if (key === "Escape") this.phase = "items";
+      if (key === "Enter" || key === " ") this.useItemOn(party[this.targetSel]);
+      return;
+    }
+  },
+  useItemOn(mon) {
+    const result = PKMN.tryEvolveWithStone(mon, this.pendingItem);
+    if (result.evolved) {
+      PKMN.Player.bag[this.pendingItem]--;
+      PKMN.saveGame();
+      this.message = `${result.from} évolue en ${result.to} !`;
+    } else {
+      this.message = "Ça n'a aucun effet...";
+    }
+    this.phase = "items";
+    this.sel = 0;
+  },
+  render(ctx) {
+    ctx.fillStyle = "#1c2833";
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 20px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Sac", 16, 30);
+
+    const items = this.itemList();
+    if (this.phase === "items" || !items.length) {
+      if (!items.length) {
+        ctx.font = "15px sans-serif";
+        ctx.fillText("Ton sac est vide.", 16, 70);
+      } else {
+        items.forEach((key, i) => {
+          const y = 50 + i * 36;
+          if (i === this.sel) { ctx.fillStyle = "#34495e"; ctx.fillRect(8, y - 4, CW - 16, 32); }
+          ctx.fillStyle = "#fff";
+          ctx.font = "15px sans-serif";
+          ctx.fillText(`${PKMN.ITEMS[key].name}  x${PKMN.Player.bag[key]}`, 16, y + 16);
+        });
+      }
+    } else if (this.phase === "target") {
+      ctx.fillStyle = "#f4d03f";
+      ctx.font = "14px sans-serif";
+      ctx.fillText(`Utiliser ${PKMN.ITEMS[this.pendingItem].name} sur qui ?`, 16, 44);
+      PKMN.Player.party.forEach((mon, i) => {
+        const species = PKMN.speciesOf(mon);
+        const y = 60 + i * 36;
+        if (i === this.targetSel) { ctx.fillStyle = "#34495e"; ctx.fillRect(8, y - 4, CW - 16, 32); }
+        ctx.fillStyle = "#fff";
+        ctx.font = "15px sans-serif";
+        ctx.fillText(`${species.name}  Nv.${mon.level}`, 16, y + 16);
+      });
+    }
+
+    if (this.message) PKMN.drawTextBox(ctx, this.message);
+    else PKMN.drawTextBox(ctx, this.phase === "items" ? "Entrée: utiliser · Échap: revenir" : "Entrée: choisir · Échap: retour", { noPrompt: true });
   }
 };
 

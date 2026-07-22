@@ -9,6 +9,7 @@ PKMN.saveGame = function () {
     party: P.party,
     pokedexSeen: [...P.pokedexSeen],
     pokedexCaught: [...P.pokedexCaught],
+    bag: P.bag,
     mapKey: P.mapKey,
     x: P.x,
     y: P.y
@@ -31,6 +32,7 @@ PKMN.loadGame = function () {
     P.party = data.party || [];
     P.pokedexSeen = new Set(data.pokedexSeen || []);
     P.pokedexCaught = new Set(data.pokedexCaught || []);
+    P.bag = data.bag || {};
     P.mapKey = data.mapKey || PKMN.START_MAP;
     P.x = data.x ?? PKMN.MAPS[PKMN.START_MAP].playerStart.x;
     P.y = data.y ?? PKMN.MAPS[PKMN.START_MAP].playerStart.y;

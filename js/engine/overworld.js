@@ -182,7 +182,7 @@ PKMN.OverworldState = {
       return;
     }
     if (this.menuOpen) {
-      const items = ["Équipe", "Pokédex", "Sauvegarder", "Fermer"];
+      const items = ["Équipe", "Sac", "Pokédex", "Sauvegarder", "Fermer"];
       if (key === "ArrowDown") this.menuSel = (this.menuSel + 1) % items.length;
       if (key === "ArrowUp") this.menuSel = (this.menuSel - 1 + items.length) % items.length;
       if (key === "Escape") this.menuOpen = false;
@@ -190,6 +190,7 @@ PKMN.OverworldState = {
         const choice = items[this.menuSel];
         this.menuOpen = false;
         if (choice === "Équipe") { PKMN.PartyState.returnTo = "overworld"; PKMN.switchState("party"); }
+        else if (choice === "Sac") PKMN.switchState("bag");
         else if (choice === "Pokédex") PKMN.switchState("pokedex");
         else if (choice === "Sauvegarder") { PKMN.saveGame(); this.message = "Partie sauvegardée !"; }
       }
@@ -313,7 +314,7 @@ PKMN.OverworldState = {
     ctx.fillText(map.name, 8, 16);
 
     if (this.menuOpen) {
-      PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, ["Équipe", "Pokédex", "Sauvegarder", "Fermer"], this.menuSel);
+      PKMN.drawMenu(ctx, PKMN.CANVAS_W - 160, 10, ["Équipe", "Sac", "Pokédex", "Sauvegarder", "Fermer"], this.menuSel);
     }
     if (this.message) {
       PKMN.drawTextBox(ctx, this.message);

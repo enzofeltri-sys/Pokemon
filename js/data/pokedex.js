@@ -1,6 +1,9 @@
 // Pokédex Génération 1 (151 Pokémon) - noms, types et statistiques officiels.
-// Simplification volontaire: toutes les évolutions se déclenchent par niveau
-// (les évolutions par pierre/échange du jeu original sont converties en paliers de niveau).
+// Évolutions fidèles aux jeux originaux: par niveau, ou par pierre (le champ
+// "niveauEvo" contient alors la clé de l'objet requis, ex: "pierre_feu").
+// Simplification volontaire: les évolutions par échange (Kadabra, Machoke,
+// Graveler, Ephemer) sont converties en paliers de niveau (pas de vrai
+// système d'échange entre joueurs dans ce jeu solo).
 window.PKMN = window.PKMN || {};
 
 // [id, nom, type1, type2, hp, atk, def, spa, spd, vit, niveauEvo, idEvo, stade, legendaire]
@@ -29,26 +32,26 @@ PKMN.POKEDEX_RAW = [
   [22,"Rapasdepic","normal","vol",65,90,65,61,61,100,null,null,2,false],
   [23,"Abo","poison",null,35,60,44,40,54,55,22,24,1,false],
   [24,"Arbok","poison",null,60,85,69,65,79,80,null,null,2,false],
-  [25,"Pikachu","electrik",null,35,55,40,50,50,90,20,26,1,false],
+  [25,"Pikachu","electrik",null,35,55,40,50,50,90,"pierre_foudre",26,1,false],
   [26,"Raichu","electrik",null,60,90,55,90,80,110,null,null,2,false],
   [27,"Sabelette","sol",null,50,75,85,20,30,40,22,28,1,false],
   [28,"Sablaireau","sol",null,75,100,110,45,55,65,null,null,2,false],
   [29,"Nidoran♀","poison",null,55,47,52,40,40,41,16,30,1,false],
-  [30,"Nidorina","poison",null,70,62,67,55,55,56,32,31,2,false],
+  [30,"Nidorina","poison",null,70,62,67,55,55,56,"pierre_lune",31,2,false],
   [31,"Nidoqueen","poison","sol",90,92,87,75,85,76,null,null,3,false],
   [32,"Nidoran♂","poison",null,46,57,40,40,40,50,16,33,1,false],
-  [33,"Nidorino","poison",null,61,72,57,55,55,65,32,34,2,false],
+  [33,"Nidorino","poison",null,61,72,57,55,55,65,"pierre_lune",34,2,false],
   [34,"Nidoking","poison","sol",81,102,77,85,75,85,null,null,3,false],
-  [35,"Mélofée","normal",null,70,45,48,60,65,35,25,36,1,false],
+  [35,"Mélofée","normal",null,70,45,48,60,65,35,"pierre_lune",36,1,false],
   [36,"Mélodelfe","normal",null,95,70,73,95,90,60,null,null,2,false],
-  [37,"Goupix","feu",null,38,41,40,50,65,65,25,38,1,false],
+  [37,"Goupix","feu",null,38,41,40,50,65,65,"pierre_feu",38,1,false],
   [38,"Feunard","feu",null,73,76,75,81,100,100,null,null,2,false],
-  [39,"Rondoudou","normal",null,115,45,20,45,25,20,20,40,1,false],
+  [39,"Rondoudou","normal",null,115,45,20,45,25,20,"pierre_lune",40,1,false],
   [40,"Grodoudou","normal",null,140,70,45,85,50,45,null,null,2,false],
   [41,"Nosferapti","poison","vol",40,45,35,30,40,55,22,42,1,false],
   [42,"Nosferalto","poison","vol",75,80,70,65,75,90,null,null,2,false],
   [43,"Mystherbe","plante","poison",45,50,55,75,65,30,21,44,1,false],
-  [44,"Ortide","plante","poison",65,65,70,85,75,40,32,45,2,false],
+  [44,"Ortide","plante","poison",65,65,70,85,75,40,"pierre_plante",45,2,false],
   [45,"Rafflesia","plante","poison",75,80,85,110,90,50,null,null,3,false],
   [46,"Paras","insecte","plante",35,70,55,45,55,25,24,47,1,false],
   [47,"Parasect","insecte","plante",60,95,80,60,80,30,null,null,2,false],
@@ -62,10 +65,10 @@ PKMN.POKEDEX_RAW = [
   [55,"Akwakwak","eau",null,80,82,78,95,80,85,null,null,2,false],
   [56,"Férosinge","combat",null,65,80,35,35,45,70,28,57,1,false],
   [57,"Colossinge","combat",null,90,105,60,60,70,95,null,null,2,false],
-  [58,"Caninos","feu",null,55,70,45,70,50,60,30,59,1,false],
+  [58,"Caninos","feu",null,55,70,45,70,50,60,"pierre_feu",59,1,false],
   [59,"Arcanin","feu",null,90,110,80,100,80,95,null,null,2,false],
   [60,"Ptitard","eau",null,40,50,40,40,40,90,25,61,1,false],
-  [61,"Têtarte","eau",null,65,65,65,50,50,90,36,62,2,false],
+  [61,"Têtarte","eau",null,65,65,65,50,50,90,"pierre_eau",62,2,false],
   [62,"Tartard","eau","combat",90,95,95,70,90,70,null,null,3,false],
   [63,"Abra","psy",null,25,20,15,105,55,90,16,64,1,false],
   [64,"Kadabra","psy",null,40,35,30,120,70,105,36,65,2,false],
@@ -94,7 +97,7 @@ PKMN.POKEDEX_RAW = [
   [87,"Lamantine","eau","glace",90,70,80,70,95,70,null,null,2,false],
   [88,"Tadmorv","poison",null,80,80,50,40,50,25,38,89,1,false],
   [89,"Grotadmorv","poison",null,105,105,75,65,100,50,null,null,2,false],
-  [90,"Kokiyas","eau",null,30,65,100,45,25,40,30,91,1,false],
+  [90,"Kokiyas","eau",null,30,65,100,45,25,40,"pierre_eau",91,1,false],
   [91,"Crustabri","eau","glace",50,95,180,85,45,70,null,null,2,false],
   [92,"Fantominus","spectre","poison",30,35,30,100,35,80,25,93,1,false],
   [93,"Spectrum","spectre","poison",45,50,45,115,55,95,40,94,2,false],
@@ -106,7 +109,7 @@ PKMN.POKEDEX_RAW = [
   [99,"Krabboss","eau",null,55,130,115,50,50,75,null,null,2,false],
   [100,"Voltorbe","electrik",null,40,30,50,55,55,100,30,101,1,false],
   [101,"Électrode","electrik",null,60,50,70,80,80,150,null,null,2,false],
-  [102,"Noeunoeuf","plante","psy",60,40,80,60,45,40,32,103,1,false],
+  [102,"Noeunoeuf","plante","psy",60,40,80,60,45,40,"pierre_plante",103,1,false],
   [103,"Noadkoko","plante","psy",95,55,105,105,65,65,null,null,2,false],
   [104,"Osselait","sol",null,50,50,95,40,50,35,28,105,1,false],
   [105,"Ossatueur","sol",null,60,80,125,50,80,55,null,null,2,false],
@@ -158,48 +161,6 @@ PKMN.POKEDEX_RAW = [
   [151,"Mew","psy",null,100,100,100,100,100,100,null,null,4,true]
 ];
 
-// Pools de capacités par type, pour construire un moveset thématique automatiquement.
-PKMN.TYPE_MOVES = {
-  normal:   ["charge","griffe","vive_attaque","rugissement","hurlement","mimi_queue","cognobscur","ecrasface","danse_lames","rapidite"],
-  feu:      ["flammeche","lance_flammes","deflagration","tourbillon_feu"],
-  eau:      ["pistolet_a_o","bulles_d_o","cascade","surf","hydrocanon"],
-  electrik: ["tonnelectrik","cage_eclair","eclair","tonnerre"],
-  plante:   ["fouet_lianes","draine","tranch_herbe","mega_sangsue","synthese","lance_soleil"],
-  glace:    ["poudreuse","huile_glacee"],
-  combat:   ["poing_karate","double_pied"],
-  poison:   ["dard_venin","poudre_toxik","sombre_toxine"],
-  sol:      ["seisme","ball_seisme"],
-  vol:      ["cyclone","attak_air","cru_aile","pika_pika"],
-  psy:      ["choc_mental","lueur","psyko","repos"],
-  insecte:  ["ligotage","dard_pin","megacorne"],
-  roche:    ["jet_pierres","eboulement"],
-  spectre:  ["moukill","ball_ombre"],
-  dragon:   ["rage_dragon","draco_rage"],
-  tenebres: ["morsure"],
-  acier:    ["boul_armure","tete_de_fer"]
-};
-
-PKMN.buildMoveset = function (type1, type2) {
-  const pool1 = PKMN.TYPE_MOVES[type1] || [];
-  const pool2 = type2 ? (PKMN.TYPE_MOVES[type2] || []) : [];
-  const moves = [];
-  const take = (pool, n) => {
-    for (const m of pool) {
-      if (moves.length >= 4) break;
-      if (!moves.includes(m) && n-- > 0) moves.push(m);
-    }
-  };
-  if (type2) {
-    take(pool1, 2);
-    take(pool2, 2);
-  } else {
-    take(pool1, 4);
-  }
-  // Complète avec des capacités Normal universelles si besoin
-  if (moves.length < 4) take(PKMN.TYPE_MOVES.normal, 4 - moves.length);
-  return moves.slice(0, 4);
-};
-
 PKMN.POKEDEX = {};
 for (const row of PKMN.POKEDEX_RAW) {
   const [id, name, type1, type2, hp, atk, def, spa, spd, spe, evoLevel, evoId, stage, legendary] = row;
@@ -208,7 +169,6 @@ for (const row of PKMN.POKEDEX_RAW) {
     types: type2 ? [type1, type2] : [type1],
     baseStats: { hp, atk, def, spa, spd, spe },
     evoLevel, evoId, stage, legendary,
-    moves: PKMN.buildMoveset(type1, type2),
     spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
     spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`
   };
