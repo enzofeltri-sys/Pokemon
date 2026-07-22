@@ -23,6 +23,7 @@ PKMN.initTouchControls = function () {
     const release = (e) => {
       if (e) e.preventDefault();
       btn.classList.remove("pressed");
+      btn.blur();
       clearInterval(interval);
       interval = null;
     };

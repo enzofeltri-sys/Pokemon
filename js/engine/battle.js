@@ -150,7 +150,16 @@ PKMN.BattleState = {
     if (this.queue.length === 0) {
       const cb = this.onQueueDone;
       this.onQueueDone = null;
-      if (cb) cb();
+      if (cb) {
+        try {
+          cb();
+        } catch (e) {
+          // Filet de sécurité : si un enchaînement de fin de combat plante pour une raison
+          // imprévue, on ne laisse jamais le joueur bloqué dans l'écran de combat.
+          console.error("Erreur pendant la fin du combat, retour forcé à la carte.", e);
+          PKMN.switchState("overworld");
+        }
+      }
     }
   },
 
