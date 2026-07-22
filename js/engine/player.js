@@ -1,17 +1,42 @@
 // Modèle de données: Pokémon possédé, équipe du joueur, XP / niveaux.
 window.PKMN = window.PKMN || {};
 
-// Stats calculées à partir des stats de base et du niveau (formule simplifiée,
-// volontairement plus simple que la formule officielle IV/EV).
-PKMN.calcStats = function (baseStats, level) {
+// Stats calculées avec la vraie formule des jeux (IV 0-31, EV 0-252/stat,
+// max 510 au total), sans nature (neutre pour tout le monde).
+PKMN.calcStats = function (baseStats, level, ivs, evs) {
+  ivs = ivs || PKMN.zeroIVs();
+  evs = evs || PKMN.zeroEVs();
   const s = {};
-  s.hp = Math.floor((baseStats.hp * level) / 50) + level + 10;
-  s.atk = Math.floor((baseStats.atk * level) / 50) + 5;
-  s.def = Math.floor((baseStats.def * level) / 50) + 5;
-  s.spa = Math.floor((baseStats.spa * level) / 50) + 5;
-  s.spd = Math.floor((baseStats.spd * level) / 50) + 5;
-  s.spe = Math.floor((baseStats.spe * level) / 50) + 5;
+  s.hp = Math.floor((2 * baseStats.hp + ivs.hp + Math.floor(evs.hp / 4)) * level / 100) + level + 10;
+  for (const key of ["atk", "def", "spa", "spd", "spe"]) {
+    s[key] = Math.floor((2 * baseStats[key] + ivs[key] + Math.floor(evs[key] / 4)) * level / 100) + 5;
+  }
   return s;
+};
+
+PKMN.zeroIVs = function () { return { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; };
+PKMN.zeroEVs = function () { return { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 }; };
+PKMN.randomIVs = function () {
+  const iv = () => Math.floor(Math.random() * 32);
+  return { hp: iv(), atk: iv(), def: iv(), spa: iv(), spd: iv(), spe: iv() };
+};
+
+// Ajoute des EV (plafond 252/stat, 510 au total) et recalcule les stats.
+PKMN.addEVs = function (mon, yieldObj) {
+  if (!yieldObj) return;
+  let total = Object.values(mon.evs).reduce((a, b) => a + b, 0);
+  for (const stat in yieldObj) {
+    if (total >= 510) break;
+    const room = Math.max(0, Math.min(252 - mon.evs[stat], 510 - total, yieldObj[stat]));
+    mon.evs[stat] += room;
+    total += room;
+  }
+  const species = PKMN.speciesOf(mon);
+  const newStats = PKMN.calcStats(species.baseStats, mon.level, mon.ivs, mon.evs);
+  const hpGain = newStats.hp - mon.stats.hp;
+  mon.stats = newStats;
+  mon.maxHp = newStats.hp;
+  if (hpGain > 0) mon.hp = Math.min(mon.maxHp, mon.hp + hpGain);
 };
 
 PKMN.xpToNextLevel = function (level) {
@@ -20,7 +45,9 @@ PKMN.xpToNextLevel = function (level) {
 
 PKMN.createPokemon = function (speciesId, level) {
   const species = PKMN.POKEDEX[speciesId];
-  const stats = PKMN.calcStats(species.baseStats, level);
+  const ivs = PKMN.randomIVs();
+  const evs = PKMN.zeroEVs();
+  const stats = PKMN.calcStats(species.baseStats, level, ivs, evs);
   return {
     species: speciesId,
     level,
@@ -28,6 +55,8 @@ PKMN.createPokemon = function (speciesId, level) {
     hp: stats.hp,
     maxHp: stats.hp,
     stats,
+    ivs,
+    evs,
     moves: PKMN.movesAtLevel(speciesId, level).map((key) => ({ key, pp: PKMN.MOVES[key].pp, maxPp: PKMN.MOVES[key].pp })),
     statStages: { atk: 0, def: 0, spa: 0, spd: 0, spe: 0 },
     status: null,
@@ -42,7 +71,7 @@ PKMN.speciesOf = function (mon) {
 function performEvolution(mon, newSpeciesId) {
   const fromName = PKMN.speciesOf(mon).name;
   const newSpecies = PKMN.POKEDEX[newSpeciesId];
-  const newStats = PKMN.calcStats(newSpecies.baseStats, mon.level);
+  const newStats = PKMN.calcStats(newSpecies.baseStats, mon.level, mon.ivs, mon.evs);
   const ratio = mon.hp / mon.maxHp;
   mon.species = newSpeciesId;
   mon.stats = newStats;
@@ -83,7 +112,7 @@ PKMN.gainExp = function (mon, amount) {
     mon.xp -= needed;
     mon.level++;
     const species = PKMN.speciesOf(mon);
-    const newStats = PKMN.calcStats(species.baseStats, mon.level);
+    const newStats = PKMN.calcStats(species.baseStats, mon.level, mon.ivs, mon.evs);
     const hpGain = newStats.hp - mon.stats.hp;
     mon.stats = newStats;
     mon.maxHp = newStats.hp;

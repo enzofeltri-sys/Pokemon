@@ -186,12 +186,44 @@ PKMN.StarterState = {
 
 // ---------- Écran équipe ----------
 PKMN.PartyState = {
-  onEnter() { this.sel = 0; this.returnTo = this.returnTo || "overworld"; },
+  onEnter() { this.sel = 0; this.actionSel = 0; this.phase = "list"; this.returnTo = this.returnTo || "overworld"; },
   onKey(key) {
     const n = PKMN.Player.party.length;
-    if (key === "ArrowDown") this.sel = (this.sel + 1) % n;
-    if (key === "ArrowUp") this.sel = (this.sel - 1 + n) % n;
-    if (key === "Escape" || key === "Enter" || key === " ") PKMN.switchState(this.returnTo);
+    if (this.phase === "list") {
+      if (key === "ArrowDown") this.sel = (this.sel + 1) % n;
+      if (key === "ArrowUp") this.sel = (this.sel - 1 + n) % n;
+      if (key === "Escape") PKMN.switchState(this.returnTo);
+      if (key === "Enter" || key === " ") { this.phase = "action"; this.actionSel = 0; }
+      return;
+    }
+    if (this.phase === "action") {
+      const items = this.actionItems();
+      if (key === "ArrowDown") this.actionSel = (this.actionSel + 1) % items.length;
+      if (key === "ArrowUp") this.actionSel = (this.actionSel - 1 + items.length) % items.length;
+      if (key === "Escape") this.phase = "list";
+      if (key === "Enter" || key === " ") this.chooseAction(items[this.actionSel]);
+      return;
+    }
+    if (this.phase === "info") {
+      if (key === "Escape" || key === "Enter" || key === " ") this.phase = "list";
+      return;
+    }
+  },
+  actionItems() {
+    const n = PKMN.Player.party.length;
+    const items = ["Infos"];
+    if (this.sel > 0) items.push("Monter");
+    if (this.sel < n - 1) items.push("Descendre");
+    items.push("Retour");
+    return items;
+  },
+  chooseAction(choice) {
+    const party = PKMN.Player.party;
+    if (choice === "Infos") { this.phase = "info"; return; }
+    if (choice === "Monter") { [party[this.sel - 1], party[this.sel]] = [party[this.sel], party[this.sel - 1]]; this.sel--; }
+    if (choice === "Descendre") { [party[this.sel + 1], party[this.sel]] = [party[this.sel], party[this.sel + 1]]; this.sel++; }
+    PKMN.saveGame();
+    this.phase = "list";
   },
   render(ctx) {
     ctx.fillStyle = "#1c2833";
@@ -220,6 +252,49 @@ PKMN.PartyState = {
         ctx.fillText("K.O.", 340, y + 20);
       }
     });
+
+    if (this.phase === "action") {
+      const items = this.actionItems();
+      PKMN.drawMenu(ctx, CW - 160, 50 + this.sel * 55, items, this.actionSel, { w: 150 });
+    } else if (this.phase === "info") {
+      this.renderInfo(ctx);
+      return;
+    }
+
+    PKMN.drawTextBox(ctx, this.phase === "list" ? "Entrée: options · Échap: revenir" : "Entrée: choisir · Échap: retour", { noPrompt: true });
+  },
+  renderInfo(ctx) {
+    const mon = PKMN.Player.party[this.sel];
+    const species = PKMN.speciesOf(mon);
+    ctx.fillStyle = "#eafaf1";
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = "#2c3e50";
+    ctx.font = "bold 18px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`${species.name}  Nv.${mon.level}  (${species.types.join("/")})`, 16, 26);
+    PKMN.drawPokemonSprite(ctx, mon.species, 16, 34, 90, false);
+
+    const statNames = { hp: "PV", atk: "Attaque", def: "Défense", spa: "Att.Spé", spd: "Déf.Spé", spe: "Vitesse" };
+    let y = 40;
+    ctx.font = "13px sans-serif";
+    for (const key of ["hp", "atk", "def", "spa", "spd", "spe"]) {
+      ctx.fillStyle = "#2c3e50";
+      const val = key === "hp" ? `${mon.hp}/${mon.maxHp}` : mon.stats[key];
+      ctx.fillText(`${statNames[key]}: ${val}   (IV ${mon.ivs[key]} · EV ${mon.evs[key]})`, 116, y);
+      y += 18;
+    }
+
+    ctx.fillText(`XP: ${mon.xp}/${PKMN.xpToNextLevel(mon.level)}`, 116, y + 4);
+
+    y += 30;
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText("Capacités:", 16, y);
+    y += 18;
+    ctx.font = "13px sans-serif";
+    for (const m of mon.moves) {
+      ctx.fillText(`${PKMN.MOVES[m.key].name} (${m.pp}/${m.maxPp} PP)`, 16, y);
+      y += 18;
+    }
 
     PKMN.drawTextBox(ctx, "Échap pour revenir.", { noPrompt: true });
   }

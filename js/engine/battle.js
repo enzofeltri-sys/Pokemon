@@ -325,6 +325,7 @@ PKMN.BattleState = {
       const species = PKMN.speciesOf(this.wild);
       const exp = expReward(species, this.wild.level);
       const money = moneyReward(this.wild.level);
+      PKMN.addEVs(this.active, species.evYield);
       const lvlMsgs = PKMN.gainExp(this.active, exp);
       PKMN.Player.money += money;
       PKMN.saveGame();
