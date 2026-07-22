@@ -95,15 +95,35 @@ PKMN.drawHpBar = function (ctx, x, y, w, h, ratio) {
 
 // ---------- Écran titre ----------
 PKMN.TitleState = {
-  onEnter() { this.blink = 0; },
-  update(dt) { this.blink += dt; },
+  onEnter() {
+    this.hasSave = PKMN.hasSave();
+    this.sel = 0;
+    this.confirmingNewGame = false;
+  },
+  items() {
+    return this.hasSave ? ["Continuer", "Nouvelle partie"] : ["Nouvelle partie"];
+  },
   onKey(key) {
-    if (key === "Enter" || key === " ") {
-      if (PKMN.hasSave()) {
-        PKMN.loadGame();
-        PKMN.switchState("overworld");
-      } else {
+    if (this.confirmingNewGame) {
+      if (key === "Enter" || key === " ") {
+        PKMN.deleteSave();
         PKMN.switchState("starter");
+      } else if (key === "Escape") {
+        this.confirmingNewGame = false;
+      }
+      return;
+    }
+    const items = this.items();
+    if (key === "ArrowDown") this.sel = (this.sel + 1) % items.length;
+    if (key === "ArrowUp") this.sel = (this.sel - 1 + items.length) % items.length;
+    if (key === "Enter" || key === " ") {
+      const choice = items[this.sel];
+      if (choice === "Continuer") {
+        const ok = PKMN.loadGame();
+        PKMN.switchState(ok ? "overworld" : "starter");
+      } else if (choice === "Nouvelle partie") {
+        if (this.hasSave) this.confirmingNewGame = true;
+        else PKMN.switchState("starter");
       }
     }
   },
@@ -113,17 +133,22 @@ PKMN.TitleState = {
     ctx.fillStyle = "#f4d03f";
     ctx.font = "bold 36px 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Pokémon", CW / 2, 140);
+    ctx.fillText("Pokémon", CW / 2, 120);
     ctx.fillStyle = "#fff";
     ctx.font = "bold 22px sans-serif";
-    ctx.fillText("Édition Perso", CW / 2, 175);
-    if (Math.floor(this.blink / 0.6) % 2 === 0) {
-      ctx.font = "18px sans-serif";
-      ctx.fillText(PKMN.hasSave() ? "Appuie sur Entrée pour continuer" : "Appuie sur Entrée pour commencer", CW / 2, 260);
-    }
+    ctx.fillText("Édition Perso", CW / 2, 155);
+
+    const items = this.items();
+    PKMN.drawMenu(ctx, CW / 2 - 100, 200, items, this.sel, { w: 200 });
+
     ctx.font = "12px sans-serif";
     ctx.fillStyle = "#bbb";
+    ctx.textAlign = "center";
     ctx.fillText("Projet fan perso — Pokémon © Nintendo/Game Freak", CW / 2, CH - 20);
+
+    if (this.confirmingNewGame) {
+      PKMN.drawTextBox(ctx, "Supprimer la sauvegarde et recommencer ? (Entrée = oui, Échap = non)");
+    }
   }
 };
 

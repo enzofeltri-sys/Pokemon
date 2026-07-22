@@ -335,12 +335,13 @@ PKMN.OverworldState = {
       return;
     }
     if (this.moving) return;
-    if (key === "Enter") {
+    if (key === "Enter" || key === " ") {
       const [fx, fy] = this.facingCoords();
       const npc = this.npcAt(fx, fy);
-      if (npc) { PKMN.DialogueState.startWith(npc); PKMN.switchState("dialogue"); return; }
-      this.menuOpen = true; this.menuSel = 0; return;
+      if (npc) { PKMN.DialogueState.startWith(npc); PKMN.switchState("dialogue"); }
+      return;
     }
+    if (key === "s") { this.menuOpen = true; this.menuSel = 0; return; }
     if (key === "Shift") { this.quickMenuOpen = true; this.quickMenuPhase = "list"; this.quickSel = 0; return; }
     if (key === "e") { this.useQuickItem(); return; }
 
