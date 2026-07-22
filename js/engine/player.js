@@ -39,8 +39,11 @@ PKMN.addEVs = function (mon, yieldObj) {
   if (hpGain > 0) mon.hp = Math.min(mon.maxHp, mon.hp + hpGain);
 };
 
+// Courbe linéaire volontairement généreuse: le ratio gain/besoin reste
+// stable à tous les niveaux (~2-4 victoires par niveau), contrairement à une
+// courbe exponentielle qui rend la montée de niveau de plus en plus lente.
 PKMN.xpToNextLevel = function (level) {
-  return Math.floor(20 * Math.pow(level, 1.6));
+  return 20 * level + 30;
 };
 
 PKMN.createPokemon = function (speciesId, level) {
