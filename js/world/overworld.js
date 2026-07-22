@@ -294,26 +294,63 @@ function drawPlayerSprite(ctx, screenX, screenY, facing, bob, walkT, stepParity)
   else if (facing === "right") { ctx.fillRect(cx + 3, topY + TILE * 0.30, 2, 2); }
 }
 
-function drawNPCSprite(ctx, screenX, screenY, npc) {
-  const cx = screenX + TILE / 2, cy = screenY + TILE / 2;
+const NPC_SKIN_TONES = ["#f2c29a", "#e8b184", "#caa06e", "#a06b45", "#7d4f30"];
+const NPC_HAIR_COLORS = ["#241a14", "#4a2f1c", "#6b4423", "#8a6d3b", "#2c2c2c", "#7a3b2e"];
+
+// Petit hash déterministe sur une chaîne, pour tirer une apparence stable
+// (peau/cheveux) à partir de l'identifiant du PNJ — toujours le même
+// personnage à chaque rendu, sans avoir à stocker ces choix dans les données.
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+// Dessine un PNJ comme un petit personnage (jambes, bras, torse, tête,
+// cheveux) plutôt qu'un simple rond de couleur avec une lettre — même plan
+// général que le sprite du joueur, avec une tenue et une carrure propres à
+// chaque PNJ (déduites de sa couleur + d'un hash de son identifiant).
+function drawNPCSprite(ctx, screenX, screenY, npc, legLift, facing) {
+  if (npc._skin === undefined) {
+    const h = hashStr(npc.id || npc.name || "npc");
+    npc._skin = NPC_SKIN_TONES[h % NPC_SKIN_TONES.length];
+    npc._hair = NPC_HAIR_COLORS[(h >> 3) % NPC_HAIR_COLORS.length];
+  }
+  const cx = screenX + TILE / 2;
+  const topY = screenY;
+  const shirt = npc.color || "#7f8c8d";
+
   ctx.save();
   ctx.filter = "blur(1.2px)";
   ctx.fillStyle = "rgba(0,0,0,0.28)";
   ctx.beginPath(); ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
-  ctx.fillStyle = npc.color || "#7f8c8d";
-  ctx.beginPath(); ctx.arc(cx, cy, TILE * 0.4, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "rgba(255,255,255,0.25)";
-  ctx.beginPath(); ctx.arc(cx - 4, cy - 5, TILE * 0.14, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = "rgba(0,0,0,0.25)";
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.arc(cx, cy, TILE * 0.4, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 14px Silkscreen, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(npc.letter || npc.name[0], cx, cy + 1);
-  ctx.textBaseline = "alphabetic";
+
+  const liftA = legLift && legLift.parity === 0 ? legLift.amount : 0;
+  const liftB = legLift && legLift.parity !== 0 ? legLift.amount : 0;
+  ctx.fillStyle = "#2c3e50";
+  ctx.fillRect(cx - 6, topY + TILE * 0.72 + liftA * 0.4, 5, 9 - liftA);
+  ctx.fillRect(cx + 1, topY + TILE * 0.72 + liftB * 0.4, 5, 9 - liftB);
+
+  ctx.fillStyle = npc._skin;
+  ctx.fillRect(cx - 11, topY + TILE * 0.46, 3, 11);
+  ctx.fillRect(cx + 8, topY + TILE * 0.46, 3, 11);
+
+  ctx.fillStyle = shirt;
+  ctx.fillRect(cx - 8, topY + TILE * 0.40, 16, 15);
+
+  ctx.fillStyle = npc._skin;
+  ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.30, 8, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = npc._hair;
+  ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.245, 8.3, Math.PI, 0); ctx.fill();
+  ctx.fillRect(cx - 8.3, topY + TILE * 0.245 - 1, 16.6, 3);
+
+  ctx.fillStyle = "#241a14";
+  const f = facing || "down";
+  if (f === "down") { ctx.fillRect(cx - 4, topY + TILE * 0.30, 2, 2); ctx.fillRect(cx + 2, topY + TILE * 0.30, 2, 2); }
+  else if (f === "left") { ctx.fillRect(cx - 5, topY + TILE * 0.30, 2, 2); }
+  else if (f === "right") { ctx.fillRect(cx + 3, topY + TILE * 0.30, 2, 2); }
 }
 
 PKMN.OverworldState = {
@@ -520,6 +557,8 @@ PKMN.OverworldState = {
         npc._wanderT = 1.5 + Math.random() * 3;
         npc._moving = false;
         npc._moveT = 0;
+        npc._facing = npc.facing || "down";
+        npc._stepParity = 0;
       }
       if (npc._moving) {
         npc._moveT += dt / 0.5;
@@ -551,6 +590,7 @@ PKMN.OverworldState = {
       npc._facing = face;
       npc._moving = true;
       npc._moveT = 0;
+      npc._stepParity = 1 - npc._stepParity;
     }
   },
 
@@ -651,7 +691,8 @@ PKMN.OverworldState = {
       const sx = nx * TILE - camX, sy = ny * TILE - camY;
       if (sx < -TILE || sy < -TILE || sx > PKMN.CANVAS_W || sy > PKMN.CANVAS_H) continue;
       const npcBob = npc._moving ? -Math.abs(Math.sin(npc._moveT * Math.PI)) * 2 : 0;
-      drawNPCSprite(ctx, sx, sy + npcBob, npc);
+      const legLift = npc._moving ? { parity: npc._stepParity, amount: 3 * Math.sin(npc._moveT * Math.PI) } : null;
+      drawNPCSprite(ctx, sx, sy + npcBob, npc, legLift, npc._facing);
     }
 
     // Joueur
