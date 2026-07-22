@@ -779,5 +779,179 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  gym7: [
+    {
+      id: "gym7_trainer",
+      name: "Alpiniste",
+      x: 4, y: 4, facing: "down",
+      color: "#5dade2", letter: "A",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym7_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Le froid ne pardonne pas !"],
+            effects: [{ startTrainerBattle: "gym7_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Glacia t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym7_leader",
+      name: "Glacia",
+      x: 4, y: 2, facing: "down",
+      color: "#2e86c1", letter: "G",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym7" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Glacia, Championne de l'Arène du Givre.",
+              "Espérons que tu résistes mieux au froid que la plupart."
+            ],
+            effects: [{ startTrainerBattle: "gym7_leader" }]
+          },
+          apres_defaite: {
+            text: ["Ce badge est amplement mérité.", "Il ne t'en reste plus qu'un, pour cette partie du voyage."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town8: [
+    {
+      id: "badaud_glaceria",
+      name: "Guide",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "G",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Glacéria reste froide toute l'année.", "Prends de quoi te couvrir, si tu comptais rester."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  maison_inutile3: [
+    {
+      id: "habitant_maison3",
+      name: "Habitant",
+      x: 3, y: 2, facing: "down",
+      color: "#7f8c8d", letter: "H",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Le chauffage laisse un peu à désirer ici.", "Mais on s'y fait."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym8: [
+    {
+      id: "gym8_trainer",
+      name: "Carrier",
+      x: 4, y: 4, facing: "down",
+      color: "#935116", letter: "C",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym8_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Solide comme la roche !"],
+            effects: [{ startTrainerBattle: "gym8_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Terrakin t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym8_leader",
+      name: "Terrakin",
+      x: 4, y: 2, facing: "down",
+      color: "#784212", letter: "T",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym8" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Terrakin, Champion de l'Arène de la Roche.",
+              "Voyons si tu peux ébranler ma défense."
+            ],
+            effects: [{ startTrainerBattle: "gym8_leader" }]
+          },
+          apres_defaite: {
+            text: ["Huit badges. Tu as fait du chemin.", "Ce n'était pourtant que la première étape."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town9: [
+    {
+      id: "badaud_solhazar",
+      name: "Mineur",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "M",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Solhazar a été bâtie sur d'anciennes carrières.", "On y trouve toutes sortes de curiosités, à ce qu'on dit."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_solhazar",
+      name: "Voyageuse épuisée",
+      x: 10, y: 7, facing: "left",
+      color: "#34495e", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: [
+              "J'ai croisé une colonne entière de ces gens en noir, plus au nord.",
+              "Ils ne m'ont rien fait, mais leur allure n'annonçait rien de bon.",
+              "Je crois qu'ils appellent leur cheffe... la Main Noire."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint5", value: true }],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
