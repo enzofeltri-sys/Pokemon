@@ -55,5 +55,45 @@ PKMN.TRAINERS = {
     team: [{ species: 77, level: 16 }, { species: 59, level: 18 }],
     reward: 800,
     onWin: [{ badge: "badge2" }, { setFlag: "beat_gym2", value: true }]
+  },
+
+  gym3_trainer: {
+    name: "Plongeuse",
+    team: [{ species: 60, level: 17 }],
+    reward: 300,
+    onWin: [{ setFlag: "beat_gym3_trainer", value: true }]
+  },
+
+  gym3_leader: {
+    name: "Néréa",
+    team: [{ species: 118, level: 19 }, { species: 61, level: 21 }],
+    reward: 1000,
+    onWin: [{ badge: "badge3" }, { setFlag: "beat_gym3", value: true }]
+  },
+
+  rival3: {
+    name: "Kian",
+    team() {
+      const baseId = PKMN.rivalStarterId();
+      const stage2 = PKMN.POKEDEX[baseId].evoId || baseId;
+      const stage3 = PKMN.POKEDEX[stage2].evoId || stage2;
+      return [{ species: stage3, level: 28 }];
+    },
+    reward: 600,
+    onWin: [{ setFlag: "beat_rival3", value: true }]
+  },
+
+  gym4_trainer: {
+    name: "Herboriste",
+    team: [{ species: 43, level: 22 }],
+    reward: 350,
+    onWin: [{ setFlag: "beat_gym4_trainer", value: true }]
+  },
+
+  gym4_leader: {
+    name: "Sylvana",
+    team: [{ species: 44, level: 24 }, { species: 71, level: 26 }],
+    reward: 1200,
+    onWin: [{ badge: "badge4" }, { setFlag: "beat_gym4", value: true }]
   }
 };

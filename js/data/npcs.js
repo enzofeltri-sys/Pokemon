@@ -329,5 +329,192 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  gym3: [
+    {
+      id: "gym3_trainer",
+      name: "Plongeuse",
+      x: 4, y: 4, facing: "down",
+      color: "#2980b9", letter: "P",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym3_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Le courant t'emportera !"],
+            effects: [{ startTrainerBattle: "gym3_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Néréa n'attend que toi, au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym3_leader",
+      name: "Néréa",
+      x: 4, y: 2, facing: "down",
+      color: "#2471a3", letter: "N",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym3" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Néréa, Championne de l'Arène de l'Eau.",
+              "Laisse-toi porter par le courant... si tu peux."
+            ],
+            effects: [{ startTrainerBattle: "gym3_leader" }]
+          },
+          apres_defaite: {
+            text: ["Ce badge te revient.", "La route continue, ne te relâche pas."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town4: [
+    {
+      id: "badaud_mireclat",
+      name: "Pêcheur",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "P",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Miréclat a les eaux les plus limpides de la région.", "Enfin, ça se dit."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_mireclat",
+      name: "Passante préoccupée",
+      x: 10, y: 7, facing: "left",
+      color: "#34495e", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint3" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "Ces gens en noir... ils remontent vers le nord, à ce qu'on raconte.",
+              "Quelqu'un a parlé d'un endroit qu'ils appellent juste \"le Sanctuaire\".",
+              "Je ne sais pas ce que ça signifie, mais méfie-toi."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint3", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Sois prudent sur la route."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  route5: [
+    {
+      id: "rival_kian_route5",
+      name: "Kian",
+      x: 10, y: 7, facing: "up",
+      color: "#e67e22", letter: "K",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_rival3" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "On approche du milieu du chemin, tu ne crois pas ?",
+              "Cette fois, je ne compte pas perdre !"
+            ],
+            effects: [{ startTrainerBattle: "rival3" }]
+          },
+          apres_defaite: {
+            text: ["Tch... encore une fois.", "Ce n'est pas fini entre nous."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym4: [
+    {
+      id: "gym4_trainer",
+      name: "Herboriste",
+      x: 4, y: 4, facing: "down",
+      color: "#27ae60", letter: "H",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym4_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["La nature ne pardonne pas l'imprudence !"],
+            effects: [{ startTrainerBattle: "gym4_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Sylvana t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym4_leader",
+      name: "Sylvana",
+      x: 4, y: 2, facing: "down",
+      color: "#1e8449", letter: "S",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym4" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Sylvana, Championne de l'Arène de la Nature.",
+              "Voyons si tu sais t'adapter à ton adversaire."
+            ],
+            effects: [{ startTrainerBattle: "gym4_leader" }]
+          },
+          apres_defaite: {
+            text: ["Un badge amplement mérité.", "Le chemin qui t'attend sera bien plus rude."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  town5: [
+    {
+      id: "badaud_verdeterre",
+      name: "Jardinière",
+      x: 5, y: 6, facing: "down",
+      color: "#7f8c8d", letter: "J",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Verdeterre pousse plus vite que n'importe où ailleurs.", "Un vrai mystère, à vrai dire."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
