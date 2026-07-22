@@ -4,16 +4,155 @@ window.PKMN = window.PKMN || {};
 
 const TILE = 32;
 
-const TILE_COLORS = {
-  "#": "#1e4d2b",
-  ".": "#8bc34a",
-  '"': "#4c8c3f",
-  C: "#8d6e63",
-  D: "#8d6e63",
-  H: "#81d4fa",
-  "<": "#c8b273",
-  ">": "#c8b273"
-};
+// Hachage déterministe (même tuile = même texture à chaque rendu, pas de scintillement)
+function tileSeed(tx, ty) {
+  let h = (tx * 374761393 + ty * 668265263) | 0;
+  h = (h ^ (h >> 13)) * 1274126177;
+  h = h ^ (h >> 16);
+  return ((h >>> 0) % 1000) / 1000;
+}
+
+function drawGrass(ctx, px, py, seed) {
+  ctx.fillStyle = "#7cb342";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = "#69a032";
+  const spots = [[6, 8], [20, 5], [11, 22], [24, 18], [16, 12], [4, 24]];
+  const n = 2 + Math.floor(seed * 4);
+  for (let i = 0; i < n; i++) {
+    const [dx, dy] = spots[i % spots.length];
+    ctx.fillRect(px + dx, py + dy, 2, 3);
+  }
+}
+
+function drawTallGrass(ctx, px, py, seed) {
+  ctx.fillStyle = "#4c8c3f";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.strokeStyle = "#2e5f27";
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  const tufts = [[6, 22], [13, 18], [20, 24], [26, 16], [9, 10], [23, 8]];
+  const n = 4 + Math.floor(seed * 2);
+  for (let i = 0; i < n; i++) {
+    const [dx, dy] = tufts[i % tufts.length];
+    ctx.beginPath();
+    ctx.moveTo(px + dx - 3, py + dy + 6);
+    ctx.lineTo(px + dx, py + dy - 2);
+    ctx.lineTo(px + dx + 3, py + dy + 6);
+    ctx.stroke();
+  }
+}
+
+function drawTree(ctx, px, py) {
+  ctx.fillStyle = "#5a8f3c";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = "#5d4529";
+  ctx.fillRect(px + TILE / 2 - 3, py + TILE - 11, 6, 11);
+  ctx.fillStyle = "#1b5e20";
+  ctx.beginPath(); ctx.arc(px + TILE * 0.5, py + TILE * 0.36, TILE * 0.42, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#2d7a31";
+  ctx.beginPath(); ctx.arc(px + TILE * 0.32, py + TILE * 0.28, TILE * 0.24, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px + TILE * 0.68, py + TILE * 0.30, TILE * 0.22, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#388e3c";
+  ctx.beginPath(); ctx.arc(px + TILE * 0.5, py + TILE * 0.20, TILE * 0.2, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawWallBrick(ctx, px, py) {
+  ctx.fillStyle = "#aab4bd";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.strokeStyle = "#7d8894";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+  ctx.beginPath();
+  ctx.moveTo(px, py + TILE / 2); ctx.lineTo(px + TILE, py + TILE / 2);
+  ctx.moveTo(px + TILE / 2, py); ctx.lineTo(px + TILE / 2, py + TILE / 2);
+  ctx.stroke();
+}
+
+function drawPath(ctx, px, py, seed) {
+  ctx.fillStyle = "#dcc190";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = "#cdae7a";
+  const spots = [[8, 8], [20, 18], [14, 26], [24, 6]];
+  const n = 1 + Math.floor(seed * 2);
+  for (let i = 0; i < n; i++) { const [dx, dy] = spots[i % spots.length]; ctx.fillRect(px + dx, py + dy, 2, 2); }
+}
+
+function drawFloor(ctx, px, py, tx, ty) {
+  const light = (tx + ty) % 2 === 0;
+  ctx.fillStyle = light ? "#f2f2f2" : "#e2e6ea";
+  ctx.fillRect(px, py, TILE, TILE);
+}
+
+function drawDoor(ctx, px, py, indoor) {
+  drawPath(ctx, px, py, 0.3);
+  ctx.fillStyle = "#a13d3d";
+  ctx.fillRect(px + 1, py, TILE - 2, 9);
+  ctx.fillStyle = "#7a2e2e";
+  ctx.fillRect(px + 1, py + 7, TILE - 2, 3);
+  ctx.fillStyle = "#5d3a1a";
+  ctx.fillRect(px + 7, py + 11, TILE - 14, TILE - 13);
+  ctx.fillStyle = "#7a4a22";
+  ctx.fillRect(px + 7, py + 11, TILE - 14, 3);
+  ctx.fillStyle = "#f4d03f";
+  ctx.beginPath(); ctx.arc(px + TILE - 12, py + TILE - 12, 1.6, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawHeal(ctx, px, py) {
+  ctx.fillStyle = "#eaf6ff";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.strokeStyle = "#4fc3f7";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(px + 3, py + 3, TILE - 6, TILE - 6);
+  ctx.fillStyle = "#e57373";
+  ctx.fillRect(px + TILE / 2 - 2, py + 8, 4, TILE - 16);
+  ctx.fillRect(px + 8, py + TILE / 2 - 2, TILE - 16, 4);
+}
+
+function drawWarp(ctx, px, py, dir) {
+  drawPath(ctx, px, py, 0.4);
+  ctx.fillStyle = "#8d6e63";
+  ctx.beginPath();
+  if (dir === ">") {
+    ctx.moveTo(px + 10, py + 8); ctx.lineTo(px + 24, py + 16); ctx.lineTo(px + 10, py + 24);
+  } else {
+    ctx.moveTo(px + 22, py + 8); ctx.lineTo(px + 8, py + 16); ctx.lineTo(px + 22, py + 24);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawPlayerSprite(ctx, screenX, screenY, facing, bob) {
+  const cx = screenX + TILE / 2;
+  const topY = screenY + bob;
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.beginPath();
+  ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#2c3e50";
+  ctx.fillRect(cx - 6, topY + TILE * 0.72, 5, 9);
+  ctx.fillRect(cx + 1, topY + TILE * 0.72, 5, 9);
+
+  ctx.fillStyle = "#f2c29a";
+  ctx.fillRect(cx - 11, topY + TILE * 0.46, 3, 11);
+  ctx.fillRect(cx + 8, topY + TILE * 0.46, 3, 11);
+
+  ctx.fillStyle = "#e74c3c";
+  ctx.fillRect(cx - 8, topY + TILE * 0.40, 16, 15);
+
+  ctx.fillStyle = "#f2c29a";
+  ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.30, 8, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = "#c0392b";
+  ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.24, 8.5, Math.PI, 0); ctx.fill();
+  ctx.fillRect(cx - 8.5, topY + TILE * 0.24 - 1, 17, 3);
+  if (facing === "down") ctx.fillRect(cx - 3, topY + TILE * 0.24 - 5, 6, 4);
+
+  ctx.fillStyle = "#241a14";
+  if (facing === "down") { ctx.fillRect(cx - 4, topY + TILE * 0.30, 2, 2); ctx.fillRect(cx + 2, topY + TILE * 0.30, 2, 2); }
+  else if (facing === "left") { ctx.fillRect(cx - 5, topY + TILE * 0.30, 2, 2); }
+  else if (facing === "right") { ctx.fillRect(cx + 3, topY + TILE * 0.30, 2, 2); }
+}
 
 PKMN.OverworldState = {
   onEnter() {
@@ -139,7 +278,7 @@ PKMN.OverworldState = {
     camX = Math.max(0, Math.min(camX, Math.max(0, mapW * TILE - PKMN.CANVAS_W)));
     camY = Math.max(0, Math.min(camY, Math.max(0, mapH * TILE - PKMN.CANVAS_H)));
 
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = map.indoor ? "#e2e6ea" : "#5a8f3c";
     ctx.fillRect(0, 0, PKMN.CANVAS_W, PKMN.CANVAS_H);
 
     const startCol = Math.floor(camX / TILE), startRow = Math.floor(camY / TILE);
@@ -148,26 +287,22 @@ PKMN.OverworldState = {
         const tx = startCol + c, ty = startRow + r;
         if (tx < 0 || ty < 0 || ty >= mapH || tx >= mapW) continue;
         const tile = map.tiles[ty][tx];
-        ctx.fillStyle = TILE_COLORS[tile] || "#8bc34a";
-        ctx.fillRect(tx * TILE - camX, ty * TILE - camY, TILE, TILE);
-        if (tile === "C" || tile === "D") {
-          ctx.fillStyle = "#4e342e";
-          ctx.fillRect(tx * TILE - camX + 6, ty * TILE - camY + 4, TILE - 12, TILE - 8);
-        }
+        const sx = tx * TILE - camX, sy = ty * TILE - camY;
+        const seed = tileSeed(tx, ty);
+        if (tile === "#") { map.indoor ? drawWallBrick(ctx, sx, sy) : drawTree(ctx, sx, sy); }
+        else if (tile === '"') drawTallGrass(ctx, sx, sy, seed);
+        else if (tile === "C" || tile === "D") drawDoor(ctx, sx, sy, map.indoor);
+        else if (tile === "H") drawHeal(ctx, sx, sy);
+        else if (tile === "<" || tile === ">") drawWarp(ctx, sx, sy, tile);
+        else if (map.indoor) drawFloor(ctx, sx, sy, tx, ty);
+        else drawGrass(ctx, sx, sy, seed);
       }
     }
 
     // Joueur
     const screenX = px * TILE - camX, screenY = py * TILE - camY;
-    ctx.fillStyle = "#e74c3c";
-    ctx.beginPath();
-    ctx.arc(screenX + TILE / 2, screenY + TILE / 2, TILE / 2 - 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    const dirOffset = { up: [0, -6], down: [0, 6], left: [-6, 0], right: [6, 0] }[this.facing];
-    ctx.beginPath();
-    ctx.arc(screenX + TILE / 2 + dirOffset[0], screenY + TILE / 2 + dirOffset[1], 3, 0, Math.PI * 2);
-    ctx.fill();
+    const bob = this.moving ? -Math.abs(Math.sin(this.moveT * Math.PI)) * 3 : 0;
+    drawPlayerSprite(ctx, screenX, screenY, this.facing, bob);
 
     // HUD nom de la zone
     ctx.fillStyle = "rgba(0,0,0,0.5)";

@@ -315,13 +315,20 @@ PKMN.BattleState = {
 
   render(ctx) {
     const W = PKMN.CANVAS_W, H = PKMN.CANVAS_H;
-    ctx.fillStyle = "#cfe8cf";
-    ctx.fillRect(0, 0, W, H);
+    const skyH = H * 0.55;
+    const sky = ctx.createLinearGradient(0, 0, 0, skyH);
+    sky.addColorStop(0, "#79c6f2");
+    sky.addColorStop(1, "#eaf7ff");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, skyH);
+    ctx.fillStyle = "#cfe6a0";
+    ctx.fillRect(0, skyH, W, H - skyH);
+    ctx.fillStyle = "#a9d17a";
+    ctx.beginPath(); ctx.ellipse(W - 95, skyH + 30, 75, 18, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(120, H - 130, 85, 20, 0, 0, Math.PI * 2); ctx.fill();
 
     const wildSpecies = PKMN.speciesOf(this.wild);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(20, 20, 200, 46);
-    ctx.strokeStyle = "#333"; ctx.lineWidth = 2; ctx.strokeRect(20, 20, 200, 46);
+    PKMN.drawPanel(ctx, 20, 20, 200, 46, { border: "#1c3f5f", fill: "#fdfefe", r: 8 });
     ctx.fillStyle = "#111"; ctx.font = "14px sans-serif"; ctx.textAlign = "left";
     ctx.fillText(`${wildSpecies.name}  Nv.${this.wild.level}`, 28, 38);
     PKMN.drawHpBar(ctx, 28, 46, 130, 10, Math.max(0, this.wild.hp) / this.wild.maxHp);
@@ -330,9 +337,7 @@ PKMN.BattleState = {
     if (this.active) {
       const activeSpecies = PKMN.speciesOf(this.active);
       PKMN.drawPokemonSprite(ctx, this.active.species, 30, H - 220, 120, true);
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(W - 220, H - 190, 200, 50);
-      ctx.strokeStyle = "#333"; ctx.strokeRect(W - 220, H - 190, 200, 50);
+      PKMN.drawPanel(ctx, W - 220, H - 190, 200, 50, { border: "#1c3f5f", fill: "#fdfefe", r: 8 });
       ctx.fillStyle = "#111"; ctx.font = "14px sans-serif";
       ctx.fillText(`${activeSpecies.name}  Nv.${this.active.level}`, W - 212, H - 172);
       ctx.fillText(`PV ${Math.max(0, this.active.hp)}/${this.active.maxHp}`, W - 212, H - 155);

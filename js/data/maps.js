@@ -38,6 +38,7 @@ PKMN.MAPS = {
 
   center: {
     name: "Centre Pokémon",
+    indoor: true,
     tiles: [
       "########",
       "#......#",

@@ -22,14 +22,32 @@ PKMN.wrapText = function (ctx, text, maxWidth) {
   return lines;
 };
 
+PKMN.roundRectPath = function (ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+};
+
+PKMN.drawPanel = function (ctx, x, y, w, h, opts) {
+  opts = opts || {};
+  const r = opts.r ?? 10;
+  PKMN.roundRectPath(ctx, x, y, w, h, r);
+  ctx.fillStyle = opts.border || "#2c3e50";
+  ctx.fill();
+  const pad = opts.pad ?? 4;
+  PKMN.roundRectPath(ctx, x + pad, y + pad, w - pad * 2, h - pad * 2, Math.max(2, r - pad));
+  ctx.fillStyle = opts.fill || "#fff";
+  ctx.fill();
+};
+
 PKMN.drawTextBox = function (ctx, text, opts) {
   opts = opts || {};
   const x = 10, y = CH - 100, w = CW - 20, h = 90;
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(x, y, w, h);
-  ctx.strokeStyle = "#2c3e50";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(x, y, w, h);
+  PKMN.drawPanel(ctx, x, y, w, h, { border: "#1c3f5f", fill: "#fdfefe" });
   ctx.fillStyle = "#111";
   ctx.font = "16px 'Segoe UI', sans-serif";
   ctx.textAlign = "left";
@@ -49,11 +67,7 @@ PKMN.drawMenu = function (ctx, x, y, items, selectedIndex, opts) {
   const lineH = opts.lineH || 26;
   const w = opts.w || 180;
   const h = items.length * lineH + 16;
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(x, y, w, h);
-  ctx.strokeStyle = "#2c3e50";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(x, y, w, h);
+  PKMN.drawPanel(ctx, x, y, w, h, { border: "#1c3f5f", fill: "#fdfefe" });
   ctx.font = "16px 'Segoe UI', sans-serif";
   ctx.textBaseline = "middle";
   items.forEach((item, i) => {
