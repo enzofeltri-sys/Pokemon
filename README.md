@@ -39,6 +39,19 @@ soigne intégralement ton équipe.
 - Les sprites officiels nécessitent une connexion internet ; hors-ligne, un
   placeholder coloré par type s'affiche à la place
 
+## Tests
+
+Un petit jeu de tests automatisés couvre le moteur de combat (types, statuts,
+capture, dresseurs multi-Pokémon...) dans `tests/`. Pour les lancer :
+
+```
+npm install
+npm test
+```
+
+Les constantes d'équilibrage (taux de capture, fractions de dégâts de statut,
+partage d'XP, etc.) sont centralisées dans `js/data/balance.js`.
+
 ## Note
 
 Projet fan réalisé pour un usage personnel uniquement. Pokémon, les noms et

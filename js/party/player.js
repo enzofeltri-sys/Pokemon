@@ -24,10 +24,11 @@ PKMN.randomIVs = function () {
 // Ajoute des EV (plafond 252/stat, 510 au total) et recalcule les stats.
 PKMN.addEVs = function (mon, yieldObj) {
   if (!yieldObj) return;
+  const BAL = PKMN.BALANCE;
   let total = Object.values(mon.evs).reduce((a, b) => a + b, 0);
   for (const stat in yieldObj) {
-    if (total >= 510) break;
-    const room = Math.max(0, Math.min(252 - mon.evs[stat], 510 - total, yieldObj[stat]));
+    if (total >= BAL.EV_CAP_TOTAL) break;
+    const room = Math.max(0, Math.min(BAL.EV_CAP_PER_STAT - mon.evs[stat], BAL.EV_CAP_TOTAL - total, yieldObj[stat]));
     mon.evs[stat] += room;
     total += room;
   }
@@ -44,7 +45,8 @@ PKMN.addEVs = function (mon, yieldObj) {
 // Ça grimpe fort avec le niveau: atteindre le niveau 100 est un vrai objectif
 // long terme, pas juste quelques combats de plus.
 PKMN.xpToNextLevel = function (level) {
-  return Math.pow(level + 1, 3) - Math.pow(level, 3);
+  const exp = PKMN.BALANCE.XP_CURVE_EXPONENT;
+  return Math.pow(level + 1, exp) - Math.pow(level, exp);
 };
 
 PKMN.createPokemon = function (speciesId, level) {
@@ -164,7 +166,7 @@ PKMN.gainExp = function (mon, amount) {
   const messages = [];
   mon.xp += amount;
   let needed = PKMN.xpToNextLevel(mon.level);
-  while (mon.xp >= needed && mon.level < 100) {
+  while (mon.xp >= needed && mon.level < PKMN.BALANCE.LEVEL_CAP) {
     mon.xp -= needed;
     mon.level++;
     const species = PKMN.speciesOf(mon);
@@ -221,7 +223,7 @@ PKMN.applyItemToMon = function (key, mon) {
   }
   if (key === "revive") {
     if (mon.hp > 0) return "Ce Pokémon n'est pas K.O. !";
-    mon.hp = Math.max(1, Math.floor(mon.maxHp / 2));
+    mon.hp = Math.max(1, Math.floor(mon.maxHp * PKMN.BALANCE.REVIVE_HEAL_FRACTION));
     PKMN.Player.bag.revive--;
     return `${species.name} est ranimé !`;
   }

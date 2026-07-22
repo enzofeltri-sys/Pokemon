@@ -1,0 +1,11 @@
+{
+  "name": "pokemon-edition-perso",
+  "private": true,
+  "description": "Petit RPG Pokémon en HTML/JS/Canvas (projet fan perso, non commercial). Aucune étape de build : le jeu tourne tel quel depuis index.html.",
+  "scripts": {
+    "test": "node tests/run-all.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

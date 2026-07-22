@@ -20,7 +20,7 @@ const LOW_HP_ABILITY_TYPE = { brasier: "feu", torrent: "eau", engrais: "plante" 
 
 // Baie Oran: se déclenche automatiquement sous 1/4 des PV max.
 function checkHeldBerryHeal(mon, msgs) {
-  if (mon.heldItem === "baie_oran" && mon.hp > 0 && mon.hp <= Math.floor(mon.maxHp / 4)) {
+  if (mon.heldItem === "baie_oran" && mon.hp > 0 && mon.hp <= Math.floor(mon.maxHp * PKMN.BALANCE.ORAN_BERRY_HP_THRESHOLD)) {
     mon.heldItem = null;
     mon.hp = Math.min(mon.maxHp, mon.hp + PKMN.ITEMS.baie_oran.healAmount);
     msgs.push(`${PKMN.speciesOf(mon).name} utilise sa Baie Oran et récupère des PV !`);
@@ -53,17 +53,18 @@ function abilityBlocksStatus(target, status) {
 }
 
 function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) {
+  const BAL = PKMN.BALANCE;
   if (move.fixedDamage) return { dmg: move.fixedDamage, eff: 1, crit: false };
   const physical = move.cat === "physique";
-  const critChance = move.highCrit ? 1 / 8 : 1 / 16;
+  const critChance = move.highCrit ? BAL.CRIT_CHANCE_HIGH : BAL.CRIT_CHANCE_NORMAL;
   const isCrit = Math.random() < critChance;
 
   let atkBase = physical ? attacker.stats.atk : attacker.stats.spa;
   if (physical) {
     if (attackerSpecies.ability === "abnegation" && attacker.status) {
-      atkBase = Math.floor(atkBase * 1.5); // Abnégation: ignore la brûlure, bonus si statut
+      atkBase = Math.floor(atkBase * BAL.ABNEGATION_MULTIPLIER); // Abnégation: ignore la brûlure, bonus si statut
     } else if (attacker.status === "burn") {
-      atkBase = Math.floor(atkBase / 2);
+      atkBase = Math.floor(atkBase * BAL.BURN_ATK_MULTIPLIER);
     }
   }
   const defBase = physical ? defender.stats.def : defender.stats.spd;
@@ -77,24 +78,24 @@ function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) 
   const def = Math.max(1, defBase * stageMul(defStage));
   const level = attacker.level;
   const base = ((2 * level) / 5 + 2) * move.power * (atk / def) / 50 + 2;
-  const stab = attackerSpecies.types.includes(move.type) ? 1.5 : 1;
+  const stab = attackerSpecies.types.includes(move.type) ? BAL.STAB_MULTIPLIER : 1;
   let eff = PKMN.getEffectiveness(move.type, defenderSpecies.types);
   if (move.type === "sol" && defenderSpecies.ability === "levitation") eff = 0;
-  const rand = 0.85 + Math.random() * 0.15;
-  const critMul = isCrit ? 1.5 : 1;
+  const rand = BAL.DAMAGE_RANDOM_MIN + Math.random() * BAL.DAMAGE_RANDOM_SPAN;
+  const critMul = isCrit ? BAL.CRIT_DAMAGE_MULTIPLIER : 1;
   const lowHpType = LOW_HP_ABILITY_TYPE[attackerSpecies.ability];
-  const abilityMul = (lowHpType === move.type && attacker.hp <= attacker.maxHp / 3) ? 1.5 : 1;
+  const abilityMul = (lowHpType === move.type && attacker.hp <= attacker.maxHp * BAL.ABILITY_LOW_HP_THRESHOLD) ? BAL.ABILITY_LOW_HP_MULTIPLIER : 1;
   const dmg = eff === 0 ? 0 : Math.max(1, Math.floor(base * stab * eff * rand * critMul * abilityMul));
   return { dmg, eff, crit: isCrit };
 }
 
 // Formule des jeux originaux: XP de base de l'espèce × son niveau / 7.
 function expReward(species, level) {
-  return Math.max(1, Math.floor((species.baseExp * level) / 7));
+  return Math.max(1, Math.floor((species.baseExp * level) / PKMN.BALANCE.XP_LEVEL_DIVISOR));
 }
 
 function moneyReward(level) {
-  return 15 + level * 3;
+  return PKMN.BALANCE.MONEY_REWARD_BASE + level * PKMN.BALANCE.MONEY_REWARD_PER_LEVEL;
 }
 
 const STATUS_ABBR = { poison: "PSN", toxic: "TOX", paralysis: "PAR", burn: "BRN", sleep: "DOD", freeze: "GEL" };
@@ -317,12 +318,16 @@ PKMN.BattleState = {
     }
     const species = PKMN.speciesOf(this.wild);
     PKMN.Player.bag[ballKey]--;
-    const baseRate = species.legendary ? 25 : species.stage === 1 ? 190 : species.stage === 2 ? 120 : 70;
-    const hpFactor = 0.2 + 0.8 * (1 - this.wild.hp / this.wild.maxHp);
-    const statusFactor = (this.wild.status === "sleep" || this.wild.status === "freeze") ? 2
-      : this.wild.status ? 1.5 : 1;
+    const BAL = PKMN.BALANCE;
+    const baseRate = species.legendary ? BAL.CATCH_RATE_LEGENDARY
+      : species.stage === 1 ? BAL.CATCH_RATE_STAGE1
+      : species.stage === 2 ? BAL.CATCH_RATE_STAGE2
+      : BAL.CATCH_RATE_STAGE3;
+    const hpFactor = BAL.CATCH_HP_FACTOR_BASE + BAL.CATCH_HP_FACTOR_SPAN * (1 - this.wild.hp / this.wild.maxHp);
+    const statusFactor = (this.wild.status === "sleep" || this.wild.status === "freeze") ? BAL.CATCH_STATUS_FACTOR_SLEEP_FREEZE
+      : this.wild.status ? BAL.CATCH_STATUS_FACTOR_OTHER : 1;
     const ballMul = PKMN.ITEMS[ballKey].ballMultiplier;
-    const chance = Math.max(0.03, Math.min(0.95, (baseRate / 255) * hpFactor * statusFactor * ballMul));
+    const chance = Math.max(BAL.CATCH_CHANCE_MIN, Math.min(BAL.CATCH_CHANCE_MAX, (baseRate / BAL.CATCH_RATE_SCALE) * hpFactor * statusFactor * ballMul));
     this.showMessages([`Tu lances ${PKMN.ITEMS[ballKey].name === "Poké Ball" ? "une" : "un"} ${PKMN.ITEMS[ballKey].name} sur ${species.name} !`], () => {
       if (Math.random() < chance) {
         const toBox = PKMN.Player.addCaught(this.wild);
@@ -352,7 +357,7 @@ PKMN.BattleState = {
   // Vitesse effective (paralysie = -50%) avec bonus/malus de stage.
   effectiveSpeed(mon) {
     let s = mon.stats.spe * stageMul(mon.statStages.spe);
-    if (mon.status === "paralysis") s *= 0.5;
+    if (mon.status === "paralysis") s *= PKMN.BALANCE.PARALYSIS_SPEED_MULTIPLIER;
     return s;
   },
 
@@ -408,14 +413,14 @@ PKMN.BattleState = {
     }
     if (secondary.confuse) {
       if (target.confused > 0 || abilityBlocksStatus(target, "confuse")) return;
-      target.confused = 2 + Math.floor(Math.random() * 2);
+      target.confused = PKMN.BALANCE.CONFUSE_MIN_TURNS + Math.floor(Math.random() * PKMN.BALANCE.CONFUSE_TURN_RANGE);
       msgs.push(`${PKMN.speciesOf(target).name} devient confus !`);
       return;
     }
     if (secondary.status) {
       if (target.status || abilityBlocksStatus(target, secondary.status)) return;
       target.status = secondary.status;
-      if (secondary.status === "sleep") target.statusCounter = 1 + Math.floor(Math.random() * 3);
+      if (secondary.status === "sleep") target.statusCounter = PKMN.BALANCE.SLEEP_MIN_TURNS + Math.floor(Math.random() * PKMN.BALANCE.SLEEP_TURN_RANGE);
       if (secondary.status === "toxic") target.statusCounter = 1;
       msgs.push(this.statusMessage(target, secondary.status));
       checkHeldBerryCure(target, msgs);
@@ -432,7 +437,7 @@ PKMN.BattleState = {
     }
 
     if (attacker.status === "freeze") {
-      if (Math.random() < 0.2) {
+      if (Math.random() < PKMN.BALANCE.FREEZE_THAW_CHANCE) {
         attacker.status = null;
         msgs.push(`${atkSpecies.name} n'est plus gelé !`);
       } else {
@@ -457,16 +462,16 @@ PKMN.BattleState = {
       return;
     }
 
-    if (attacker.status === "paralysis" && Math.random() < 0.25) {
+    if (attacker.status === "paralysis" && Math.random() < PKMN.BALANCE.PARALYSIS_FULL_CHANCE) {
       msgs.push(`${atkSpecies.name} est paralysé ! Il ne peut pas bouger !`);
       return;
     }
 
     if (attacker.confused > 0) {
       attacker.confused--;
-      if (Math.random() < 1 / 3) {
+      if (Math.random() < PKMN.BALANCE.CONFUSE_SELF_HIT_CHANCE) {
         msgs.push(`${atkSpecies.name} est confus et se blesse !`);
-        const selfDmg = Math.max(1, Math.floor(attacker.stats.atk * 0.4));
+        const selfDmg = Math.max(1, Math.floor(attacker.stats.atk * PKMN.BALANCE.CONFUSE_SELF_DAMAGE_MULTIPLIER));
         attacker.hp = Math.max(0, attacker.hp - selfDmg);
         if (attacker.hp <= 0) msgs.push(`${atkSpecies.name} est mis K.O. !`);
         checkHeldBerryHeal(attacker, msgs);
@@ -526,7 +531,7 @@ PKMN.BattleState = {
       this.applySecondary(defender, move.secondary, msgs);
     }
 
-    if (totalDmg > 0 && attacker.hp > 0 && !attacker.status && Math.random() < 0.3) {
+    if (totalDmg > 0 && attacker.hp > 0 && !attacker.status && Math.random() < PKMN.BALANCE.STATUS_ABILITY_PROC_CHANCE) {
       if (defSpecies.ability === "statik") {
         attacker.status = "paralysis";
         msgs.push(`${atkSpecies.name} est paralysé par Statik !`);
@@ -563,7 +568,7 @@ PKMN.BattleState = {
       if (target.confused > 0 || abilityBlocksStatus(target, "confuse")) {
         msgs.push("Mais ça échoue !");
       } else {
-        target.confused = 2 + Math.floor(Math.random() * 2);
+        target.confused = PKMN.BALANCE.CONFUSE_MIN_TURNS + Math.floor(Math.random() * PKMN.BALANCE.CONFUSE_TURN_RANGE);
         msgs.push(`${PKMN.speciesOf(target).name} devient confus !`);
       }
       return;
@@ -574,7 +579,7 @@ PKMN.BattleState = {
         msgs.push("Mais ça échoue !");
       } else {
         target.status = eff.status;
-        if (eff.status === "sleep") target.statusCounter = 1 + Math.floor(Math.random() * 3);
+        if (eff.status === "sleep") target.statusCounter = PKMN.BALANCE.SLEEP_MIN_TURNS + Math.floor(Math.random() * PKMN.BALANCE.SLEEP_TURN_RANGE);
         if (eff.status === "toxic") target.statusCounter = 1;
         msgs.push(this.statusMessage(target, eff.status));
         checkHeldBerryCure(target, msgs);
@@ -601,16 +606,16 @@ PKMN.BattleState = {
       if (mon.hp <= 0) continue;
       const name = PKMN.speciesOf(mon).name;
       if (mon.status === "poison") {
-        const dmg = Math.max(1, Math.floor(mon.maxHp / 8));
+        const dmg = Math.max(1, Math.floor(mon.maxHp * PKMN.BALANCE.POISON_FRACTION));
         mon.hp = Math.max(0, mon.hp - dmg);
         msgs.push(`${name} souffre du poison !`);
       } else if (mon.status === "toxic") {
-        const dmg = Math.max(1, Math.floor((mon.maxHp * mon.statusCounter) / 16));
+        const dmg = Math.max(1, Math.floor((mon.maxHp * mon.statusCounter) / PKMN.BALANCE.TOXIC_FRACTION_DIVISOR));
         mon.hp = Math.max(0, mon.hp - dmg);
         mon.statusCounter++;
         msgs.push(`${name} souffre gravement du poison !`);
       } else if (mon.status === "burn") {
-        const dmg = Math.max(1, Math.floor(mon.maxHp / 16));
+        const dmg = Math.max(1, Math.floor(mon.maxHp * PKMN.BALANCE.BURN_FRACTION));
         mon.hp = Math.max(0, mon.hp - dmg);
         msgs.push(`${name} souffre de sa brûlure !`);
       }
@@ -631,7 +636,7 @@ PKMN.BattleState = {
         if (mon.hp <= 0) continue;
         const participated = this.participants.has(mon);
         if (!participated && !PKMN.Player.options.multiExp) continue;
-        const amount = participated ? exp : Math.max(1, Math.floor(exp * 0.5));
+        const amount = participated ? exp : Math.max(1, Math.floor(exp * PKMN.BALANCE.MULTI_EXP_SHARE));
         if (participated) PKMN.addEVs(mon, species.evYield);
         const lvlMsgs = PKMN.gainExp(mon, amount);
         msgs.push(`${PKMN.speciesOf(mon).name} gagne ${amount} points d'expérience !`, ...lvlMsgs);
