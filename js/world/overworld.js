@@ -22,7 +22,32 @@ function tileSeed(tx, ty) {
   return ((h >>> 0) % 1000) / 1000;
 }
 
+// Textures de tuiles/décors tirées du pack Sprout Lands - Sprites (Cup Nooble),
+// recolorées pour coller à notre palette. Chaque tuile bitmap retombe sur son
+// ancien rendu procédural si l'image n'est pas dispo (hors-ligne, cache pas
+// encore rempli) — même filet de sécurité que pour les sprites de personnages.
+const TILE_SPRITE_URLS = {
+  grass: "./sprites/tiles/grass.png",
+  water: "./sprites/tiles/water.png",
+  treeA: "./sprites/tiles/tree_a.png",
+  treeB: "./sprites/tiles/tree_b.png"
+};
+
 function drawGrass(ctx, px, py, seed) {
+  const entry = PKMN.getSpriteImage(TILE_SPRITE_URLS.grass);
+  if (entry.status === "ok" && entry.img.naturalWidth === 16 && entry.img.naturalHeight === 16) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(entry.img, 0, 0, 16, 16, px, py, TILE, TILE);
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = PKMN.PALETTE.grassDark;
+    ctx.fillRect(px, py, TILE, 4);
+    ctx.globalAlpha = 1;
+    return;
+  }
+  drawGrassProcedural(ctx, px, py, seed);
+}
+
+function drawGrassProcedural(ctx, px, py, seed) {
   const P = PKMN.PALETTE;
   ctx.fillStyle = P.grassMid;
   ctx.fillRect(px, py, TILE, TILE);
@@ -79,6 +104,31 @@ function drawTallGrass(ctx, px, py, seed, time) {
 }
 
 function drawTree(ctx, px, py, seed, time) {
+  const useB = seed > 0.5;
+  const url = useB ? TILE_SPRITE_URLS.treeB : TILE_SPRITE_URLS.treeA;
+  const expectedW = useB ? 14 : 24, expectedH = useB ? 29 : 31;
+  const entry = PKMN.getSpriteImage(url);
+  if (entry.status === "ok" && entry.img.naturalWidth === expectedW && entry.img.naturalHeight === expectedH) {
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.beginPath(); ctx.ellipse(px + TILE * 0.5, py + TILE - 6, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+    const renderH = 42;
+    const renderW = Math.round(renderH * (expectedW / expectedH));
+    const baseX = px + TILE / 2, baseY = py + TILE - 2;
+    const pivotX = baseX, pivotY = baseY - renderH * 0.15;
+    const sway = Math.sin((time || 0) * 1.4 + seed * 6.28) * 0.05;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(pivotX, pivotY);
+    ctx.rotate(sway);
+    ctx.translate(-pivotX, -pivotY);
+    ctx.drawImage(entry.img, 0, 0, expectedW, expectedH, baseX - renderW / 2, baseY - renderH, renderW, renderH);
+    ctx.restore();
+    return;
+  }
+  drawTreeProcedural(ctx, px, py, seed, time);
+}
+
+function drawTreeProcedural(ctx, px, py, seed, time) {
   const P = PKMN.PALETTE;
   ctx.fillStyle = P.grassMid;
   ctx.fillRect(px, py, TILE, TILE);
@@ -110,7 +160,18 @@ function drawTree(ctx, px, py, seed, time) {
   ctx.restore();
 }
 
-function drawWater(ctx, px, py, seed) {
+function drawWater(ctx, px, py, seed, time) {
+  const entry = PKMN.getSpriteImage(TILE_SPRITE_URLS.water);
+  if (entry.status === "ok" && entry.img.naturalWidth === 64 && entry.img.naturalHeight === 16) {
+    const frame = Math.floor((time || 0) * 2 + seed * 4) % 4;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(entry.img, frame * 16, 0, 16, 16, px, py, TILE, TILE);
+    return;
+  }
+  drawWaterProcedural(ctx, px, py, seed);
+}
+
+function drawWaterProcedural(ctx, px, py, seed) {
   const P = PKMN.PALETTE;
   const grad = ctx.createLinearGradient(px, py, px, py + TILE);
   grad.addColorStop(0, P.waterMid);
@@ -770,7 +831,7 @@ PKMN.OverworldState = {
         else if (tile === "P") drawPC(ctx, sx, sy);
         else if (tile === "H") drawHeal(ctx, sx, sy);
         else if (tile === "<" || tile === ">") drawWarp(ctx, sx, sy, tile);
-        else if (tile === "~") drawWater(ctx, sx, sy, seed);
+        else if (tile === "~") drawWater(ctx, sx, sy, seed, this.time);
         else if (map.cave) drawCaveFloor(ctx, sx, sy, tx, ty);
         else if (map.indoor) drawFloor(ctx, sx, sy, tx, ty);
         else drawGrass(ctx, sx, sy, seed);
