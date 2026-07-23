@@ -15,6 +15,7 @@ PKMN.rivalStarterId = function () {
 
 PKMN.checkStoryCondition = function (cond) {
   if (!cond) return true;
+  if (cond.all !== undefined) return cond.all.every((c) => PKMN.checkStoryCondition(c));
   if (cond.flag !== undefined) return !!PKMN.Player.getFlag(cond.flag) === (cond.equals !== false);
   if (cond.quest !== undefined) return PKMN.Player.questStatus(cond.quest) === cond.status;
   if (cond.badge !== undefined) return PKMN.Player.hasBadge(cond.badge) === (cond.equals !== false);

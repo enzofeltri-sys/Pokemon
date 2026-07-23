@@ -105,11 +105,15 @@ function statusTag(mon) {
 }
 
 PKMN.BattleState = {
-  startWild(speciesId, level) {
+  // `opts.onCatch` (optionnel): effets façon dialogue (setFlag, give...) déclenchés
+  // uniquement si ce Pokémon sauvage est effectivement capturé — utilisé par les
+  // rencontres uniques scénarisées (légendaires) pour faire avancer une quête.
+  startWild(speciesId, level, opts) {
     this.isTrainer = false;
     this.trainer = null;
     this.wild = PKMN.createPokemon(speciesId, level);
     this.wildIsNew = !PKMN.Player.pokedexCaught.has(speciesId);
+    this.onCatchEffects = (opts && opts.onCatch) || null;
   },
 
   // Combat de Dresseur: `trainer` = { name, color, letter, team:[{species,level},...],
@@ -331,6 +335,7 @@ PKMN.BattleState = {
     this.showMessages([`Tu lances ${PKMN.ITEMS[ballKey].name === "Poké Ball" ? "une" : "un"} ${PKMN.ITEMS[ballKey].name} sur ${species.name} !`], () => {
       if (Math.random() < chance) {
         const toBox = PKMN.Player.addCaught(this.wild);
+        if (this.onCatchEffects) PKMN.runStoryEffects(this.onCatchEffects);
         PKMN.saveGame();
         const where = toBox ? "Envoyé à la Boîte PC (équipe déjà complète)." : "Ajouté à ton équipe.";
         this.showMessages([`${species.name} est capturé !`, where], () => { this.phase = "end"; });

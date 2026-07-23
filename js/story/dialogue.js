@@ -43,8 +43,9 @@ PKMN.DialogueState = {
     return PKMN.checkStoryCondition(cond);
   },
 
-  // Sépare l'effet spécial `startTrainerBattle` (qui bascule vers l'écran de
-  // combat) des effets "standards" délégués à PKMN.runStoryEffects.
+  // Sépare les effets spéciaux qui basculent vers l'écran de combat
+  // (`startTrainerBattle`, `startLegendaryBattle`) des effets "standards"
+  // délégués à PKMN.runStoryEffects.
   runEffects(effects) {
     if (!effects) return;
     const standard = [];
@@ -52,6 +53,11 @@ PKMN.DialogueState = {
       if (eff.startTrainerBattle) {
         const trainer = PKMN.TRAINERS[eff.startTrainerBattle];
         PKMN.BattleState.startTrainer(trainer);
+        PKMN.switchState("battle");
+        this._battleTriggered = true;
+      } else if (eff.startLegendaryBattle) {
+        const { species, level, onCatch } = eff.startLegendaryBattle;
+        PKMN.BattleState.startWild(species, level, { onCatch });
         PKMN.switchState("battle");
         this._battleTriggered = true;
       } else {

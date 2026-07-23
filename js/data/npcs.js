@@ -120,6 +120,41 @@ PKMN.NPCS = {
           }
         }
       }
+    },
+    {
+      id: "ombre_curieuse",
+      name: "Ombre curieuse",
+      x: 12, y: 7, facing: "down",
+      color: "#f7dc6f", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_mew_terminee" }, node: "calme" },
+          {
+            condition: {
+              all: [
+                { flag: "quete_electhor_terminee" },
+                { flag: "quete_artikodin_terminee" },
+                { flag: "quete_sulfura_terminee" },
+                { flag: "quete_mewtwo_terminee" }
+              ]
+            },
+            node: "decouverte"
+          }
+        ],
+        default: "rien",
+        nodes: {
+          rien: { text: ["Un recoin tranquille de Val Brumeux. Rien de particulier."], next: null },
+          decouverte: {
+            text: [
+              "En repassant par ici, tu remarques un mouvement furtif, presque invisible.",
+              "Après tout ce que tu as accompli, quelque chose d'infiniment rare a décidé de se montrer à toi."
+            ],
+            effects: [{ startLegendaryBattle: { species: 151, level: 90, onCatch: [{ setFlag: "quete_mew_terminee", value: true }] } }]
+          },
+          calme: { text: ["Le recoin est de nouveau parfaitement silencieux."], next: null }
+        }
+      }
     }
   ],
 
@@ -692,6 +727,31 @@ PKMN.NPCS = {
           }
         }
       }
+    },
+    {
+      id: "presence_electhor",
+      name: "Vieux tiroir",
+      x: 5, y: 3, facing: "down",
+      color: "#f9e79f", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_electhor_terminee" }, node: "calme" },
+          { condition: { flag: "beat_gym5", equals: false }, node: "rien" }
+        ],
+        default: "decouverte",
+        nodes: {
+          rien: { text: ["Un vieux tiroir poussiéreux. Rien d'autre."], next: null },
+          decouverte: {
+            text: [
+              "En l'ouvrant, une décharge électrique jaillit soudain !",
+              "Quelque chose de bien plus puissant qu'un meuble se cachait là..."
+            ],
+            effects: [{ startLegendaryBattle: { species: 145, level: 34, onCatch: [{ setFlag: "quete_electhor_terminee", value: true }] } }]
+          },
+          calme: { text: ["Le tiroir est vide et silencieux, à présent."], next: null }
+        }
+      }
     }
   ],
 
@@ -778,6 +838,31 @@ PKMN.NPCS = {
           }
         }
       }
+    },
+    {
+      id: "presence_artikodin",
+      name: "Courant d'air glacé",
+      x: 5, y: 3, facing: "down",
+      color: "#aed6f1", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_artikodin_terminee" }, node: "calme" },
+          { condition: { flag: "beat_gym6", equals: false }, node: "rien" }
+        ],
+        default: "decouverte",
+        nodes: {
+          rien: { text: ["Un courant d'air froid, rien de plus."], next: null },
+          decouverte: {
+            text: [
+              "Le froid devient soudain glacial, presque hostile.",
+              "Quelque chose respire dans ce courant d'air..."
+            ],
+            effects: [{ startLegendaryBattle: { species: 144, level: 38, onCatch: [{ setFlag: "quete_artikodin_terminee", value: true }] } }]
+          },
+          calme: { text: ["L'air est redevenu parfaitement calme."], next: null }
+        }
+      }
     }
   ],
 
@@ -862,6 +947,31 @@ PKMN.NPCS = {
             text: ["Le chauffage laisse un peu à désirer ici.", "Mais on s'y fait."],
             next: null
           }
+        }
+      }
+    },
+    {
+      id: "presence_sulfura",
+      name: "Foyer éteint",
+      x: 5, y: 3, facing: "down",
+      color: "#f5b041", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_sulfura_terminee" }, node: "calme" },
+          { condition: { flag: "beat_gym7", equals: false }, node: "rien" }
+        ],
+        default: "decouverte",
+        nodes: {
+          rien: { text: ["Un vieux foyer éteint depuis longtemps."], next: null },
+          decouverte: {
+            text: [
+              "Une chaleur impossible se dégage soudain des cendres froides.",
+              "Le foyer n'était pas si éteint que ça, finalement..."
+            ],
+            effects: [{ startLegendaryBattle: { species: 146, level: 42, onCatch: [{ setFlag: "quete_sulfura_terminee", value: true }] } }]
+          },
+          calme: { text: ["Le foyer est retombé en cendres, pour de bon cette fois."], next: null }
         }
       }
     }
@@ -1846,6 +1956,37 @@ PKMN.NPCS = {
           },
           revisite: {
             text: ["Fais ce que nous n'avons pas pu faire."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gardien_sanctuaire_veritable",
+      name: "Présence silencieuse",
+      x: 16, y: 7, facing: "down",
+      color: "#8e44ad", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_mewtwo_terminee" }, node: "calme" },
+          { condition: { flag: "beat_super_champion", equals: false }, node: "pas_encore" }
+        ],
+        default: "decouverte",
+        nodes: {
+          pas_encore: {
+            text: ["Une présence pèse sur ce lieu, mais elle reste cachée pour l'instant."],
+            next: null
+          },
+          decouverte: {
+            text: [
+              "Maintenant que la Main Noire a été repoussée, la présence qui dormait ici se révèle enfin.",
+              "Le vrai gardien du sanctuaire d'Astrae te fait face."
+            ],
+            effects: [{ startLegendaryBattle: { species: 150, level: 88, onCatch: [{ setFlag: "quete_mewtwo_terminee", value: true }] } }]
+          },
+          calme: {
+            text: ["Le sanctuaire est silencieux, maintenant. Apaisé."],
             next: null
           }
         }
