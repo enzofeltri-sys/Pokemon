@@ -61,7 +61,7 @@ PKMN.NPCS = {
       id: "rival_kian",
       name: "Kian",
       x: 3, y: 2, facing: "down",
-      color: "#e67e22", letter: "K",
+      color: "#e67e22", letter: "K", spriteSheet: "rival",
       type: "utile",
       dialogue: {
         start: [{ condition: { flag: "beat_rival1" }, node: "apres_defaite" }],
@@ -252,7 +252,7 @@ PKMN.NPCS = {
       id: "rival_kian_route3",
       name: "Kian",
       x: 10, y: 7, facing: "up",
-      color: "#e67e22", letter: "K",
+      color: "#e67e22", letter: "K", spriteSheet: "rival",
       type: "utile",
       dialogue: {
         start: [{ condition: { flag: "beat_rival2" }, node: "apres_defaite" }],
@@ -465,7 +465,7 @@ PKMN.NPCS = {
       id: "rival_kian_route5",
       name: "Kian",
       x: 10, y: 7, facing: "up",
-      color: "#e67e22", letter: "K",
+      color: "#e67e22", letter: "K", spriteSheet: "rival",
       type: "utile",
       dialogue: {
         start: [{ condition: { flag: "beat_rival3" }, node: "apres_defaite" }],
@@ -2212,7 +2212,7 @@ PKMN.NPCS = {
       id: "gym16_trainer",
       name: "Opérative de la Main Noire",
       x: 4, y: 10, facing: "down",
-      color: "#17202a", letter: "O",
+      color: "#17202a", letter: "O", spriteSheet: "main_noire",
       type: "utile",
       dialogue: {
         start: [{ condition: { flag: "beat_gym16_trainer" }, node: "apres_defaite" }],
@@ -2233,7 +2233,7 @@ PKMN.NPCS = {
       id: "gym16_leader",
       name: "Ébène",
       x: 4, y: 2, facing: "down",
-      color: "#0b0b0b", letter: "É",
+      color: "#0b0b0b", letter: "É", spriteSheet: "main_noire_boss",
       type: "utile",
       dialogue: {
         start: [

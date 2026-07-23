@@ -357,7 +357,37 @@ function hashStr(s) {
 // cheveux) plutôt qu'un simple rond de couleur avec une lettre — même plan
 // général que le sprite du joueur, avec une tenue et une carrure propres à
 // chaque PNJ (déduites de sa couleur + d'un hash de son identifiant).
+// PNJ à sprite dédié (rival, Main Noire...) plutôt que l'apparence procédurale
+// générique — même filet de sécurité que le joueur: si l'image n'est pas
+// prête (ou d'un format inattendu), on retombe sur le dessin procédural.
+const NPC_SPRITE_SHEETS = {
+  rival: "./sprites/rival.png",
+  main_noire: "./sprites/main_noire.png",
+  main_noire_boss: "./sprites/main_noire_boss.png"
+};
+const NPC_SHEET_ROWS = { down: 0, left: 1, right: 2, up: 3 };
+
+function drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, url) {
+  const entry = PKMN.getSpriteImage(url);
+  if (entry.status !== "ok" || entry.img.naturalWidth !== 128 || entry.img.naturalHeight !== 128) return false;
+  const cx = screenX + TILE / 2;
+  ctx.save();
+  ctx.filter = "blur(1.2px)";
+  ctx.fillStyle = "rgba(0,0,0,0.28)";
+  ctx.beginPath(); ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  const row = NPC_SHEET_ROWS[facing || "down"] || 0;
+  const col = !legLift || !legLift.amount ? 0 : (legLift.parity === 0 ? 1 : 3);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(entry.img, col * 32, row * 32, 32, 32, screenX, screenY, TILE, TILE);
+  return true;
+}
+
 function drawNPCSprite(ctx, screenX, screenY, npc, legLift, facing) {
+  if (npc.spriteSheet && NPC_SPRITE_SHEETS[npc.spriteSheet]) {
+    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, NPC_SPRITE_SHEETS[npc.spriteSheet]);
+    if (drawn) return;
+  }
   if (npc._skin === undefined) {
     const h = hashStr(npc.id || npc.name || "npc");
     npc._skin = NPC_SKIN_TONES[h % NPC_SKIN_TONES.length];
