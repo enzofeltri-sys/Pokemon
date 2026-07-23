@@ -60,9 +60,10 @@ partage d'XP, etc.) sont centralisées dans `js/data/balance.js`.
 - Rival, Main Noire et PNJ génériques (sprites/rival.png, sprites/main_noire*.png,
   sprites/npc_a.png, sprites/npc_b.png, sprites/npc_c.png) :
   *QuestDX Character Pack (Free Version)*, par Snoblin.
-- Tuiles d'herbe/eau, arbres, façades de bâtiments (porte maison/Centre/Mart)
-  et mur intérieur (sprites/tiles/) : recolorées à partir de *Sprout Lands -
-  Sprites - Basic pack*, par Cup Nooble (usage non-commercial).
+- Tuiles d'herbe/eau, arbres, façades de bâtiments (porte maison/Centre/Mart),
+  mur intérieur et déco (tableau, plante, tapis) (sprites/tiles/) : reprises
+  et recolorées à partir de *Sprout Lands - Sprites - Basic pack*, par
+  Cup Nooble (usage non-commercial).
 
 ## Note
 

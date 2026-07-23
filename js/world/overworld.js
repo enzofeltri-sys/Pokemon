@@ -22,6 +22,19 @@ function tileSeed(tx, ty) {
   return ((h >>> 0) % 1000) / 1000;
 }
 
+// Comme tileSeed, mais qui tient aussi compte de la carte courante — plusieurs
+// intérieurs (les 18 Centres Pokémon, par ex.) partagent exactement la même
+// grille de tuiles, donc tileSeed(tx,ty) seul donnerait toujours la même
+// décoration (même tableau, même plante) partout. On décale (tx,ty) par un
+// hash du mapKey avant de hacher, pour varier la déco d'un lieu à l'autre.
+function mapDecorSeed(tx, ty) {
+  const key = PKMN.Player.mapKey || "";
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  h = Math.abs(h);
+  return tileSeed(tx + (h & 0xff), ty + ((h >> 8) & 0xff));
+}
+
 // Textures de tuiles/décors tirées du pack Sprout Lands - Sprites (Cup Nooble),
 // recolorées pour coller à notre palette. Chaque tuile bitmap retombe sur son
 // ancien rendu procédural si l'image n'est pas dispo (hors-ligne, cache pas
@@ -244,6 +257,50 @@ function drawFloor(ctx, px, py, tx, ty) {
   ctx.fillRect(px, py, TILE, TILE);
   ctx.strokeStyle = "rgba(0,0,0,0.05)";
   ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+}
+
+// Petite déco d'intérieur (tableau au mur, plante et tapis au sol) tirée du
+// pack Sprout Lands - Objects, pour que les Centres/maisons ne soient plus
+// des pièces totalement nues. Purement visuelle (pas de nouvelle mécanique):
+// si l'image n'est pas prête, on retombe simplement sur le mur/sol nu.
+const PAINTING_URLS = ["./sprites/tiles/painting_0.png", "./sprites/tiles/painting_1.png", "./sprites/tiles/painting_2.png"];
+const PLANT_URLS = ["./sprites/tiles/plant_0.png", "./sprites/tiles/plant_1.png", "./sprites/tiles/plant_2.png"];
+const RUG_URLS = ["./sprites/tiles/rug_0.png", "./sprites/tiles/rug_1.png", "./sprites/tiles/rug_2.png"];
+
+function drawWallPainting(ctx, px, py, tx, ty) {
+  drawWallBrick(ctx, px, py);
+  const seed = mapDecorSeed(tx, ty);
+  const url = PAINTING_URLS[Math.floor(seed * PAINTING_URLS.length) % PAINTING_URLS.length];
+  const entry = PKMN.getSpriteImage(url);
+  if (entry.status !== "ok") return;
+  const w = entry.img.naturalWidth, h = entry.img.naturalHeight;
+  const scale = 2;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(entry.img, 0, 0, w, h, px + (TILE - w * scale) / 2, py + TILE * 0.4, w * scale, h * scale);
+}
+
+function drawFloorPlant(ctx, px, py, tx, ty) {
+  drawFloor(ctx, px, py, tx, ty);
+  const seed = mapDecorSeed(tx, ty);
+  const url = PLANT_URLS[Math.floor(seed * PLANT_URLS.length) % PLANT_URLS.length];
+  const entry = PKMN.getSpriteImage(url);
+  if (entry.status !== "ok") return;
+  const w = entry.img.naturalWidth, h = entry.img.naturalHeight;
+  const scale = 2;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(entry.img, 0, 0, w, h, px + (TILE - w * scale) / 2, py + TILE - h * scale - 2, w * scale, h * scale);
+}
+
+function drawFloorRug(ctx, px, py, tx, ty) {
+  drawFloor(ctx, px, py, tx, ty);
+  const seed = mapDecorSeed(tx, ty);
+  const url = RUG_URLS[Math.floor(seed * RUG_URLS.length) % RUG_URLS.length];
+  const entry = PKMN.getSpriteImage(url);
+  if (entry.status !== "ok") return;
+  const w = entry.img.naturalWidth, h = entry.img.naturalHeight;
+  const scale = 1.3;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(entry.img, 0, 0, w, h, px + (TILE - w * scale) / 2, py + (TILE - h * scale) / 2, w * scale, h * scale);
 }
 
 function drawCaveFloor(ctx, px, py, tx, ty) {
@@ -1022,6 +1079,9 @@ PKMN.OverworldState = {
         else if (tile === "M") drawBuildingEntrance(ctx, sx, sy, tile);
         else if (tile === "P") drawPC(ctx, sx, sy);
         else if (tile === "H") drawHeal(ctx, sx, sy);
+        else if (tile === "W") drawWallPainting(ctx, sx, sy, tx, ty);
+        else if (tile === "F") drawFloorPlant(ctx, sx, sy, tx, ty);
+        else if (tile === "R") drawFloorRug(ctx, sx, sy, tx, ty);
         else if (tile === "<" || tile === ">") drawWarp(ctx, sx, sy, tile);
         else if (tile === "~") drawWater(ctx, sx, sy, seed, this.time);
         else if (map.cave) drawCaveFloor(ctx, sx, sy, tx, ty);
