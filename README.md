@@ -54,12 +54,13 @@ partage d'XP, etc.) sont centralisées dans `js/data/balance.js`.
 
 ## Crédits
 
-- Personnage jouable (sprites/player.png) : dessin personnalisé fourni pour ce projet.
 - Boîte de dialogue et indicateur "appuie pour continuer" (sprites/ui/) :
   *Sprout Lands - UI Pack - Basic pack*, par Cup Nooble (usage non-commercial).
-- Rival, Main Noire et PNJ génériques (sprites/rival.png, sprites/main_noire*.png,
-  sprites/npc_a.png, sprites/npc_b.png, sprites/npc_c.png) :
-  *QuestDX Character Pack (Free Version)*, par Snoblin.
+- Personnage jouable, rival, Main Noire et PNJ génériques (sprites/player.png,
+  sprites/rival.png, sprites/main_noire*.png, sprites/npc_a.png,
+  sprites/npc_b.png, sprites/npc_c.png) : même style graphique pour tout le
+  monde, par souci d'harmonie visuelle — *QuestDX Character Pack
+  (Free Version)*, par Snoblin.
 - Tuiles d'herbe/eau, arbres, façades de bâtiments (porte maison/Centre/Mart),
   mur intérieur et déco (tableau, plante, tapis) (sprites/tiles/) : reprises
   et recolorées à partir de *Sprout Lands - Sprites - Basic pack*, par

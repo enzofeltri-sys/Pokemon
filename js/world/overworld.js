@@ -415,29 +415,25 @@ function drawWarp(ctx, px, py, dir) {
   ctx.fill();
 }
 
-// Feuille de sprite du joueur (sprites/player.png): grille propre 3 colonnes
-// (marche gauche / arrêt / marche droite) x 4 lignes (bas / gauche / droite /
-// haut), 32x32 px par frame, fond transparent — même pitch que TILE, donc
-// un blit direct sans mise à l'échelle. Tant que l'image n'est pas chargée
-// (ou hors-ligne), on retombe sur le dessin procédural d'origine.
+// Feuille de sprite du joueur (sprites/player.png): même format QuestDX que
+// le rival/la Main Noire/les PNJ — grille 128x128, 4 colonnes (idle / pas /
+// idle / pas) x 4 lignes (bas / gauche / droite / haut), 32x32 px par case —
+// pour que le perso jouable partage exactement le même style graphique que
+// tout le reste du casting (harmonie visuelle). Tant que l'image n'est pas
+// chargée (ou hors-ligne, ou un vieux format traîne en cache), on retombe
+// sur le dessin procédural d'origine.
 const PLAYER_SPRITE_URL = "./sprites/player.png";
 const PLAYER_SHEET_ROWS = { down: 0, left: 1, right: 2, up: 3 };
 const PLAYER_FRAME = 32;
 
 function drawPlayerSprite(ctx, screenX, screenY, facing, bob, walkT, stepParity) {
   const entry = PKMN.getSpriteImage(PLAYER_SPRITE_URL);
-  // Si une version différente de l'image traîne encore dans un cache
-  // (service worker périmé, PWA pas relancée après une mise à jour...),
-  // ses dimensions ne collent plus à la grille 3x4 attendue: mieux vaut
-  // retomber sur le dessin procédural que découper une case vide au
-  // hasard et afficher un joueur invisible.
-  if (entry.status !== "ok" || entry.img.naturalWidth !== PLAYER_FRAME * 3 || entry.img.naturalHeight !== PLAYER_FRAME * 4) {
+  if (entry.status !== "ok" || entry.img.naturalWidth !== PLAYER_FRAME * 4 || entry.img.naturalHeight !== PLAYER_FRAME * 4) {
     drawPlayerSpriteProcedural(ctx, screenX, screenY, facing, bob, walkT, stepParity);
     return;
   }
   const row = PLAYER_SHEET_ROWS[facing] ?? 0;
-  // Frame du milieu (arrêt) quand immobile, alternée gauche/droite en marchant.
-  const col = !walkT ? 1 : (stepParity === 0 ? 0 : 2);
+  const col = !walkT ? 0 : (stepParity === 0 ? 1 : 3);
 
   const cx = screenX + TILE / 2;
   ctx.save();
@@ -549,29 +545,6 @@ function traitsFromIndex(index) {
     accessory: pick(NPC_ACCESSORIES)
   };
 }
-
-// Personnages importants: apparence choisie à la main (pas tirée au sort) pour
-// coller à leur rôle — la Professeure a un look de professeure, chaque
-// Champion·ne d'Arène a une tenue/couleur qui évoque son type de prédilection.
-const NPC_ARCHETYPES = {
-  prof_aline: { kind: "professor" },
-
-  gym1_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#f2e9d8", hairStyle: "long", outfitShape: "dress", outfitColor: "#aed6f1", accessory: "none" },
-  gym2_leader: { skin: NPC_SKIN_TONES[1], hairColor: "#e0532b", hairStyle: "spiky", outfitShape: "standard", outfitColor: "#c0392b", accessory: "none" },
-  gym3_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#1b4f72", hairStyle: "long", outfitShape: "dress", outfitColor: "#2980b9", accessory: "none" },
-  gym4_leader: { skin: NPC_SKIN_TONES[2], hairColor: "#4a2f1c", hairStyle: "bob", outfitShape: "overalls", outfitColor: "#27ae60", accessory: "none" },
-  gym5_leader: { skin: NPC_SKIN_TONES[3], hairColor: "#241a14", hairStyle: "long", outfitShape: "robe", outfitColor: "#4a2b5c", accessory: "none" },
-  gym6_leader: { skin: NPC_SKIN_TONES[1], hairColor: "#2c2c2c", hairStyle: "spiky", outfitShape: "standard", outfitColor: "#f1c40f", accessory: "glasses" },
-  gym7_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#eef2f5", hairStyle: "long", outfitShape: "robe", outfitColor: "#aed6f1", accessory: "none" },
-  gym8_leader: { skin: NPC_SKIN_TONES[4], hairColor: "#6b4423", hairStyle: "bald", outfitShape: "overalls", outfitColor: "#8a6d3b", accessory: "bandana" },
-  gym9_leader: { skin: NPC_SKIN_TONES[3], hairColor: "#7a3b2e", hairStyle: "short", outfitShape: "standard", outfitColor: "#d68910", accessory: "none" },
-  gym10_leader: { skin: NPC_SKIN_TONES[2], hairColor: "#2c2c2c", hairStyle: "bob", outfitShape: "dress", outfitColor: "#16a085", accessory: "none" },
-  gym11_leader: { skin: NPC_SKIN_TONES[1], hairColor: "#8a6d3b", hairStyle: "spiky", outfitShape: "standard", outfitColor: "#d4ac0d", accessory: "none" },
-  gym12_leader: { skin: NPC_SKIN_TONES[3], hairColor: "#241a14", hairStyle: "short", outfitShape: "standard", outfitColor: "#943126", accessory: "bandana" },
-  gym13_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#4a2f1c", hairStyle: "long", outfitShape: "robe", outfitColor: "#8e44ad", accessory: "none" },
-  gym14_leader: { skin: NPC_SKIN_TONES[2], hairColor: "#2c2c2c", hairStyle: "bald", outfitShape: "overalls", outfitColor: "#5d6d7e", accessory: "glasses" },
-  gym15_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#eef2f5", hairStyle: "long", outfitShape: "robe", outfitColor: "#2c3e75", accessory: "none" }
-};
 
 function drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, url) {
   const entry = PKMN.getSpriteImage(url);
@@ -713,36 +686,26 @@ function drawHumanoid(ctx, screenX, screenY, traits, legLift, facing) {
   drawAccessory(ctx, cx, topY, traits.accessory);
 }
 
-// Look dédié pour la Professeure: blouse claire, lunettes, cheveux attachés
-// grisonnants et un petit carnet contre elle — reconnaissable au premier
-// coup d'œil, sans dépendre du tirage générique.
-function drawProfessorSprite(ctx, screenX, screenY, legLift, facing) {
-  drawHumanoid(ctx, screenX, screenY, {
-    skin: NPC_SKIN_TONES[2],
-    hairColor: "#d8d3c8",
-    hairStyle: "bob",
-    outfitShape: "robe",
-    outfitColor: "#f5f2e6",
-    accessory: "glasses"
-  }, legLift, facing);
-  const cx = screenX + TILE / 2;
-  ctx.fillStyle = "#c9a876";
-  ctx.fillRect(cx + 7, screenY + TILE * 0.62, 6, 8);
-  ctx.strokeStyle = "#8a6d3b";
-  ctx.lineWidth = 0.8;
-  ctx.strokeRect(cx + 7, screenY + TILE * 0.62, 6, 8);
+// PNJ sans sprite dédié: un des 3 looks QuestDX "Base" (même style graphique
+// que le joueur/rival/Main Noire, pour une harmonie visuelle complète —
+// pas de mélange avec un rendu procédural), tiré au hasard mais stable par
+// PNJ (hash de son identifiant).
+const NPC_BASE_SHEETS = ["./sprites/npc_a.png", "./sprites/npc_b.png", "./sprites/npc_c.png"];
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
 }
 
 function drawNPCSprite(ctx, screenX, screenY, npc, legLift, facing) {
-  const archetype = NPC_ARCHETYPES[npc.id];
-  if (archetype) {
-    if (archetype.kind === "professor") drawProfessorSprite(ctx, screenX, screenY, legLift, facing);
-    else drawHumanoid(ctx, screenX, screenY, archetype, legLift, facing);
-    return;
-  }
   const explicitUrl = npc.spriteSheet && NPC_SPRITE_SHEETS[npc.spriteSheet];
   if (explicitUrl) {
     const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, explicitUrl);
+    if (drawn) return;
+  } else {
+    const h = hashStr(npc.id || npc.name || "npc");
+    const baseUrl = NPC_BASE_SHEETS[h % NPC_BASE_SHEETS.length];
+    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, baseUrl);
     if (drawn) return;
   }
   const traits = traitsFromIndex(npcLookIndexFor(npc));
