@@ -15,6 +15,8 @@ PKMN.BALANCE = {
   ABILITY_LOW_HP_THRESHOLD: 1 / 3,   // Brasier/Torrent/Engrais: sous ce ratio de PV max
   ABILITY_LOW_HP_MULTIPLIER: 1.5,
   ABNEGATION_MULTIPLIER: 1.5,    // Abnégation: bonus d'attaque si sous statut
+  STAB_MULTIPLIER_ADAPTABILITY: 2,   // bonus STAB renforcé (talent Adaptabilité)
+  TOUGH_SKIN_MULTIPLIER: 0.9,    // Peau Dure: dégâts physiques reçus réduits de 10%
 
   // --- Statuts ---
   POISON_FRACTION: 1 / 8,        // dégâts de poison classique = maxHp / 8 par tour

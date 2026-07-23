@@ -54,6 +54,7 @@ PKMN.createPokemon = function (speciesId, level) {
   const ivs = PKMN.randomIVs();
   const evs = PKMN.zeroEVs();
   const stats = PKMN.calcStats(species.baseStats, level, ivs, evs);
+  const rolled = PKMN.rollAbility(speciesId);
   return {
     species: speciesId,
     level,
@@ -71,7 +72,9 @@ PKMN.createPokemon = function (speciesId, level) {
     mustRecharge: false,
     flinched: false,
     heldItem: null,
-    caughtWith: "Poké Ball"
+    caughtWith: "Poké Ball",
+    ability: rolled.key,
+    abilitySlot: rolled.slot
   };
 };
 
@@ -123,6 +126,13 @@ PKMN.normalizePokemon = function (mon) {
   if (typeof mon.flinched !== "boolean") mon.flinched = false;
   if (mon.heldItem === undefined) mon.heldItem = null;
   if (!mon.caughtWith) mon.caughtWith = "Poké Ball";
+  // Sauvegarde d'avant les talents multiples (un seul talent fixe par espèce):
+  // tire un talent réel pour ce Pokémon précis, une bonne fois pour toutes.
+  if (!mon.ability || !PKMN.ABILITIES[mon.ability]) {
+    const rolled = PKMN.rollAbility(mon.species);
+    mon.ability = rolled.key;
+    mon.abilitySlot = rolled.slot;
+  }
   return mon;
 };
 
@@ -135,6 +145,11 @@ function performEvolution(mon, newSpeciesId) {
   mon.stats = newStats;
   mon.maxHp = newStats.hp;
   mon.hp = Math.max(1, Math.round(newStats.hp * ratio));
+  // Garde le même "type" de talent après évolution (un talent caché reste
+  // caché) plutôt que d'en retirer un au hasard à chaque évolution.
+  const rolled = PKMN.rollAbility(newSpeciesId, mon.abilitySlot);
+  mon.ability = rolled.key;
+  mon.abilitySlot = rolled.slot;
   return { evolved: true, from: fromName, to: newSpecies.name };
 }
 

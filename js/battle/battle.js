@@ -45,10 +45,11 @@ function checkHeldBerryCure(mon, msgs) {
 }
 
 function abilityBlocksStatus(target, status) {
-  const ability = PKMN.speciesOf(target).ability;
+  const ability = target.ability;
   if (status === "sleep" && ability === "insomniaque") return true;
   if ((status === "poison" || status === "toxic") && ability === "immunite") return true;
   if (status === "confuse" && ability === "tempo_perso") return true;
+  if (status === "freeze" && ability === "coeur_de_glace") return true;
   return false;
 }
 
@@ -57,11 +58,11 @@ function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) 
   if (move.fixedDamage) return { dmg: move.fixedDamage, eff: 1, crit: false };
   const physical = move.cat === "physique";
   const critChance = move.highCrit ? BAL.CRIT_CHANCE_HIGH : BAL.CRIT_CHANCE_NORMAL;
-  const isCrit = Math.random() < critChance;
+  const isCrit = Math.random() < critChance && defender.ability !== "prudence";
 
   let atkBase = physical ? attacker.stats.atk : attacker.stats.spa;
   if (physical) {
-    if (attackerSpecies.ability === "abnegation" && attacker.status) {
+    if (attacker.ability === "abnegation" && attacker.status) {
       atkBase = Math.floor(atkBase * BAL.ABNEGATION_MULTIPLIER); // Abnégation: ignore la brûlure, bonus si statut
     } else if (attacker.status === "burn") {
       atkBase = Math.floor(atkBase * BAL.BURN_ATK_MULTIPLIER);
@@ -78,14 +79,17 @@ function calcDamage(attacker, attackerSpecies, defender, defenderSpecies, move) 
   const def = Math.max(1, defBase * stageMul(defStage));
   const level = attacker.level;
   const base = ((2 * level) / 5 + 2) * move.power * (atk / def) / 50 + 2;
-  const stab = attackerSpecies.types.includes(move.type) ? BAL.STAB_MULTIPLIER : 1;
+  const stabMul = attacker.ability === "adaptabilite" ? BAL.STAB_MULTIPLIER_ADAPTABILITY : BAL.STAB_MULTIPLIER;
+  const stab = attackerSpecies.types.includes(move.type) ? stabMul : 1;
   let eff = PKMN.getEffectiveness(move.type, defenderSpecies.types);
-  if (move.type === "sol" && defenderSpecies.ability === "levitation") eff = 0;
+  if (move.type === "sol" && defender.ability === "levitation") eff = 0;
+  if (move.type === "electrik" && defender.ability === "isolant") eff = 0;
   const rand = BAL.DAMAGE_RANDOM_MIN + Math.random() * BAL.DAMAGE_RANDOM_SPAN;
   const critMul = isCrit ? BAL.CRIT_DAMAGE_MULTIPLIER : 1;
-  const lowHpType = LOW_HP_ABILITY_TYPE[attackerSpecies.ability];
+  const lowHpType = LOW_HP_ABILITY_TYPE[attacker.ability];
   const abilityMul = (lowHpType === move.type && attacker.hp <= attacker.maxHp * BAL.ABILITY_LOW_HP_THRESHOLD) ? BAL.ABILITY_LOW_HP_MULTIPLIER : 1;
-  const dmg = eff === 0 ? 0 : Math.max(1, Math.floor(base * stab * eff * rand * critMul * abilityMul));
+  const toughSkinMul = (physical && defender.ability === "peau_dure") ? BAL.TOUGH_SKIN_MULTIPLIER : 1;
+  const dmg = eff === 0 ? 0 : Math.max(1, Math.floor(base * stab * eff * rand * critMul * abilityMul * toughSkinMul));
   return { dmg, eff, crit: isCrit };
 }
 
@@ -149,7 +153,7 @@ PKMN.BattleState = {
 
   triggerSendOut(mon, opponent, msgs) {
     if (!mon || !opponent || opponent.hp <= 0) return;
-    const ability = PKMN.speciesOf(mon).ability;
+    const ability = mon.ability;
     if (ability === "intimidation") {
       const cur = opponent.statStages.atk;
       const next = Math.max(-6, cur - 1);
@@ -487,7 +491,7 @@ PKMN.BattleState = {
 
     const move = PKMN.MOVES[moveSlot.key];
     const defSpecies = PKMN.speciesOf(defender);
-    moveSlot.pp = Math.max(0, moveSlot.pp - (defSpecies.ability === "pression" ? 2 : 1));
+    moveSlot.pp = Math.max(0, moveSlot.pp - (defender.ability === "pression" ? 2 : 1));
     msgs.push(`${atkSpecies.name} utilise ${move.name} !`);
 
     if (!checkAccuracy(move, attacker, defender)) {
@@ -508,7 +512,7 @@ PKMN.BattleState = {
       const { dmg, eff, crit } = calcDamage(attacker, atkSpecies, defender, defSpecies, move);
       defender.hp = Math.max(0, defender.hp - dmg);
       if (dmg > 0) this.triggerHitEffect(defender);
-      if (defender.hp <= 0 && wasFull && defSpecies.ability === "fermete") {
+      if (defender.hp <= 0 && wasFull && defender.ability === "fermete") {
         defender.hp = 1;
         msgs.push(`${defSpecies.name} tient bon grâce à Fermeté !`);
       }
@@ -538,13 +542,17 @@ PKMN.BattleState = {
     }
 
     if (totalDmg > 0 && attacker.hp > 0 && !attacker.status && Math.random() < PKMN.BALANCE.STATUS_ABILITY_PROC_CHANCE) {
-      if (defSpecies.ability === "statik") {
+      if (defender.ability === "statik") {
         attacker.status = "paralysis";
         msgs.push(`${atkSpecies.name} est paralysé par Statik !`);
         checkHeldBerryCure(attacker, msgs);
-      } else if (defSpecies.ability === "point_poison") {
+      } else if (defender.ability === "point_poison") {
         attacker.status = "poison";
         msgs.push(`${atkSpecies.name} est empoisonné par Point Poison !`);
+        checkHeldBerryCure(attacker, msgs);
+      } else if (defender.ability === "corps_ardent") {
+        attacker.status = "burn";
+        msgs.push(`${atkSpecies.name} est brûlé par Corps Ardent !`);
         checkHeldBerryCure(attacker, msgs);
       }
     }

@@ -364,7 +364,8 @@ PKMN.PartyState = {
     ctx.font = "12px sans-serif";
     ctx.fillStyle = "#2c3e50";
     const heldName = mon.heldItem ? PKMN.ITEMS[mon.heldItem].name : "aucun";
-    ctx.fillText(`Talent: ${PKMN.ABILITIES[species.ability].name}  ·  Objet: ${heldName}`, 16, y);
+    const abilityName = PKMN.ABILITIES[mon.ability].name + (mon.abilitySlot === "hidden" ? " (caché)" : "");
+    ctx.fillText(`Talent: ${abilityName}  ·  Objet: ${heldName}`, 16, y);
 
     y += 16;
     ctx.font = "bold 13px sans-serif";
@@ -677,7 +678,8 @@ PKMN.PokedexState = {
       if (key === "Escape" || key === "Enter" || key === " ") this.phase = "list";
       return;
     }
-    if (key === "ArrowDown") this.sel = Math.min(this.sel + 1, 150);
+    const total = Object.keys(PKMN.POKEDEX).length;
+    if (key === "ArrowDown") this.sel = Math.min(this.sel + 1, total - 1);
     if (key === "ArrowUp") this.sel = Math.max(this.sel - 1, 0);
     if (key === "Escape") { PKMN.switchState("overworld"); return; }
     if (key === "Enter" || key === " ") {
@@ -691,13 +693,14 @@ PKMN.PokedexState = {
     ctx.fillStyle = "#fff";
     ctx.font = "bold 20px sans-serif";
     ctx.textAlign = "left";
+    const total = Object.keys(PKMN.POKEDEX).length;
     const caught = PKMN.Player.pokedexCaught.size;
-    ctx.fillText(`Pokédex — ${caught}/151 capturés`, 16, 26);
+    ctx.fillText(`Pokédex — ${caught}/${total} capturés`, 16, 26);
 
-    const scroll = Math.max(0, Math.min(this.sel - 3, 151 - 8));
+    const scroll = Math.max(0, Math.min(this.sel - 3, total - 8));
     for (let i = 0; i < 8; i++) {
       const id = scroll + i + 1;
-      if (id > 151) break;
+      if (id > total) break;
       const species = PKMN.POKEDEX[id];
       const seen = PKMN.Player.pokedexSeen.has(id);
       const caughtIt = PKMN.Player.pokedexCaught.has(id);
@@ -747,6 +750,14 @@ PKMN.PokedexState = {
     y += 16;
     ctx.fillStyle = "#27ae60";
     ctx.fillText(`Résiste à: ${resist.length ? resist.join(", ") : "rien de particulier"}`, 16, y);
+
+    y += 20;
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#2c3e50";
+    const normalNames = species.abilities.normal.map((k) => PKMN.ABILITIES[k].name).join(" ou ");
+    ctx.fillText(`Talents possibles: ${normalNames}`, 16, y);
+    y += 16;
+    ctx.fillText(`Talent caché: ${PKMN.ABILITIES[species.abilities.hidden].name}`, 16, y);
 
     PKMN.drawTextBox(ctx, "Échap pour revenir à la liste.", { noPrompt: true });
   }

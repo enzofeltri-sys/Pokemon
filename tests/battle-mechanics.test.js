@@ -35,7 +35,8 @@ module.exports = [
         PKMN.Player.party = [];
         PKMN.Player.addToParty(1, 50);
         PKMN.Player.party[0].moves = [{ key: "seisme", pp: 10, maxPp: 10 }];
-        PKMN.BattleState.startWild(81, 50); // Magnéti (talent Lévitation)
+        PKMN.BattleState.startWild(81, 50); // Magnéti
+        PKMN.BattleState.wild.ability = "levitation"; // talents multiples: on fixe celui qu'on veut tester
         PKMN.switchState("battle");
         const before = PKMN.BattleState.wild.hp;
         PKMN.BattleState.doMoveAction(PKMN.BattleState.active, PKMN.BattleState.wild, PKMN.BattleState.active.moves[0], [], false);

@@ -274,6 +274,18 @@ for (const row of PKMN.POKEDEX_RAW) {
   let baseExp = 8 + Math.floor(statTotal / 4);
   if (legendary) baseExp = Math.floor(baseExp * 1.4);
   const ability = PKMN.ABILITY_OVERRIDES[id] || PKMN.TYPE_DEFAULT_ABILITY[type1] || "tempo_perso";
+  // Second talent normal: dérivé du type secondaire s'il en propose un
+  // différent du premier, sinon une alternative piochée dans un pool
+  // générique (rotation déterministe par id, jamais identique au premier).
+  let ability2 = type2 && PKMN.TYPE_DEFAULT_ABILITY[type2] !== ability ? PKMN.TYPE_DEFAULT_ABILITY[type2] : null;
+  if (!ability2) {
+    const pool = PKMN.SECONDARY_ABILITY_POOL;
+    for (let i = 0; i < pool.length; i++) {
+      const candidate = pool[(id + i) % pool.length];
+      if (candidate !== ability) { ability2 = candidate; break; }
+    }
+  }
+  const hiddenAbility = PKMN.TYPE_HIDDEN_ABILITY[type1] || "adaptabilite";
   PKMN.POKEDEX[id] = {
     id, name,
     types: type2 ? [type1, type2] : [type1],
@@ -282,6 +294,7 @@ for (const row of PKMN.POKEDEX_RAW) {
     evYield: { [topStat]: legendary ? 2 : 1 },
     baseExp,
     ability,
+    abilities: { normal: [ability, ability2], hidden: hiddenAbility },
     spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
     spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${id}.png`
   };
