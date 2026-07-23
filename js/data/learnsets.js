@@ -228,7 +228,108 @@ PKMN.LEARNSETS = {
   149: [[1, "charge"], [1, "rage_dragon"], [1, "draco_rage"], [1, "cru_aile"], [45, "attak_air"]],
 
   150: [[1, "choc_mental"], [1, "lueur"], [1, "psyko"], [50, "ultralaser"]],
-  151: [[1, "charge"], [1, "choc_mental"], [1, "psyko"], [1, "lueur"]]
+  151: [[1, "charge"], [1, "choc_mental"], [1, "psyko"], [1, "lueur"]],
+
+  152: [[1, "charge"], [1, "fouet_lianes"], [10, "draine"], [11, "mega_sangsue"], [13, "lance_soleil"]], // Germignon
+  153: [[1, "charge"], [1, "fouet_lianes"], [14, "draine"], [19, "mega_sangsue"], [25, "lance_soleil"]], // Macronium
+  154: [[1, "charge"], [1, "fouet_lianes"], [18, "draine"], [27, "mega_sangsue"], [37, "lance_soleil"]], // Méganium
+  155: [[1, "charge"], [1, "flammeche"], [9, "tourbillon_feu"], [10, "lance_flammes"], [11, "deflagration"]], // Héricendre
+  156: [[1, "charge"], [1, "flammeche"], [15, "tourbillon_feu"], [21, "lance_flammes"], [28, "deflagration"]], // Feurisson
+  157: [[1, "charge"], [1, "flammeche"], [18, "tourbillon_feu"], [27, "lance_flammes"], [37, "deflagration"]], // Typhlosion
+  158: [[1, "charge"], [1, "pistolet_a_o"], [10, "bulles_d_o"], [12, "cascade"], [14, "hydrocanon"]], // Kaiminus
+  159: [[1, "charge"], [1, "pistolet_a_o"], [13, "bulles_d_o"], [18, "cascade"], [23, "hydrocanon"]], // Crocrodil
+  160: [[1, "charge"], [1, "pistolet_a_o"], [18, "bulles_d_o"], [27, "cascade"], [37, "hydrocanon"]], // Aligatueur
+  161: [[1, "charge"], [1, "vive_attaque"], [10, "ecrasface"], [11, "cognobscur"]], // Fouinette
+  162: [[1, "charge"], [1, "vive_attaque"], [19, "ecrasface"], [29, "cognobscur"]], // Fouinar
+  163: [[1, "charge"], [1, "vive_attaque"], [1, "cyclone"], [10, "ecrasface"], [11, "cognobscur"], [13, "cru_aile"], [15, "attak_air"], [16, "pika_pika"]], // Hoothoot
+  164: [[1, "charge"], [1, "vive_attaque"], [1, "cyclone"], [13, "ecrasface"], [19, "cognobscur"], [24, "cru_aile"], [29, "attak_air"], [35, "pika_pika"]], // Noarfang
+  165: [[1, "charge"], [1, "ligotage"], [1, "cyclone"], [9, "dard_pin"], [11, "megacorne"], [12, "cru_aile"], [13, "attak_air"], [15, "pika_pika"]], // Coxy
+  166: [[1, "charge"], [1, "ligotage"], [1, "cyclone"], [13, "dard_pin"], [19, "megacorne"], [24, "cru_aile"], [29, "attak_air"], [35, "pika_pika"]], // Coxyclaque
+  167: [[1, "charge"], [1, "ligotage"], [1, "dard_venin"], [10, "dard_pin"], [13, "megacorne"], [15, "poudre_toxik"], [18, "sombre_toxine"]], // Mimigal
+  168: [[1, "charge"], [1, "ligotage"], [1, "dard_venin"], [14, "dard_pin"], [21, "megacorne"], [27, "poudre_toxik"], [34, "sombre_toxine"]], // Migalos
+  169: [[1, "charge"], [1, "dard_venin"], [1, "cyclone"], [14, "poudre_toxik"], [21, "sombre_toxine"], [27, "cru_aile"], [33, "attak_air"], [40, "pika_pika"]], // Nostenfer
+  170: [[1, "charge"], [1, "pistolet_a_o"], [1, "tonnelectrik"], [10, "bulles_d_o"], [13, "cascade"], [15, "hydrocanon"], [18, "cage_eclair"], [20, "eclair"], [23, "tonnerre"]], // Loupio
+  171: [[1, "charge"], [1, "pistolet_a_o"], [1, "tonnelectrik"], [13, "bulles_d_o"], [17, "cascade"], [22, "hydrocanon"], [26, "cage_eclair"], [31, "eclair"], [35, "tonnerre"]], // Lanturn
+  172: [[1, "charge"], [1, "tonnelectrik"], [14, "cage_eclair"], [20, "eclair"], [26, "tonnerre"]], // Pichu
+  173: [[1, "charge"], [1, "vive_attaque"], [16, "ecrasface"], [24, "cognobscur"]], // Mélo
+  174: [[1, "charge"], [1, "vive_attaque"], [16, "ecrasface"], [24, "cognobscur"]], // Toudoudou
+  175: [[1, "charge"], [1, "vive_attaque"], [13, "ecrasface"], [18, "cognobscur"]], // Togepi
+  176: [[1, "charge"], [1, "vive_attaque"], [1, "cyclone"], [13, "ecrasface"], [19, "cognobscur"], [24, "cru_aile"], [29, "attak_air"], [35, "pika_pika"]], // Togetic
+  177: [[1, "charge"], [1, "choc_mental"], [1, "cyclone"], [10, "regard_confus"], [12, "psyko"], [14, "ultralaser"], [17, "cru_aile"], [19, "attak_air"], [21, "pika_pika"]], // Natu
+  178: [[1, "charge"], [1, "choc_mental"], [1, "cyclone"], [13, "regard_confus"], [17, "psyko"], [22, "ultralaser"], [26, "cru_aile"], [31, "attak_air"], [35, "pika_pika"]], // Xatu
+  179: [[1, "charge"], [1, "tonnelectrik"], [9, "cage_eclair"], [11, "eclair"], [12, "tonnerre"]], // Wattouat
+  180: [[1, "charge"], [1, "tonnelectrik"], [13, "cage_eclair"], [18, "eclair"], [23, "tonnerre"]], // Lainergie
+  181: [[1, "charge"], [1, "tonnelectrik"], [18, "cage_eclair"], [27, "eclair"], [37, "tonnerre"]], // Pharamp
+  182: [[1, "charge"], [1, "fouet_lianes"], [16, "draine"], [24, "mega_sangsue"], [32, "lance_soleil"]], // Joliflor
+  183: [[1, "charge"], [1, "pistolet_a_o"], [10, "bulles_d_o"], [12, "cascade"], [14, "hydrocanon"]], // Marill
+  184: [[1, "charge"], [1, "pistolet_a_o"], [18, "bulles_d_o"], [27, "cascade"], [37, "hydrocanon"]], // Azumarill
+  185: [[1, "charge"], [1, "jet_pierres"], [24, "eboulement"]], // Simularbre
+  186: [[1, "charge"], [1, "pistolet_a_o"], [16, "bulles_d_o"], [24, "cascade"], [32, "hydrocanon"]], // Tarpaud
+  187: [[1, "charge"], [1, "fouet_lianes"], [1, "cyclone"], [9, "draine"], [10, "mega_sangsue"], [11, "lance_soleil"], [13, "cru_aile"], [14, "attak_air"], [15, "pika_pika"]], // Granivol
+  188: [[1, "charge"], [1, "fouet_lianes"], [1, "cyclone"], [10, "draine"], [13, "mega_sangsue"], [15, "lance_soleil"], [18, "cru_aile"], [20, "attak_air"], [23, "pika_pika"]], // Floravol
+  189: [[1, "charge"], [1, "fouet_lianes"], [1, "cyclone"], [13, "draine"], [19, "mega_sangsue"], [24, "lance_soleil"], [30, "cru_aile"], [35, "attak_air"], [41, "pika_pika"]], // Cotovol
+  190: [[1, "charge"], [1, "vive_attaque"], [16, "ecrasface"], [24, "cognobscur"]], // Capumain
+  191: [[1, "charge"], [1, "fouet_lianes"], [7, "mega_sangsue"], [7, "lance_soleil"], [8, "draine"]], // Tournegrin
+  192: [[1, "charge"], [1, "fouet_lianes"], [16, "draine"], [24, "mega_sangsue"], [32, "lance_soleil"]], // Héliatronc
+  193: [[1, "charge"], [1, "ligotage"], [1, "cyclone"], [12, "dard_pin"], [16, "megacorne"], [20, "cru_aile"], [24, "attak_air"], [28, "pika_pika"]], // Yanma
+  194: [[1, "charge"], [1, "pistolet_a_o"], [1, "seisme"], [10, "bulles_d_o"], [11, "cascade"], [13, "hydrocanon"], [15, "ball_seisme"], [16, "eboulement"]], // Axoloto
+  195: [[1, "charge"], [1, "pistolet_a_o"], [1, "seisme"], [13, "bulles_d_o"], [19, "cascade"], [24, "hydrocanon"], [29, "ball_seisme"], [35, "eboulement"]], // Maraiste
+  196: [[1, "charge"], [1, "choc_mental"], [16, "regard_confus"], [24, "psyko"], [32, "ultralaser"]], // Mentali
+  197: [[1, "charge"], [1, "morsure"], [19, "crocs_ultimes"], [29, "eclats_noirs"]], // Noctali
+  198: [[1, "charge"], [1, "morsure"], [1, "cyclone"], [12, "crocs_ultimes"], [16, "eclats_noirs"], [20, "cru_aile"], [24, "attak_air"], [28, "pika_pika"]], // Cornèbre
+  199: [[1, "charge"], [1, "pistolet_a_o"], [1, "choc_mental"], [13, "bulles_d_o"], [17, "cascade"], [22, "hydrocanon"], [26, "regard_confus"], [31, "psyko"], [35, "ultralaser"]], // Roigada
+  200: [[1, "charge"], [1, "moukill"], [20, "ball_ombre"]], // Feuforêve
+  201: [[1, "charge"], [1, "choc_mental"], [14, "regard_confus"], [20, "psyko"], [26, "ultralaser"]], // Zarbi
+  202: [[1, "charge"], [1, "choc_mental"], [16, "regard_confus"], [24, "psyko"], [32, "ultralaser"]], // Qulbutoké
+  203: [[1, "charge"], [1, "vive_attaque"], [1, "choc_mental"], [12, "ecrasface"], [16, "cognobscur"], [20, "regard_confus"], [24, "psyko"], [28, "ultralaser"]], // Girafarig
+  204: [[1, "charge"], [1, "ligotage"], [15, "dard_pin"], [22, "megacorne"]], // Pomdepik
+  205: [[1, "charge"], [1, "ligotage"], [1, "boul_armure"], [14, "dard_pin"], [21, "megacorne"], [27, "griffe_acier"], [34, "tete_de_fer"]], // Foretress
+  206: [[1, "charge"], [1, "vive_attaque"], [16, "ecrasface"], [24, "cognobscur"]], // Insolourdo
+  207: [[1, "charge"], [1, "seisme"], [1, "cyclone"], [12, "ball_seisme"], [16, "eboulement"], [20, "cru_aile"], [24, "attak_air"], [28, "pika_pika"]], // Scorplane
+  208: [[1, "charge"], [1, "boul_armure"], [1, "seisme"], [16, "griffe_acier"], [23, "tete_de_fer"], [31, "ball_seisme"], [38, "eboulement"]], // Steelix
+  209: [[1, "charge"], [1, "vive_attaque"], [12, "ecrasface"], [17, "cognobscur"]], // Snubbull
+  210: [[1, "charge"], [1, "vive_attaque"], [19, "ecrasface"], [29, "cognobscur"]], // Granbull
+  211: [[1, "charge"], [1, "pistolet_a_o"], [1, "dard_venin"], [12, "bulles_d_o"], [16, "cascade"], [20, "hydrocanon"], [24, "poudre_toxik"], [28, "sombre_toxine"]], // Qwilfish
+  212: [[1, "charge"], [1, "ligotage"], [1, "boul_armure"], [16, "dard_pin"], [23, "megacorne"], [31, "griffe_acier"], [38, "tete_de_fer"]], // Cizayox
+  213: [[1, "charge"], [1, "ligotage"], [1, "jet_pierres"], [14, "dard_pin"], [20, "megacorne"], [26, "eboulement"]], // Caratroc
+  214: [[1, "charge"], [1, "ligotage"], [1, "poing_karate"], [13, "dard_pin"], [18, "megacorne"], [22, "double_pied"], [27, "corps_a_corps"]], // Scarhino
+  215: [[1, "charge"], [1, "morsure"], [1, "poudreuse"], [14, "crocs_ultimes"], [20, "eclats_noirs"], [26, "huile_glacee"]], // Farfuret
+  216: [[1, "charge"], [1, "vive_attaque"], [15, "ecrasface"], [21, "cognobscur"]], // Teddiursa
+  217: [[1, "charge"], [1, "vive_attaque"], [19, "ecrasface"], [29, "cognobscur"]], // Ursaring
+  218: [[1, "charge"], [1, "flammeche"], [15, "tourbillon_feu"], [22, "lance_flammes"], [29, "deflagration"]], // Limagma
+  219: [[1, "charge"], [1, "flammeche"], [1, "jet_pierres"], [14, "tourbillon_feu"], [21, "lance_flammes"], [27, "deflagration"], [34, "eboulement"]], // Volcaropod
+  220: [[1, "charge"], [1, "poudreuse"], [1, "seisme"], [14, "huile_glacee"], [20, "ball_seisme"], [25, "eboulement"]], // Marcacrin
+  221: [[1, "charge"], [1, "poudreuse"], [1, "seisme"], [16, "huile_glacee"], [24, "ball_seisme"], [32, "eboulement"]], // Cochignon
+  222: [[1, "charge"], [1, "pistolet_a_o"], [1, "jet_pierres"], [13, "bulles_d_o"], [18, "cascade"], [22, "hydrocanon"], [27, "eboulement"]], // Corayon
+  223: [[1, "charge"], [1, "pistolet_a_o"], [12, "bulles_d_o"], [16, "cascade"], [19, "hydrocanon"]], // Rémoraid
+  224: [[1, "charge"], [1, "pistolet_a_o"], [16, "bulles_d_o"], [24, "cascade"], [32, "hydrocanon"]], // Octillery
+  225: [[1, "charge"], [1, "poudreuse"], [1, "cyclone"], [13, "huile_glacee"], [18, "cru_aile"], [22, "attak_air"], [27, "pika_pika"]], // Cadoizo
+  226: [[1, "charge"], [1, "pistolet_a_o"], [1, "cyclone"], [13, "bulles_d_o"], [17, "cascade"], [22, "hydrocanon"], [26, "cru_aile"], [31, "attak_air"], [35, "pika_pika"]], // Démanta
+  227: [[1, "charge"], [1, "boul_armure"], [1, "cyclone"], [12, "griffe_acier"], [16, "tete_de_fer"], [20, "cru_aile"], [24, "attak_air"], [28, "pika_pika"]], // Airmure
+  228: [[1, "charge"], [1, "morsure"], [1, "flammeche"], [10, "crocs_ultimes"], [13, "eclats_noirs"], [15, "tourbillon_feu"], [17, "lance_flammes"], [20, "deflagration"]], // Malosse
+  229: [[1, "charge"], [1, "morsure"], [1, "flammeche"], [13, "crocs_ultimes"], [19, "eclats_noirs"], [24, "tourbillon_feu"], [29, "lance_flammes"], [35, "deflagration"]], // Démolosse
+  230: [[1, "charge"], [1, "pistolet_a_o"], [1, "rage_dragon"], [14, "bulles_d_o"], [21, "cascade"], [27, "hydrocanon"], [33, "dracochoc"], [40, "draco_rage"]], // Hyporoi
+  231: [[1, "charge"], [1, "seisme"], [13, "ball_seisme"], [18, "eboulement"]], // Phanpy
+  232: [[1, "charge"], [1, "seisme"], [19, "ball_seisme"], [29, "eboulement"]], // Donphan
+  233: [[1, "charge"], [1, "vive_attaque"], [21, "ecrasface"], [33, "cognobscur"]], // Porygon2
+  234: [[1, "charge"], [1, "vive_attaque"], [16, "ecrasface"], [24, "cognobscur"]], // Cerfrousse
+  235: [[1, "charge"], [1, "vive_attaque"], [16, "ecrasface"], [24, "cognobscur"]], // Queulorior
+  236: [[1, "charge"], [1, "poing_karate"], [11, "double_pied"], [15, "corps_a_corps"]], // Debugant
+  237: [[1, "charge"], [1, "poing_karate"], [19, "double_pied"], [29, "corps_a_corps"]], // Kapoera
+  238: [[1, "charge"], [1, "poudreuse"], [1, "choc_mental"], [12, "huile_glacee"], [16, "regard_confus"], [20, "psyko"], [24, "ultralaser"]], // Lippouti
+  239: [[1, "charge"], [1, "tonnelectrik"], [13, "cage_eclair"], [18, "eclair"], [23, "tonnerre"]], // Élekid
+  240: [[1, "charge"], [1, "flammeche"], [13, "tourbillon_feu"], [18, "lance_flammes"], [23, "deflagration"]], // Magby
+  241: [[1, "charge"], [1, "vive_attaque"], [16, "ecrasface"], [24, "cognobscur"]], // Écrémeuh
+  242: [[1, "charge"], [1, "vive_attaque"], [21, "ecrasface"], [33, "cognobscur"]], // Leuphorie
+  243: [[1, "charge"], [1, "tonnelectrik"], [19, "cage_eclair"], [29, "eclair"], [40, "tonnerre"]], // Raikou
+  244: [[1, "charge"], [1, "flammeche"], [19, "tourbillon_feu"], [29, "lance_flammes"], [40, "deflagration"]], // Entei
+  245: [[1, "charge"], [1, "pistolet_a_o"], [19, "bulles_d_o"], [29, "cascade"], [40, "hydrocanon"]], // Suicune
+  246: [[1, "charge"], [1, "jet_pierres"], [1, "seisme"], [13, "eboulement"], [18, "ball_seisme"]], // Embrylex
+  247: [[1, "charge"], [1, "jet_pierres"], [1, "seisme"], [19, "eboulement"], [31, "ball_seisme"]], // Ymphect
+  248: [[1, "charge"], [1, "jet_pierres"], [1, "morsure"], [18, "eboulement"], [27, "crocs_ultimes"], [37, "eclats_noirs"]], // Tyranocif
+  249: [[1, "charge"], [1, "choc_mental"], [1, "cyclone"], [14, "regard_confus"], [20, "psyko"], [26, "ultralaser"], [32, "cru_aile"], [38, "attak_air"], [44, "pika_pika"]], // Lugia
+  250: [[1, "charge"], [1, "flammeche"], [1, "cyclone"], [14, "tourbillon_feu"], [20, "lance_flammes"], [26, "deflagration"], [32, "cru_aile"], [38, "attak_air"], [44, "pika_pika"]], // Ho-Oh
+  251: [[1, "charge"], [1, "choc_mental"], [1, "fouet_lianes"], [14, "regard_confus"], [20, "psyko"], [26, "ultralaser"], [32, "draine"], [38, "mega_sangsue"], [44, "lance_soleil"]], // Celebi
 };
 
 PKMN.movesAtLevel = function (speciesId, level) {

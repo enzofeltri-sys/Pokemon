@@ -15,9 +15,10 @@
 //       nodes: {
 //         nomDuNoeud: {
 //           text: "..." ou ["ligne 1", "ligne 2", ...],
-//           effects: [ { give: {item, amount} }, { setFlag, value }, { startQuest },
-//                      { advanceQuest: {id, step} }, { completeQuest }, { money: {delta} },
-//                      { moral: {axis, delta} }, { heal: true }, { badge }, { startTrainerBattle } ],
+//           effects: [ { give: {item, amount} }, { givePokemon: {species, level} }, { setFlag, value },
+//                      { startQuest }, { advanceQuest: {id, step} }, { completeQuest }, { money: {delta} },
+//                      { moral: {axis, delta} }, { heal: true }, { badge }, { startTrainerBattle },
+//                      { startLegendaryBattle: {species, level, onCatch} } ],
 //           choices: [ { label, next, condition, effects } ],  // optionnel
 //           next: "id du nœud suivant"  // optionnel si pas de choix, sinon fin du dialogue
 //         }
@@ -1102,6 +1103,57 @@ PKMN.NPCS = {
           }
         }
       }
+    },
+    {
+      id: "chercheuse_zenithia",
+      name: "Chercheuse Ilex",
+      x: 14, y: 6, facing: "up",
+      color: "#27ae60", letter: "I",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_champion1", equals: false }, node: "pas_encore" },
+          { condition: { flag: "starter_johto_chosen" }, node: "deja_choisi" }
+        ],
+        default: "propose",
+        nodes: {
+          pas_encore: {
+            text: ["Je n'ai rien pour toi tant que le titre de Champion n'est pas tombé."],
+            next: null
+          },
+          propose: {
+            text: [
+              "J'étudie des Pokémon venus d'une région bien plus lointaine que celle-ci.",
+              "Un Champion a le niveau pour en garder un avec lui. Lequel choisis-tu ?"
+            ],
+            choices: [
+              { label: "Germignon", next: "confirm_germignon" },
+              { label: "Héricendre", next: "confirm_hericendre" },
+              { label: "Kaiminus", next: "confirm_kaiminus" },
+              { label: "Pas maintenant", next: null }
+            ]
+          },
+          confirm_germignon: {
+            text: ["Germignon veille sur toi, maintenant."],
+            effects: [{ givePokemon: { species: 152, level: 5 } }, { setFlag: "starter_johto_chosen", value: true }],
+            next: null
+          },
+          confirm_hericendre: {
+            text: ["Héricendre veille sur toi, maintenant."],
+            effects: [{ givePokemon: { species: 155, level: 5 } }, { setFlag: "starter_johto_chosen", value: true }],
+            next: null
+          },
+          confirm_kaiminus: {
+            text: ["Kaiminus veille sur toi, maintenant."],
+            effects: [{ givePokemon: { species: 158, level: 5 } }, { setFlag: "starter_johto_chosen", value: true }],
+            next: null
+          },
+          deja_choisi: {
+            text: ["Prends soin de celui que tu as choisi."],
+            next: null
+          }
+        }
+      }
     }
   ],
 
@@ -1306,6 +1358,42 @@ PKMN.NPCS = {
           }
         }
       }
+    },
+    {
+      id: "presence_celebi",
+      name: "Scintillement furtif",
+      x: 15, y: 7, facing: "down",
+      color: "#58d68d", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_celebi_terminee" }, node: "calme" },
+          {
+            condition: {
+              all: [
+                { flag: "quete_raikou_terminee" },
+                { flag: "quete_entei_terminee" },
+                { flag: "quete_suicune_terminee" },
+                { flag: "quete_lugia_terminee" },
+                { flag: "quete_hooh_terminee" }
+              ]
+            },
+            node: "decouverte"
+          }
+        ],
+        default: "rien",
+        nodes: {
+          rien: { text: ["Un coin tranquille de Cendrelune. Rien de particulier, pour l'instant."], next: null },
+          decouverte: {
+            text: [
+              "En repassant par Cendrelune, un scintillement furtif attire ton regard.",
+              "Comme si le temps lui-même hésitait autour de cette petite silhouette verte."
+            ],
+            effects: [{ startLegendaryBattle: { species: 251, level: 90, onCatch: [{ setFlag: "quete_celebi_terminee", value: true }] } }]
+          },
+          calme: { text: ["Le coin tranquille de Cendrelune est de nouveau silencieux."], next: null }
+        }
+      }
     }
   ],
 
@@ -1397,6 +1485,31 @@ PKMN.NPCS = {
             text: ["La mer garde ses secrets, à ce qu'on dit."],
             next: null
           }
+        }
+      }
+    },
+    {
+      id: "presence_raikou",
+      name: "Grondement lointain",
+      x: 15, y: 4, facing: "down",
+      color: "#f1c40f", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_raikou_terminee" }, node: "calme" },
+          { condition: { flag: "beat_gym10", equals: false }, node: "rien" }
+        ],
+        default: "decouverte",
+        nodes: {
+          rien: { text: ["Un grondement au loin, comme un orage qui ne se décide pas."], next: null },
+          decouverte: {
+            text: [
+              "Le grondement se rapproche soudain, électrique, presque vivant.",
+              "Une silhouette fauve jaillit devant toi dans un éclair."
+            ],
+            effects: [{ startLegendaryBattle: { species: 243, level: 58, onCatch: [{ setFlag: "quete_raikou_terminee", value: true }] } }]
+          },
+          calme: { text: ["Le calme est revenu. Plus aucun grondement à l'horizon."], next: null }
         }
       }
     }
@@ -1585,6 +1698,31 @@ PKMN.NPCS = {
           }
         }
       }
+    },
+    {
+      id: "presence_entei",
+      name: "Chaleur montante",
+      x: 15, y: 4, facing: "down",
+      color: "#c0392b", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_entei_terminee" }, node: "calme" },
+          { condition: { flag: "beat_gym12", equals: false }, node: "rien" }
+        ],
+        default: "decouverte",
+        nodes: {
+          rien: { text: ["L'air tremble un peu ici, comme au-dessus d'une braise."], next: null },
+          decouverte: {
+            text: [
+              "La chaleur devient soudain intense, presque brûlante.",
+              "Une forme ardente surgit d'entre les failles d'Obsidor."
+            ],
+            effects: [{ startLegendaryBattle: { species: 244, level: 62, onCatch: [{ setFlag: "quete_entei_terminee", value: true }] } }]
+          },
+          calme: { text: ["La chaleur est retombée. L'air est de nouveau frais."], next: null }
+        }
+      }
     }
   ],
 
@@ -1771,6 +1909,31 @@ PKMN.NPCS = {
           }
         }
       }
+    },
+    {
+      id: "presence_suicune",
+      name: "Brise inattendue",
+      x: 15, y: 4, facing: "down",
+      color: "#3498db", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_suicune_terminee" }, node: "calme" },
+          { condition: { flag: "beat_gym14", equals: false }, node: "rien" }
+        ],
+        default: "decouverte",
+        nodes: {
+          rien: { text: ["Une brise fraîche traverse Ferrance, étrange au milieu des forges."], next: null },
+          decouverte: {
+            text: [
+              "La brise se change en un courant vif et froid.",
+              "Une silhouette bleue passe devant toi, silencieuse comme l'eau."
+            ],
+            effects: [{ startLegendaryBattle: { species: 245, level: 66, onCatch: [{ setFlag: "quete_suicune_terminee", value: true }] } }]
+          },
+          calme: { text: ["La brise est retombée. Rien d'autre que le bruit des marteaux."], next: null }
+        }
+      }
     }
   ],
 
@@ -1862,6 +2025,31 @@ PKMN.NPCS = {
             text: ["Astrae. C'est là que tout se jouera, je crois."],
             next: null
           }
+        }
+      }
+    },
+    {
+      id: "presence_lugia",
+      name: "Ombre sous les vagues",
+      x: 15, y: 4, facing: "down",
+      color: "#5dade2", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_lugia_terminee" }, node: "calme" },
+          { condition: { flag: "beat_super_champion", equals: false }, node: "pas_encore" }
+        ],
+        default: "decouverte",
+        nodes: {
+          pas_encore: { text: ["Une ombre immense semble dormir sous l'écume, au large. Elle ne bouge pas."], next: null },
+          decouverte: {
+            text: [
+              "Maintenant que la région est en paix, l'ombre remonte enfin à la surface.",
+              "Un être colossal jaillit des flots de Lunécume."
+            ],
+            effects: [{ startLegendaryBattle: { species: 249, level: 85, onCatch: [{ setFlag: "quete_lugia_terminee", value: true }] } }]
+          },
+          calme: { text: ["La mer d'écume est parfaitement calme, maintenant."], next: null }
         }
       }
     }
@@ -1958,6 +2146,31 @@ PKMN.NPCS = {
             text: ["Fais ce que nous n'avons pas pu faire."],
             next: null
           }
+        }
+      }
+    },
+    {
+      id: "presence_hooh",
+      name: "Reflet incandescent",
+      x: 3, y: 7, facing: "down",
+      color: "#e67e22", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "quete_hooh_terminee" }, node: "calme" },
+          { condition: { flag: "beat_super_champion", equals: false }, node: "pas_encore" }
+        ],
+        default: "decouverte",
+        nodes: {
+          pas_encore: { text: ["Un reflet chatoyant danse au-dessus du sanctuaire, hors de portée."], next: null },
+          decouverte: {
+            text: [
+              "Le reflet descend enfin du ciel d'Astrae, dans une traînée de couleurs.",
+              "Un oiseau flamboyant se pose devant toi, dans un silence presque sacré."
+            ],
+            effects: [{ startLegendaryBattle: { species: 250, level: 85, onCatch: [{ setFlag: "quete_hooh_terminee", value: true }] } }]
+          },
+          calme: { text: ["Le ciel d'Astrae est redevenu paisible."], next: null }
         }
       }
     },

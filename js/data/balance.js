@@ -58,5 +58,29 @@ PKMN.BALANCE = {
   EV_CAP_TOTAL: 510,
   LEVEL_CAP: 100,
   XP_CURVE_EXPONENT: 3,          // xp cumulée nécessaire pour un niveau = niveau^exposant
-  REVIVE_HEAL_FRACTION: 0.5
+  REVIVE_HEAL_FRACTION: 0.5,
+
+  // --- Rencontres sauvages ---
+  ENCOUNTER_WEIGHT_LEGENDARY: 1,
+  ENCOUNTER_WEIGHT_STAGE1: 30,   // pas encore évolué: le plus courant
+  ENCOUNTER_WEIGHT_STAGE2: 12,
+  ENCOUNTER_WEIGHT_STAGE3: 5,    // pleinement évolué: rare à l'état sauvage
+  ENCOUNTER_POWER_REFERENCE: 300 // total de stats de référence pour la pondération par puissance
+};
+
+// Poids de rencontre sauvage dérivé de la rareté (stade d'évolution / légendaire)
+// et de la puissance brute (total de stats de base): à rareté égale, un Pokémon
+// plus puissant apparaît moins souvent, sans qu'il faille authorer un poids
+// à la main pour chaque espèce de chaque route (js/world/overworld.js).
+PKMN.encounterWeight = function (speciesId) {
+  const species = PKMN.POKEDEX[speciesId];
+  if (!species) return 1;
+  const BAL = PKMN.BALANCE;
+  const base = species.legendary ? BAL.ENCOUNTER_WEIGHT_LEGENDARY
+    : species.stage === 1 ? BAL.ENCOUNTER_WEIGHT_STAGE1
+    : species.stage === 2 ? BAL.ENCOUNTER_WEIGHT_STAGE2
+    : BAL.ENCOUNTER_WEIGHT_STAGE3;
+  const statTotal = Object.values(species.baseStats).reduce((a, b) => a + b, 0);
+  const powerFactor = BAL.ENCOUNTER_POWER_REFERENCE / Math.max(statTotal, 150);
+  return Math.max(1, Math.round(base * powerFactor));
 };

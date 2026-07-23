@@ -110,12 +110,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.12,
     encounterTable: [
-      { id: 16, weight: 30, min: 2, max: 4 },  // Roucool
-      { id: 19, weight: 30, min: 2, max: 4 },  // Rattata
-      { id: 13, weight: 15, min: 2, max: 3 },  // Aspicot
-      { id: 10, weight: 15, min: 2, max: 3 },  // Chenipan
-      { id: 29, weight: 5,  min: 3, max: 5 },  // Nidoran F
-      { id: 32, weight: 5,  min: 3, max: 5 }   // Nidoran M
+      { id: 16, min: 2, max: 4 },  // Roucool
+      { id: 19, min: 2, max: 4 },  // Rattata
+      { id: 13, min: 2, max: 3 },  // Aspicot
+      { id: 10, min: 2, max: 3 },  // Chenipan
+      { id: 29, min: 3, max: 5 },  // Nidoran F
+      { id: 32, min: 3, max: 5 }   // Nidoran M
     ]
   },
 
@@ -139,12 +139,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.14,
     encounterTable: [
-      { id: 25, weight: 12, min: 5, max: 8 },  // Pikachu
-      { id: 27, weight: 22, min: 5, max: 8 },  // Sabelette
-      { id: 52, weight: 22, min: 5, max: 8 },  // Miaouss
-      { id: 23, weight: 18, min: 5, max: 8 },  // Abo
-      { id: 43, weight: 18, min: 5, max: 9 },  // Mystherbe
-      { id: 77, weight: 8,  min: 6, max: 9 }   // Ponyta
+      { id: 25, min: 5, max: 8 },  // Pikachu
+      { id: 27, min: 5, max: 8 },  // Sabelette
+      { id: 52, min: 5, max: 8 },  // Miaouss
+      { id: 23, min: 5, max: 8 },  // Abo
+      { id: 43, min: 5, max: 9 },  // Mystherbe
+      { id: 77, min: 6, max: 9 }   // Ponyta
     ]
   },
 
@@ -224,11 +224,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 77, weight: 20, min: 8,  max: 11 },  // Ponyta
-      { id: 58, weight: 18, min: 9,  max: 12 },  // Caninos
-      { id: 27, weight: 20, min: 7,  max: 10 },  // Sabelette
-      { id: 74, weight: 20, min: 7,  max: 10 },  // Racaillou
-      { id: 19, weight: 22, min: 6,  max: 9  }   // Rattata
+      { id: 77, min: 8,  max: 11 },  // Ponyta
+      { id: 58, min: 9,  max: 12 },  // Caninos
+      { id: 27, min: 7,  max: 10 },  // Sabelette
+      { id: 74, min: 7,  max: 10 },  // Racaillou
+      { id: 19, min: 6,  max: 9  }   // Rattata
     ]
   },
 
@@ -308,11 +308,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 79,  weight: 18, min: 13, max: 16 },  // Ramoloss
-      { id: 118, weight: 22, min: 12, max: 15 },  // Poissirene
-      { id: 41,  weight: 20, min: 13, max: 16 },  // Nosferapti
-      { id: 74,  weight: 20, min: 12, max: 15 },  // Racaillou
-      { id: 19,  weight: 20, min: 11, max: 14 }   // Rattata
+      { id: 79,  min: 13, max: 16 },  // Ramoloss
+      { id: 118, min: 12, max: 15 },  // Poissirene
+      { id: 41,  min: 13, max: 16 },  // Nosferapti
+      { id: 74,  min: 12, max: 15 },  // Racaillou
+      { id: 19,  min: 11, max: 14 }   // Rattata
     ]
   },
 
@@ -392,11 +392,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 43,  weight: 22, min: 18, max: 21 },  // Mystherbe
-      { id: 69,  weight: 20, min: 18, max: 21 },  // Chetiflor
-      { id: 102, weight: 18, min: 18, max: 21 },  // Saquedeneu
-      { id: 16,  weight: 20, min: 17, max: 20 },  // Roucool
-      { id: 27,  weight: 20, min: 17, max: 20 }   // Sabelette
+      { id: 43,  min: 18, max: 21 },  // Mystherbe
+      { id: 69,  min: 18, max: 21 },  // Chetiflor
+      { id: 102, min: 18, max: 21 },  // Saquedeneu
+      { id: 16,  min: 17, max: 20 },  // Roucool
+      { id: 27,  min: 17, max: 20 }   // Sabelette
     ]
   },
 
@@ -478,11 +478,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 95, weight: 15, min: 20, max: 23 },  // Onix
-      { id: 66, weight: 20, min: 19, max: 22 },  // Machoc
-      { id: 74, weight: 20, min: 19, max: 22 },  // Racaillou
-      { id: 19, weight: 25, min: 17, max: 20 },  // Rattata
-      { id: 16, weight: 20, min: 17, max: 20 }   // Roucool
+      { id: 95, min: 20, max: 23 },  // Onix
+      { id: 66, min: 19, max: 22 },  // Machoc
+      { id: 74, min: 19, max: 22 },  // Racaillou
+      { id: 19, min: 17, max: 20 },  // Rattata
+      { id: 16, min: 17, max: 20 }   // Roucool
     ]
   },
 
@@ -506,10 +506,10 @@ PKMN.MAPS = {
     },
     encounterRate: 0.18,
     encounterTable: [
-      { id: 95,  weight: 25, min: 20, max: 24 },  // Onix
-      { id: 41,  weight: 30, min: 19, max: 22 },  // Nosferapti
-      { id: 66,  weight: 25, min: 19, max: 23 },  // Machoc
-      { id: 74,  weight: 20, min: 18, max: 22 }   // Racaillou
+      { id: 95,  min: 20, max: 24 },  // Onix
+      { id: 41,  min: 19, max: 22 },  // Nosferapti
+      { id: 66,  min: 19, max: 23 },  // Machoc
+      { id: 74,  min: 18, max: 22 }   // Racaillou
     ]
   },
 
@@ -533,11 +533,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 92,  weight: 22, min: 22, max: 25 },  // Fantominus
-      { id: 41,  weight: 22, min: 21, max: 24 },  // Nosferapti
-      { id: 19,  weight: 25, min: 19, max: 22 },  // Rattata
-      { id: 16,  weight: 20, min: 19, max: 22 },  // Roucool
-      { id: 27,  weight: 11, min: 19, max: 22 }   // Sabelette
+      { id: 92,  min: 22, max: 25 },  // Fantominus
+      { id: 41,  min: 21, max: 24 },  // Nosferapti
+      { id: 19,  min: 19, max: 22 },  // Rattata
+      { id: 16,  min: 19, max: 22 },  // Roucool
+      { id: 27,  min: 19, max: 22 }   // Sabelette
     ]
   },
 
@@ -635,11 +635,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 118, weight: 25, min: 24, max: 27 },  // Poissirène
-      { id: 79,  weight: 20, min: 24, max: 27 },  // Ramoloss
-      { id: 60,  weight: 20, min: 23, max: 26 },  // Ptitard
-      { id: 41,  weight: 20, min: 23, max: 26 },  // Nosferapti
-      { id: 19,  weight: 15, min: 21, max: 24 }   // Rattata
+      { id: 118, min: 24, max: 27 },  // Poissirène
+      { id: 79,  min: 24, max: 27 },  // Ramoloss
+      { id: 60,  min: 23, max: 26 },  // Ptitard
+      { id: 41,  min: 23, max: 26 },  // Nosferapti
+      { id: 19,  min: 21, max: 24 }   // Rattata
     ]
   },
 
@@ -736,11 +736,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 86,  weight: 20, min: 36, max: 39 },  // Otaria
-      { id: 131, weight: 12, min: 36, max: 39 },  // Lokhlass
-      { id: 95,  weight: 22, min: 35, max: 38 },  // Onix
-      { id: 27,  weight: 23, min: 34, max: 37 },  // Sabelette
-      { id: 19,  weight: 23, min: 33, max: 36 }   // Rattata
+      { id: 86,  min: 36, max: 39 },  // Otaria
+      { id: 131, min: 36, max: 39 },  // Lokhlass
+      { id: 95,  min: 35, max: 38 },  // Onix
+      { id: 27,  min: 34, max: 37 },  // Sabelette
+      { id: 19,  min: 33, max: 36 }   // Rattata
     ]
   },
 
@@ -837,11 +837,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 74,  weight: 22, min: 40, max: 43 },  // Racaillou
-      { id: 75,  weight: 20, min: 40, max: 43 },  // Gravalanch
-      { id: 95,  weight: 20, min: 39, max: 42 },  // Onix
-      { id: 66,  weight: 20, min: 39, max: 42 },  // Machoc
-      { id: 27,  weight: 18, min: 38, max: 41 }   // Sabelette
+      { id: 74,  min: 40, max: 43 },  // Racaillou
+      { id: 75,  min: 40, max: 43 },  // Gravalanch
+      { id: 95,  min: 39, max: 42 },  // Onix
+      { id: 66,  min: 39, max: 42 },  // Machoc
+      { id: 27,  min: 38, max: 41 }   // Sabelette
     ]
   },
 
@@ -921,11 +921,11 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 95,  weight: 20, min: 44, max: 47 },  // Onix
-      { id: 76,  weight: 18, min: 44, max: 47 },  // Grolem
-      { id: 131, weight: 15, min: 44, max: 47 },  // Lokhlass
-      { id: 34,  weight: 22, min: 43, max: 46 },  // Nidoking
-      { id: 31,  weight: 25, min: 43, max: 46 }   // Nidoqueen
+      { id: 95,  min: 44, max: 47 },  // Onix
+      { id: 76,  min: 44, max: 47 },  // Grolem
+      { id: 131, min: 44, max: 47 },  // Lokhlass
+      { id: 34,  min: 43, max: 46 },  // Nidoking
+      { id: 31,  min: 43, max: 46 }   // Nidoqueen
     ]
   },
 
@@ -1020,10 +1020,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 27,  weight: 30, min: 47, max: 50 },  // Sabelette
-      { id: 111, weight: 30, min: 47, max: 50 },  // Rhinocorne
-      { id: 128, weight: 20, min: 47, max: 50 },  // Tauros
-      { id: 77,  weight: 20, min: 47, max: 50 }   // Ponyta
+      { id: 27,  min: 47, max: 50 },  // Sabelette
+      { id: 111, min: 47, max: 50 },  // Rhinocorne
+      { id: 128, min: 47, max: 50 },  // Tauros
+      { id: 77,  min: 47, max: 50 },  // Ponyta
+      { id: 161, min: 47, max: 50 },  // Fouinette
+      { id: 179, min: 47, max: 50 }   // Wattouat
     ]
   },
 
@@ -1103,10 +1105,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 98,  weight: 30, min: 49, max: 52 },  // Krabby
-      { id: 72,  weight: 30, min: 49, max: 52 },  // Tentacool
-      { id: 90,  weight: 25, min: 49, max: 52 },  // Kokiyas
-      { id: 120, weight: 15, min: 49, max: 52 }   // Stari
+      { id: 98,  min: 49, max: 52 },  // Krabby
+      { id: 72,  min: 49, max: 52 },  // Tentacool
+      { id: 90,  min: 49, max: 52 },  // Kokiyas
+      { id: 120, min: 49, max: 52 },  // Stari
+      { id: 170, min: 49, max: 52 },  // Loupio
+      { id: 211, min: 49, max: 52 }   // Qwilfish
     ]
   },
 
@@ -1186,10 +1190,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 84,  weight: 35, min: 53, max: 56 },  // Doduo
-      { id: 41,  weight: 30, min: 53, max: 56 },  // Nosferapti
-      { id: 111, weight: 20, min: 53, max: 56 },  // Rhinocorne
-      { id: 128, weight: 15, min: 53, max: 56 }   // Tauros
+      { id: 84,  min: 53, max: 56 },  // Doduo
+      { id: 41,  min: 53, max: 56 },  // Nosferapti
+      { id: 111, min: 53, max: 56 },  // Rhinocorne
+      { id: 128, min: 53, max: 56 },  // Tauros
+      { id: 163, min: 53, max: 56 },  // Hoothoot
+      { id: 165, min: 53, max: 56 }   // Coxy
     ]
   },
 
@@ -1269,10 +1275,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 66,  weight: 30, min: 55, max: 58 },  // Machoc
-      { id: 56,  weight: 30, min: 55, max: 58 },  // Férosinge
-      { id: 111, weight: 20, min: 55, max: 58 },  // Rhinocorne
-      { id: 74,  weight: 20, min: 55, max: 58 }   // Racaillou
+      { id: 66,  min: 55, max: 58 },  // Machoc
+      { id: 56,  min: 55, max: 58 },  // Férosinge
+      { id: 111, min: 55, max: 58 },  // Rhinocorne
+      { id: 74,  min: 55, max: 58 },  // Racaillou
+      { id: 236, min: 55, max: 58 },  // Debugant
+      { id: 246, min: 55, max: 58 }   // Embrylex
     ]
   },
 
@@ -1352,10 +1360,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 96,  weight: 30, min: 57, max: 60 },  // Soporifik
-      { id: 102, weight: 30, min: 57, max: 60 },  // Noeunoeuf
-      { id: 56,  weight: 20, min: 57, max: 60 },  // Férosinge
-      { id: 128, weight: 20, min: 57, max: 60 }   // Tauros
+      { id: 96,  min: 57, max: 60 },  // Soporifik
+      { id: 102, min: 57, max: 60 },  // Noeunoeuf
+      { id: 56,  min: 57, max: 60 },  // Férosinge
+      { id: 128, min: 57, max: 60 },  // Tauros
+      { id: 177, min: 57, max: 60 },  // Natu
+      { id: 203, min: 57, max: 60 }   // Girafarig
     ]
   },
 
@@ -1435,10 +1445,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 81,  weight: 30, min: 59, max: 62 },  // Magnéti
-      { id: 74,  weight: 30, min: 59, max: 62 },  // Racaillou
-      { id: 111, weight: 20, min: 59, max: 62 },  // Rhinocorne
-      { id: 56,  weight: 20, min: 59, max: 62 }   // Férosinge
+      { id: 81,  min: 59, max: 62 },  // Magnéti
+      { id: 74,  min: 59, max: 62 },  // Racaillou
+      { id: 111, min: 59, max: 62 },  // Rhinocorne
+      { id: 56,  min: 59, max: 62 },  // Férosinge
+      { id: 204, min: 59, max: 62 },  // Pomdepik
+      { id: 213, min: 59, max: 62 }   // Caratroc
     ]
   },
 
@@ -1518,10 +1530,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.15,
     encounterTable: [
-      { id: 91,  weight: 30, min: 61, max: 64 },  // Crustabri
-      { id: 90,  weight: 30, min: 61, max: 64 },  // Kokiyas
-      { id: 120, weight: 25, min: 61, max: 64 },  // Stari
-      { id: 41,  weight: 15, min: 61, max: 64 }   // Nosferapti
+      { id: 91,  min: 61, max: 64 },  // Crustabri
+      { id: 90,  min: 61, max: 64 },  // Kokiyas
+      { id: 120, min: 61, max: 64 },  // Stari
+      { id: 41,  min: 61, max: 64 },  // Nosferapti
+      { id: 222, min: 61, max: 64 },  // Corayon
+      { id: 223, min: 61, max: 64 }   // Rémoraid
     ]
   },
 
@@ -1602,10 +1616,12 @@ PKMN.MAPS = {
     },
     encounterRate: 0.12,
     encounterTable: [
-      { id: 24,  weight: 30, min: 63, max: 66 },  // Arbok
-      { id: 53,  weight: 25, min: 63, max: 66 },  // Persian
-      { id: 91,  weight: 25, min: 63, max: 66 },  // Crustabri
-      { id: 82,  weight: 20, min: 63, max: 66 }   // Magnéton
+      { id: 24,  min: 63, max: 66 },  // Arbok
+      { id: 53,  min: 63, max: 66 },  // Persian
+      { id: 91,  min: 63, max: 66 },  // Crustabri
+      { id: 82,  min: 63, max: 66 },  // Magnéton
+      { id: 198, min: 63, max: 66 },  // Cornèbre
+      { id: 214, min: 63, max: 66 }   // Scarhino
     ]
   },
 

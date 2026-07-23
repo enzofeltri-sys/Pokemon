@@ -635,10 +635,15 @@ PKMN.OverworldState = {
   startEncounter(map) {
     const table = map.encounterTable || [];
     if (!table.length) return;
-    const totalW = table.reduce((s, e) => s + e.weight, 0);
+    // Le poids de chaque espèce n'est pas authoré à la main: il découle de sa
+    // rareté (stade d'évolution / légendaire) et de sa puissance brute
+    // (PKMN.encounterWeight, js/data/balance.js) — seule la liste d'espèces
+    // disponibles est propre à chaque route.
+    const weights = table.map((e) => PKMN.encounterWeight(e.id));
+    const totalW = weights.reduce((s, w) => s + w, 0);
     let r = Math.random() * totalW;
     let pick = table[0];
-    for (const e of table) { if (r < e.weight) { pick = e; break; } r -= e.weight; }
+    for (let i = 0; i < table.length; i++) { if (r < weights[i]) { pick = table[i]; break; } r -= weights[i]; }
     const level = pick.min + Math.floor(Math.random() * (pick.max - pick.min + 1));
     PKMN.Player.pokedexSeen.add(pick.id);
     PKMN.BattleState.startWild(pick.id, level);

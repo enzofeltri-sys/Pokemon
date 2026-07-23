@@ -150,8 +150,9 @@ PKMN.tryEvolve = function (mon) {
 // Évolution par pierre. `stoneKey` ex: "pierre_feu". Renvoie {evolved:false} si la pierre
 // ne fait rien sur ce Pokémon.
 PKMN.tryEvolveWithStone = function (mon, stoneKey) {
-  if (mon.species === PKMN.EEVEE_ID) {
-    const targetId = PKMN.EEVEE_STONE_EVOS[stoneKey];
+  const branch = PKMN.BRANCH_STONE_EVOS[mon.species];
+  if (branch) {
+    const targetId = branch[stoneKey];
     if (targetId) return performEvolution(mon, targetId);
     return { evolved: false };
   }

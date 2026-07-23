@@ -7,6 +7,8 @@ PKMN.ITEMS = {
   pierre_foudre: { name: "Pierre Foudre" },
   pierre_plante: { name: "Pierre Plante" },
   pierre_lune: { name: "Pierre Lune" },
+  pierre_soleil: { name: "Pierre Soleil" },
+  pierre_royale: { name: "Pierre Royale" },
   pokeball: { name: "Poké Ball", price: 200, category: "ball", ballMultiplier: 1 },
   superball: { name: "Super Ball", price: 600, category: "ball", ballMultiplier: 1.5 },
   hyperball: { name: "Hyper Ball", price: 1200, category: "ball", ballMultiplier: 2 },
@@ -22,11 +24,11 @@ PKMN.ITEMS = {
 
 PKMN.MART_STOCK = ["pokeball", "superball", "hyperball", "potion", "antidote", "revive", "repel", "baie_oran", "baie_pecha", "baie_chesto", "baie_persil"];
 
-// Évoli est un cas particulier: une même espèce évolue différemment
-// selon la pierre utilisée.
-PKMN.EEVEE_ID = 133;
-PKMN.EEVEE_STONE_EVOS = {
-  pierre_feu: 136,   // Pyroli
-  pierre_eau: 134,   // Aquali
-  pierre_foudre: 135 // Voltali
+// Certaines espèces évoluent différemment selon la pierre utilisée
+// (au lieu du chemin d'évolution unique porté par species.evoLevel).
+PKMN.BRANCH_STONE_EVOS = {
+  133: { pierre_feu: 136, pierre_eau: 134, pierre_foudre: 135, pierre_soleil: 196, pierre_lune: 197 }, // Évoli -> Pyroli/Aquali/Voltali/Mentali/Noctali
+  44: { pierre_plante: 45, pierre_soleil: 182 },  // Ortide -> Rafflesia/Joliflor
+  61: { pierre_eau: 62, pierre_royale: 186 },     // Têtarte -> Tartard/Tarpaud
+  79: { pierre_royale: 199 }                      // Ramoloss -> Roigada (en plus de l'évolution par niveau)
 };

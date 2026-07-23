@@ -26,6 +26,7 @@ PKMN.runStoryEffects = function (effects) {
   if (!effects) return;
   for (const eff of effects) {
     if (eff.give) PKMN.Player.bag[eff.give.item] = (PKMN.Player.bag[eff.give.item] || 0) + (eff.give.amount || 1);
+    if (eff.givePokemon) PKMN.Player.addToParty(eff.givePokemon.species, eff.givePokemon.level);
     if (eff.money) PKMN.Player.money = Math.max(0, PKMN.Player.money + eff.money.delta);
     if (eff.setFlag) PKMN.Player.setFlag(eff.setFlag, eff.value);
     if (eff.startQuest) PKMN.Player.startQuest(eff.startQuest);

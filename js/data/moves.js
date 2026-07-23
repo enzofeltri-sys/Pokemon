@@ -42,6 +42,7 @@ PKMN.MOVES = {
 
   poing_karate: { name: "Poing Karaté",   type: "combat",  power: 50,  acc: 100, pp: 25, cat: "physique", highCrit: true },
   double_pied:  { name: "Double Pied",    type: "combat",  power: 30,  acc: 100, pp: 30, cat: "physique", hits: 2 },
+  corps_a_corps:{ name: "Corps-à-Corps",  type: "combat",  power: 120, acc: 100, pp: 5,  cat: "physique" },
 
   dard_venin:   { name: "Dard-Venin",     type: "poison",  power: 15,  acc: 100, pp: 35, cat: "physique" },
   sombre_toxine:{ name: "Sombre Toxine",  type: "poison",  power: null, acc: 90,  pp: 10, cat: "statut", effect: { status: "toxic", target: "foe" } },
@@ -72,10 +73,14 @@ PKMN.MOVES = {
 
   rage_dragon:  { name: "Rage Dragon",    type: "dragon",  power: 40,  acc: 100, pp: 10, cat: "special", fixedDamage: 40 },
   draco_rage:   { name: "Draco-Rage",     type: "dragon",  power: 100, acc: 100, pp: 10, cat: "special" },
+  dracochoc:    { name: "Draco-Choc",     type: "dragon",  power: 90,  acc: 100, pp: 10, cat: "physique" },
 
   morsure:      { name: "Morsure",        type: "tenebres", power: 60, acc: 100, pp: 25, cat: "physique", secondary: { chance: 30, flinch: true } },
+  crocs_ultimes:{ name: "Crocs Ultimes",  type: "tenebres", power: 80, acc: 100, pp: 15, cat: "physique" },
+  eclats_noirs: { name: "Éclats Noirs",   type: "tenebres", power: 80, acc: 100, pp: 15, cat: "special" },
 
   boul_armure:  { name: "Boul'Armure",    type: "acier",   power: 40,  acc: 100, pp: 20, cat: "physique" },
+  griffe_acier: { name: "Griffe Acier",   type: "acier",   power: 50,  acc: 95,  pp: 25, cat: "physique" },
   tete_de_fer:  { name: "Tête de Fer",    type: "acier",   power: 80,  acc: 100, pp: 15, cat: "physique" },
 
   draine:       { name: "Draine",         type: "plante",  power: 20,  acc: 100, pp: 25, cat: "special", drain: 0.5 },
