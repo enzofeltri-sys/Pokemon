@@ -64,6 +64,8 @@ partage d'XP, etc.) sont centralisées dans `js/data/balance.js`.
   mur intérieur et déco (tableau, plante, tapis) (sprites/tiles/) : reprises
   et recolorées à partir de *Sprout Lands - Sprites - Basic pack*, par
   Cup Nooble (usage non-commercial).
+- Portraits affichés dans les boîtes de dialogue (sprites/portraits/) :
+  fournis pour ce projet.
 
 ## Note
 
