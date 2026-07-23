@@ -263,7 +263,51 @@ function drawWarp(ctx, px, py, dir) {
   ctx.fill();
 }
 
+// Feuille de sprite du joueur (dessin fourni, sprites/player.png): 3 colonnes
+// (marche gauche / arrêt / marche droite) x 4 lignes (bas / gauche / droite /
+// haut). Chaque personnage n'occupe qu'une fraction de sa cellule (beaucoup
+// de marge autour), d'où ces rectangles de recadrage exacts par frame —
+// calculés une fois depuis l'image et figés ici plutôt que redevinés à
+// l'exécution. Tant que l'image n'est pas chargée (ou hors-ligne), on
+// retombe sur le dessin procédural d'origine.
+const PLAYER_SPRITE_URL = "./sprites/player.png";
+const PLAYER_SHEET_ROWS = { down: 0, left: 1, right: 2, up: 3 };
+const PLAYER_SHEET_FRAMES = [
+  [[101, 2, 59, 117], [208, 2, 61, 117], [320, 2, 60, 117]],
+  [[100, 120, 60, 110], [206, 120, 67, 111], [320, 120, 65, 111]],
+  [[96, 240, 63, 103], [198, 240, 66, 103], [320, 240, 56, 103]],
+  [[98, 360, 61, 104], [204, 360, 63, 104], [320, 360, 58, 105]]
+];
+
 function drawPlayerSprite(ctx, screenX, screenY, facing, bob, walkT, stepParity) {
+  const entry = PKMN.getSpriteImage(PLAYER_SPRITE_URL);
+  if (entry.status !== "ok") {
+    drawPlayerSpriteProcedural(ctx, screenX, screenY, facing, bob, walkT, stepParity);
+    return;
+  }
+  const row = PLAYER_SHEET_ROWS[facing] ?? 0;
+  // Frame du milieu (arrêt) quand immobile, alternée gauche/droite en marchant.
+  const col = !walkT ? 1 : (stepParity === 0 ? 0 : 2);
+  const [sx, sy, sw, sh] = PLAYER_SHEET_FRAMES[row][col];
+
+  const cx = screenX + TILE / 2;
+  ctx.save();
+  ctx.filter = "blur(1.2px)";
+  ctx.fillStyle = "rgba(0,0,0,0.3)";
+  ctx.beginPath();
+  ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Le perso est plus grand qu'une tuile (comme la plupart des sprites RPG):
+  // largeur proche de la tuile, hauteur proportionnelle, ancré par les pieds.
+  const drawW = TILE * 0.95;
+  const drawH = drawW * (sh / sw);
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(entry.img, sx, sy, sw, sh, cx - drawW / 2, screenY + bob + TILE - drawH, drawW, drawH);
+}
+
+function drawPlayerSpriteProcedural(ctx, screenX, screenY, facing, bob, walkT, stepParity) {
   const cx = screenX + TILE / 2;
   const topY = screenY + bob;
   ctx.save();
