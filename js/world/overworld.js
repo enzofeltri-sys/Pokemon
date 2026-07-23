@@ -365,6 +365,9 @@ const NPC_SPRITE_SHEETS = {
   main_noire: "./sprites/main_noire.png",
   main_noire_boss: "./sprites/main_noire_boss.png"
 };
+// Apparence par défaut des PNJ génériques (sans spriteSheet propre): 3 tons
+// tirés au hasard (mais stable par PNJ, via son id) parmi le pack QuestDX Base.
+const NPC_BASE_SHEETS = ["./sprites/npc_a.png", "./sprites/npc_b.png", "./sprites/npc_c.png"];
 const NPC_SHEET_ROWS = { down: 0, left: 1, right: 2, up: 3 };
 
 function drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, url) {
@@ -384,8 +387,14 @@ function drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, url
 }
 
 function drawNPCSprite(ctx, screenX, screenY, npc, legLift, facing) {
-  if (npc.spriteSheet && NPC_SPRITE_SHEETS[npc.spriteSheet]) {
-    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, NPC_SPRITE_SHEETS[npc.spriteSheet]);
+  const explicitUrl = npc.spriteSheet && NPC_SPRITE_SHEETS[npc.spriteSheet];
+  if (explicitUrl) {
+    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, explicitUrl);
+    if (drawn) return;
+  } else {
+    const h = hashStr(npc.id || npc.name || "npc");
+    const baseUrl = NPC_BASE_SHEETS[h % NPC_BASE_SHEETS.length];
+    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, baseUrl);
     if (drawn) return;
   }
   if (npc._skin === undefined) {

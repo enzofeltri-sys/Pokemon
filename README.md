@@ -57,7 +57,8 @@ partage d'XP, etc.) sont centralisées dans `js/data/balance.js`.
 - Personnage jouable (sprites/player.png) : dessin personnalisé fourni pour ce projet.
 - Boîte de dialogue et indicateur "appuie pour continuer" (sprites/ui/) :
   *Sprout Lands - UI Pack - Basic pack*, par Cup Nooble (usage non-commercial).
-- Rival et Main Noire (sprites/rival.png, sprites/main_noire*.png) :
+- Rival, Main Noire et PNJ génériques (sprites/rival.png, sprites/main_noire*.png,
+  sprites/npc_a.png, sprites/npc_b.png, sprites/npc_c.png) :
   *QuestDX Character Pack (Free Version)*, par Snoblin.
 
 ## Note
