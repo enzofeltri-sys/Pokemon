@@ -404,32 +404,83 @@ function drawPlayerSpriteProcedural(ctx, screenX, screenY, facing, bob, walkT, s
 
 const NPC_SKIN_TONES = ["#f2c29a", "#e8b184", "#caa06e", "#a06b45", "#7d4f30"];
 const NPC_HAIR_COLORS = ["#241a14", "#4a2f1c", "#6b4423", "#8a6d3b", "#2c2c2c", "#7a3b2e"];
+const NPC_HAIR_STYLES = ["short", "long", "spiky", "bob", "bald"];
+const NPC_OUTFIT_SHAPES = ["standard", "dress", "overalls", "robe"];
+const NPC_OUTFIT_COLORS = ["#7f8c8d", "#c0392b", "#2980b9", "#27ae60", "#8e44ad", "#d68910", "#16a085", "#34495e"];
+const NPC_ACCESSORIES = ["none", "hat", "glasses", "bandana"];
 
-// Petit hash déterministe sur une chaîne, pour tirer une apparence stable
-// (peau/cheveux) à partir de l'identifiant du PNJ — toujours le même
-// personnage à chaque rendu, sans avoir à stocker ces choix dans les données.
-function hashStr(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-
-// Dessine un PNJ comme un petit personnage (jambes, bras, torse, tête,
-// cheveux) plutôt qu'un simple rond de couleur avec une lettre — même plan
-// général que le sprite du joueur, avec une tenue et une carrure propres à
-// chaque PNJ (déduites de sa couleur + d'un hash de son identifiant).
-// PNJ à sprite dédié (rival, Main Noire...) plutôt que l'apparence procédurale
-// générique — même filet de sécurité que le joueur: si l'image n'est pas
-// prête (ou d'un format inattendu), on retombe sur le dessin procédural.
+// PNJ à sprite dédié (rival, Main Noire, PNJ nommés repris du pack QuestDX...)
+// plutôt que l'apparence procédurale générique — même filet de sécurité que
+// le joueur: si l'image n'est pas prête (ou d'un format inattendu), on
+// retombe sur le dessin procédural.
 const NPC_SPRITE_SHEETS = {
   rival: "./sprites/rival.png",
   main_noire: "./sprites/main_noire.png",
-  main_noire_boss: "./sprites/main_noire_boss.png"
+  main_noire_boss: "./sprites/main_noire_boss.png",
+  npc_a: "./sprites/npc_a.png",
+  npc_b: "./sprites/npc_b.png",
+  npc_c: "./sprites/npc_c.png"
 };
-// Apparence par défaut des PNJ génériques (sans spriteSheet propre): 3 tons
-// tirés au hasard (mais stable par PNJ, via son id) parmi le pack QuestDX Base.
-const NPC_BASE_SHEETS = ["./sprites/npc_a.png", "./sprites/npc_b.png", "./sprites/npc_c.png"];
 const NPC_SHEET_ROWS = { down: 0, left: 1, right: 2, up: 3 };
+
+// Chaque PNJ générique (sans sprite ni rôle particulier) reçoit une combinaison
+// unique d'apparence (peau + couleur/coiffure de cheveux + forme/couleur de
+// tenue + accessoire), assignée une fois pour toutes via un compteur global.
+// Comme l'assignation est séquentielle (pas un hash avec risque de collision),
+// deux PNJ différents ne tombent JAMAIS sur la même combinaison tant qu'il y a
+// moins de PNJ que de combinaisons possibles (ici plusieurs milliers) — "tous
+// différents" est donc garanti, pas seulement probable.
+let _npcLookCounter = 0;
+const _npcLookIndex = new Map();
+function npcLookIndexFor(npc) {
+  const key = npc.id || npc.name || "npc";
+  if (!_npcLookIndex.has(key)) _npcLookIndex.set(key, _npcLookCounter++);
+  return _npcLookIndex.get(key);
+}
+const NPC_LOOK_SPACE = NPC_SKIN_TONES.length * NPC_HAIR_COLORS.length * NPC_HAIR_STYLES.length *
+  NPC_OUTFIT_SHAPES.length * NPC_OUTFIT_COLORS.length * NPC_ACCESSORIES.length;
+function traitsFromIndex(index) {
+  // Les PNJ voisins dans un même fichier de carte reçoivent des indices
+  // consécutifs (0, 1, 2...) — décoder l'indice brut ferait donc varier
+  // seulement le trait le plus "rapide" (la peau) entre deux PNJ côte à côte,
+  // le reste restant identique. On brasse d'abord l'indice via une
+  // multiplication par une constante première avec l'espace des looks
+  // (permutation bijective: l'unicité garantie par l'indice reste garantie
+  // après brassage), pour que des PNJ voisins aient des looks bien dispersés.
+  let n = (index * 6863) % NPC_LOOK_SPACE;
+  const pick = (arr) => { const v = arr[n % arr.length]; n = Math.floor(n / arr.length); return v; };
+  return {
+    skin: pick(NPC_SKIN_TONES),
+    hairColor: pick(NPC_HAIR_COLORS),
+    hairStyle: pick(NPC_HAIR_STYLES),
+    outfitShape: pick(NPC_OUTFIT_SHAPES),
+    outfitColor: pick(NPC_OUTFIT_COLORS),
+    accessory: pick(NPC_ACCESSORIES)
+  };
+}
+
+// Personnages importants: apparence choisie à la main (pas tirée au sort) pour
+// coller à leur rôle — la Professeure a un look de professeure, chaque
+// Champion·ne d'Arène a une tenue/couleur qui évoque son type de prédilection.
+const NPC_ARCHETYPES = {
+  prof_aline: { kind: "professor" },
+
+  gym1_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#f2e9d8", hairStyle: "long", outfitShape: "dress", outfitColor: "#aed6f1", accessory: "none" },
+  gym2_leader: { skin: NPC_SKIN_TONES[1], hairColor: "#e0532b", hairStyle: "spiky", outfitShape: "standard", outfitColor: "#c0392b", accessory: "none" },
+  gym3_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#1b4f72", hairStyle: "long", outfitShape: "dress", outfitColor: "#2980b9", accessory: "none" },
+  gym4_leader: { skin: NPC_SKIN_TONES[2], hairColor: "#4a2f1c", hairStyle: "bob", outfitShape: "overalls", outfitColor: "#27ae60", accessory: "none" },
+  gym5_leader: { skin: NPC_SKIN_TONES[3], hairColor: "#241a14", hairStyle: "long", outfitShape: "robe", outfitColor: "#4a2b5c", accessory: "none" },
+  gym6_leader: { skin: NPC_SKIN_TONES[1], hairColor: "#2c2c2c", hairStyle: "spiky", outfitShape: "standard", outfitColor: "#f1c40f", accessory: "glasses" },
+  gym7_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#eef2f5", hairStyle: "long", outfitShape: "robe", outfitColor: "#aed6f1", accessory: "none" },
+  gym8_leader: { skin: NPC_SKIN_TONES[4], hairColor: "#6b4423", hairStyle: "bald", outfitShape: "overalls", outfitColor: "#8a6d3b", accessory: "bandana" },
+  gym9_leader: { skin: NPC_SKIN_TONES[3], hairColor: "#7a3b2e", hairStyle: "short", outfitShape: "standard", outfitColor: "#d68910", accessory: "none" },
+  gym10_leader: { skin: NPC_SKIN_TONES[2], hairColor: "#2c2c2c", hairStyle: "bob", outfitShape: "dress", outfitColor: "#16a085", accessory: "none" },
+  gym11_leader: { skin: NPC_SKIN_TONES[1], hairColor: "#8a6d3b", hairStyle: "spiky", outfitShape: "standard", outfitColor: "#d4ac0d", accessory: "none" },
+  gym12_leader: { skin: NPC_SKIN_TONES[3], hairColor: "#241a14", hairStyle: "short", outfitShape: "standard", outfitColor: "#943126", accessory: "bandana" },
+  gym13_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#4a2f1c", hairStyle: "long", outfitShape: "robe", outfitColor: "#8e44ad", accessory: "none" },
+  gym14_leader: { skin: NPC_SKIN_TONES[2], hairColor: "#2c2c2c", hairStyle: "bald", outfitShape: "overalls", outfitColor: "#5d6d7e", accessory: "glasses" },
+  gym15_leader: { skin: NPC_SKIN_TONES[0], hairColor: "#eef2f5", hairStyle: "long", outfitShape: "robe", outfitColor: "#2c3e75", accessory: "none" }
+};
 
 function drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, url) {
   const entry = PKMN.getSpriteImage(url);
@@ -447,25 +498,72 @@ function drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, url
   return true;
 }
 
-function drawNPCSprite(ctx, screenX, screenY, npc, legLift, facing) {
-  const explicitUrl = npc.spriteSheet && NPC_SPRITE_SHEETS[npc.spriteSheet];
-  if (explicitUrl) {
-    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, explicitUrl);
-    if (drawn) return;
-  } else {
-    const h = hashStr(npc.id || npc.name || "npc");
-    const baseUrl = NPC_BASE_SHEETS[h % NPC_BASE_SHEETS.length];
-    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, baseUrl);
-    if (drawn) return;
+function drawHairStyle(ctx, cx, topY, style, color) {
+  ctx.fillStyle = color;
+  if (style === "bald") return;
+  if (style === "long") {
+    ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.245, 8.3, Math.PI, 0); ctx.fill();
+    ctx.fillRect(cx - 8.3, topY + TILE * 0.245 - 1, 16.6, 3);
+    ctx.fillRect(cx - 9, topY + TILE * 0.28, 3, 14);
+    ctx.fillRect(cx + 6, topY + TILE * 0.28, 3, 14);
+    return;
   }
-  if (npc._skin === undefined) {
-    const h = hashStr(npc.id || npc.name || "npc");
-    npc._skin = NPC_SKIN_TONES[h % NPC_SKIN_TONES.length];
-    npc._hair = NPC_HAIR_COLORS[(h >> 3) % NPC_HAIR_COLORS.length];
+  if (style === "bob") {
+    ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.24, 9, Math.PI, 0); ctx.fill();
+    ctx.fillRect(cx - 9, topY + TILE * 0.24 - 1, 18, 3);
+    ctx.fillRect(cx - 9.5, topY + TILE * 0.26, 3, 8);
+    ctx.fillRect(cx + 6.5, topY + TILE * 0.26, 3, 8);
+    return;
   }
+  if (style === "spiky") {
+    ctx.beginPath();
+    ctx.moveTo(cx - 8.5, topY + TILE * 0.27);
+    ctx.lineTo(cx - 5, topY + TILE * 0.11);
+    ctx.lineTo(cx - 2, topY + TILE * 0.24);
+    ctx.lineTo(cx + 1, topY + TILE * 0.09);
+    ctx.lineTo(cx + 4, topY + TILE * 0.24);
+    ctx.lineTo(cx + 8.5, topY + TILE * 0.13);
+    ctx.lineTo(cx + 8.5, topY + TILE * 0.27);
+    ctx.closePath();
+    ctx.fill();
+    return;
+  }
+  // "short" par défaut.
+  ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.245, 8.3, Math.PI, 0); ctx.fill();
+  ctx.fillRect(cx - 8.3, topY + TILE * 0.245 - 1, 16.6, 3);
+}
+
+function drawAccessory(ctx, cx, topY, accessory) {
+  if (!accessory || accessory === "none") return;
+  if (accessory === "hat") {
+    ctx.fillStyle = "#34495e";
+    ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.19, 7, Math.PI, 0); ctx.fill();
+    ctx.fillRect(cx - 9, topY + TILE * 0.19, 18, 3.5);
+    return;
+  }
+  if (accessory === "glasses") {
+    ctx.strokeStyle = "#241a14";
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(cx - 6, topY + TILE * 0.285, 4, 3);
+    ctx.strokeRect(cx + 2, topY + TILE * 0.285, 4, 3);
+    ctx.beginPath(); ctx.moveTo(cx - 2, topY + TILE * 0.30); ctx.lineTo(cx + 2, topY + TILE * 0.30); ctx.stroke();
+    return;
+  }
+  if (accessory === "bandana") {
+    ctx.fillStyle = "#c0392b";
+    ctx.fillRect(cx - 8.5, topY + TILE * 0.215, 17, 3.5);
+  }
+}
+
+// Dessine un PNJ comme un petit personnage composé (jambes, bras, torse, tête,
+// cheveux, accessoire) plutôt qu'un simple rond de couleur — la coiffure, la
+// forme de la tenue et l'accessoire varient indépendamment, ce qui permet à
+// chaque PNJ d'avoir une silhouette vraiment différente et pas juste une
+// autre couleur du même dessin.
+function drawHumanoid(ctx, screenX, screenY, traits, legLift, facing) {
   const cx = screenX + TILE / 2;
   const topY = screenY;
-  const shirt = npc.color || "#7f8c8d";
+  const f = facing || "down";
 
   ctx.save();
   ctx.filter = "blur(1.2px)";
@@ -473,31 +571,91 @@ function drawNPCSprite(ctx, screenX, screenY, npc, legLift, facing) {
   ctx.beginPath(); ctx.ellipse(cx, screenY + TILE - 5, 10, 3.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 
-  const liftA = legLift && legLift.parity === 0 ? legLift.amount : 0;
-  const liftB = legLift && legLift.parity !== 0 ? legLift.amount : 0;
-  ctx.fillStyle = "#2c3e50";
-  ctx.fillRect(cx - 6, topY + TILE * 0.72 + liftA * 0.4, 5, 9 - liftA);
-  ctx.fillRect(cx + 1, topY + TILE * 0.72 + liftB * 0.4, 5, 9 - liftB);
+  const covered = traits.outfitShape === "dress" || traits.outfitShape === "robe";
+  if (!covered) {
+    const liftA = legLift && legLift.parity === 0 ? legLift.amount : 0;
+    const liftB = legLift && legLift.parity !== 0 ? legLift.amount : 0;
+    ctx.fillStyle = "#2c3e50";
+    ctx.fillRect(cx - 6, topY + TILE * 0.72 + liftA * 0.4, 5, 9 - liftA);
+    ctx.fillRect(cx + 1, topY + TILE * 0.72 + liftB * 0.4, 5, 9 - liftB);
+  }
 
-  ctx.fillStyle = npc._skin;
+  ctx.fillStyle = traits.skin;
   ctx.fillRect(cx - 11, topY + TILE * 0.46, 3, 11);
   ctx.fillRect(cx + 8, topY + TILE * 0.46, 3, 11);
 
-  ctx.fillStyle = shirt;
-  ctx.fillRect(cx - 8, topY + TILE * 0.40, 16, 15);
+  ctx.fillStyle = traits.outfitColor;
+  if (traits.outfitShape === "dress") {
+    ctx.beginPath();
+    ctx.moveTo(cx - 6, topY + TILE * 0.40);
+    ctx.lineTo(cx + 6, topY + TILE * 0.40);
+    ctx.lineTo(cx + 10, topY + TILE * 0.88);
+    ctx.lineTo(cx - 10, topY + TILE * 0.88);
+    ctx.closePath();
+    ctx.fill();
+  } else if (traits.outfitShape === "robe") {
+    ctx.beginPath();
+    ctx.moveTo(cx - 7, topY + TILE * 0.40);
+    ctx.lineTo(cx + 7, topY + TILE * 0.40);
+    ctx.lineTo(cx + 9, topY + TILE * 0.95);
+    ctx.lineTo(cx - 9, topY + TILE * 0.95);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    ctx.fillRect(cx - 8, topY + TILE * 0.40, 16, 15);
+    if (traits.outfitShape === "overalls") {
+      ctx.fillStyle = "rgba(0,0,0,0.22)";
+      ctx.fillRect(cx - 5, topY + TILE * 0.40, 10, 15);
+    }
+  }
 
-  ctx.fillStyle = npc._skin;
+  ctx.fillStyle = traits.skin;
   ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.30, 8, 0, Math.PI * 2); ctx.fill();
 
-  ctx.fillStyle = npc._hair;
-  ctx.beginPath(); ctx.arc(cx, topY + TILE * 0.245, 8.3, Math.PI, 0); ctx.fill();
-  ctx.fillRect(cx - 8.3, topY + TILE * 0.245 - 1, 16.6, 3);
+  drawHairStyle(ctx, cx, topY, traits.hairStyle, traits.hairColor);
 
   ctx.fillStyle = "#241a14";
-  const f = facing || "down";
   if (f === "down") { ctx.fillRect(cx - 4, topY + TILE * 0.30, 2, 2); ctx.fillRect(cx + 2, topY + TILE * 0.30, 2, 2); }
   else if (f === "left") { ctx.fillRect(cx - 5, topY + TILE * 0.30, 2, 2); }
   else if (f === "right") { ctx.fillRect(cx + 3, topY + TILE * 0.30, 2, 2); }
+
+  drawAccessory(ctx, cx, topY, traits.accessory);
+}
+
+// Look dédié pour la Professeure: blouse claire, lunettes, cheveux attachés
+// grisonnants et un petit carnet contre elle — reconnaissable au premier
+// coup d'œil, sans dépendre du tirage générique.
+function drawProfessorSprite(ctx, screenX, screenY, legLift, facing) {
+  drawHumanoid(ctx, screenX, screenY, {
+    skin: NPC_SKIN_TONES[2],
+    hairColor: "#d8d3c8",
+    hairStyle: "bob",
+    outfitShape: "robe",
+    outfitColor: "#f5f2e6",
+    accessory: "glasses"
+  }, legLift, facing);
+  const cx = screenX + TILE / 2;
+  ctx.fillStyle = "#c9a876";
+  ctx.fillRect(cx + 7, screenY + TILE * 0.62, 6, 8);
+  ctx.strokeStyle = "#8a6d3b";
+  ctx.lineWidth = 0.8;
+  ctx.strokeRect(cx + 7, screenY + TILE * 0.62, 6, 8);
+}
+
+function drawNPCSprite(ctx, screenX, screenY, npc, legLift, facing) {
+  const archetype = NPC_ARCHETYPES[npc.id];
+  if (archetype) {
+    if (archetype.kind === "professor") drawProfessorSprite(ctx, screenX, screenY, legLift, facing);
+    else drawHumanoid(ctx, screenX, screenY, archetype, legLift, facing);
+    return;
+  }
+  const explicitUrl = npc.spriteSheet && NPC_SPRITE_SHEETS[npc.spriteSheet];
+  if (explicitUrl) {
+    const drawn = drawNPCSpriteFromSheet(ctx, screenX, screenY, npc, legLift, facing, explicitUrl);
+    if (drawn) return;
+  }
+  const traits = traitsFromIndex(npcLookIndexFor(npc));
+  drawHumanoid(ctx, screenX, screenY, traits, legLift, facing);
 }
 
 PKMN.OverworldState = {

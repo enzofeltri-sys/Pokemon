@@ -165,6 +165,7 @@ PKMN.NPCS = {
       name: "Novice des Vents",
       x: 4, y: 4, facing: "down",
       color: "#2980b9", letter: "J",
+      spriteSheet: "npc_a",
       type: "utile",
       dialogue: {
         start: [{ condition: { flag: "beat_gym1_trainer" }, node: "apres_defaite" }],
@@ -280,6 +281,7 @@ PKMN.NPCS = {
       name: "Recrue Ardente",
       x: 4, y: 4, facing: "down",
       color: "#d35400", letter: "R",
+      spriteSheet: "npc_b",
       type: "utile",
       dialogue: {
         start: [{ condition: { flag: "beat_gym2_trainer" }, node: "apres_defaite" }],
@@ -373,6 +375,7 @@ PKMN.NPCS = {
       name: "Plongeuse",
       x: 4, y: 4, facing: "down",
       color: "#2980b9", letter: "P",
+      spriteSheet: "npc_c",
       type: "utile",
       dialogue: {
         start: [{ condition: { flag: "beat_gym3_trainer" }, node: "apres_defaite" }],
@@ -1287,6 +1290,7 @@ PKMN.NPCS = {
       name: "Kian",
       x: 4, y: 2, facing: "down",
       color: "#e67e22", letter: "K",
+      spriteSheet: "rival",
       type: "utile",
       dialogue: {
         start: [
@@ -2348,7 +2352,7 @@ PKMN.NPCS = {
       id: "super_champion",
       name: "Ébène",
       x: 4, y: 2, facing: "down",
-      color: "#0b0b0b", letter: "É",
+      color: "#0b0b0b", letter: "É", spriteSheet: "main_noire_boss",
       type: "utile",
       dialogue: {
         start: [
