@@ -1431,5 +1431,98 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town14: [
+    {
+      id: "badaud_obsidor",
+      name: "Mineur",
+      x: 9, y: 5, facing: "down",
+      color: "#5d4037", letter: "M",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Le sol d'Obsidor est plein de failles profondes.", "Certaines n'ont jamais été explorées jusqu'au bout, à ce qu'on dit."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_obsidor",
+      name: "Garde fatigué",
+      x: 12, y: 6, facing: "left",
+      color: "#616a6b", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint10" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "On m'a chargé de surveiller les allées et venues ici, à cause de la Main Noire.",
+              "Leurs éclaireurs sont déjà passés. Ils comptent les failles, une par une.",
+              "S'ils cherchent vraiment ce que je crois, on n'est plus très loin de la fin de leur quête."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint10", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Reste sur tes gardes, Dresseur."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym12: [
+    {
+      id: "gym12_trainer",
+      name: "Karatéka",
+      x: 4, y: 4, facing: "down",
+      color: "#6e2c00", letter: "K",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym12_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Trouve la faille dans ma garde, si tu peux !"],
+            effects: [{ startTrainerBattle: "gym12_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Roklan t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym12_leader",
+      name: "Roklan",
+      x: 4, y: 2, facing: "down",
+      color: "#4a2c17", letter: "R",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym12" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Roklan, Champion de l'Arène des Failles.",
+              "Chaque adversaire a une faille. Voyons si tu sais où se trouve la tienne."
+            ],
+            effects: [{ startTrainerBattle: "gym12_leader" }]
+          },
+          apres_defaite: {
+            text: ["Douze badges. Tu n'as montré aucune faille, aujourd'hui."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
