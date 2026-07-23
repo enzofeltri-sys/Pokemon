@@ -4,6 +4,16 @@ window.PKMN = window.PKMN || {};
 
 const TILE = 32;
 
+// Teinte jour/nuit d'après l'heure réelle de l'appareil: nuit profonde,
+// aube/crépuscule chaud, ou rien en plein jour. Renvoie un rgba() prêt à
+// l'emploi ou null.
+function nightTintStyle() {
+  const h = new Date().getHours();
+  if (h >= 22 || h < 5) return "rgba(30,30,70,0.45)";
+  if (h >= 19 || h < 7) return "rgba(255,140,60,0.18)";
+  return null;
+}
+
 // Hachage déterministe (même tuile = même texture à chaque rendu, pas de scintillement)
 function tileSeed(tx, ty) {
   let h = (tx * 374761393 + ty * 668265263) | 0;
@@ -531,6 +541,7 @@ PKMN.OverworldState = {
 
   update(dt) {
     this.time = (this.time || 0) + dt;
+    if (this.transitionT > 0) this.transitionT = Math.max(0, this.transitionT - dt / 0.35);
     if (this.moving) {
       this.moveT += dt / 0.14;
       if (this.moveT >= 1) {
@@ -604,6 +615,7 @@ PKMN.OverworldState = {
         PKMN.Player.x = warp.x;
         PKMN.Player.y = warp.y;
         this.fromX = warp.x; this.fromY = warp.y;
+        this.transitionT = 1; // fondu depuis le noir sur la nouvelle carte
         return;
       }
     }
@@ -705,6 +717,14 @@ PKMN.OverworldState = {
     const bob = this.moving ? -Math.abs(Math.sin(this.moveT * Math.PI)) * 3 : 0;
     drawPlayerSprite(ctx, screenX, screenY, this.facing, bob, this.moving ? this.moveT : 0, this.stepParity);
 
+    // Teinte jour/nuit selon l'heure réelle de l'appareil (façon Or/Argent),
+    // appliquée sous le HUD pour que celui-ci reste parfaitement lisible.
+    const tint = nightTintStyle();
+    if (tint) {
+      ctx.fillStyle = tint;
+      ctx.fillRect(0, 0, PKMN.CANVAS_W, PKMN.CANVAS_H);
+    }
+
     // HUD nom de la zone
     PKMN.drawBorderedBox(ctx, 6, 6, Math.min(200, ctx.measureText(map.name).width + 40), 26, { r: 4 });
     ctx.fillStyle = PKMN.PALETTE.ink;
@@ -732,6 +752,15 @@ PKMN.OverworldState = {
     }
     if (this.message) {
       PKMN.drawTextBox(ctx, this.message);
+    }
+
+    // Fondu depuis le noir après un changement de carte (warp), pour éviter
+    // le cut instantané. Couvre tout, HUD compris.
+    if (this.transitionT > 0) {
+      ctx.fillStyle = "#000";
+      ctx.globalAlpha = this.transitionT;
+      ctx.fillRect(0, 0, PKMN.CANVAS_W, PKMN.CANVAS_H);
+      ctx.globalAlpha = 1;
     }
   }
 };

@@ -15,6 +15,15 @@ PKMN.TYPE_COLORS = {
   acier: "#B8B8D0"
 };
 
+// Libellé court affiché sur les badges de type (voir PKMN.drawTypeBadge).
+PKMN.TYPE_LABELS = {
+  normal: "NORMAL", feu: "FEU", eau: "EAU", electrik: "ÉLEC",
+  plante: "PLANTE", glace: "GLACE", combat: "COMBAT", poison: "POISON",
+  sol: "SOL", vol: "VOL", psy: "PSY", insecte: "INSECTE",
+  roche: "ROCHE", spectre: "SPECTRE", dragon: "DRAGON", tenebres: "TÉNÈBRES",
+  acier: "ACIER"
+};
+
 PKMN.TYPE_CHART = {
   normal:   { roche: 0.5, spectre: 0, acier: 0.5 },
   feu:      { feu: 0.5, eau: 0.5, plante: 2, glace: 2, insecte: 2, roche: 0.5, dragon: 0.5, acier: 2 },

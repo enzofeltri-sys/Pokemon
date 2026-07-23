@@ -64,12 +64,18 @@ PKMN.drawMenu = function (ctx, x, y, items, selectedIndex, opts) {
   PKMN.drawBorderedBox(ctx, x, y, w, h);
   ctx.font = "13px Silkscreen, 'Segoe UI', sans-serif";
   ctx.textBaseline = "middle";
+  // Légère respiration de la surbrillance + rebond du curseur, pour que la
+  // sélection ne soit pas un simple aplat figé (aucun état à suivre: piloté
+  // par l'horloge, s'applique automatiquement à tous les menus du jeu).
+  const t = Date.now() / 1000;
+  const pulse = 0.28 + Math.sin(t * 5) * 0.08;
+  const bob = Math.sin(t * 5) * 2;
   items.forEach((item, i) => {
     const ly = y + 8 + i * lineH + lineH / 2;
     if (i === selectedIndex) {
-      ctx.fillStyle = "rgba(244,197,66,0.35)";
+      ctx.fillStyle = `rgba(244,197,66,${pulse.toFixed(3)})`;
       ctx.fillRect(x + 7, y + 7 + i * lineH, w - 14, lineH - 2);
-      PKMN.drawCursorTriangle(ctx, x + 12, ly, PKMN.PALETTE.uiAccentDark);
+      PKMN.drawCursorTriangle(ctx, x + 12 + bob, ly, PKMN.PALETTE.uiAccentDark);
     }
     ctx.fillStyle = PKMN.PALETTE.ink;
     ctx.textAlign = "left";
@@ -345,7 +351,8 @@ PKMN.PartyState = {
     ctx.fillStyle = "#2c3e50";
     ctx.font = "bold 18px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(`${species.name}  Nv.${mon.level}  (${species.types.join("/")})`, 16, 26);
+    ctx.fillText(`${species.name}  Nv.${mon.level}`, 16, 26);
+    PKMN.drawTypeBadges(ctx, species.types, 300, 12);
     PKMN.drawPokemonSprite(ctx, mon.species, 16, 34, 90, false);
 
     const statNames = { hp: "PV", atk: "Attaque", def: "Défense", spa: "Att.Spé", spd: "Déf.Spé", spe: "Vitesse" };
@@ -710,8 +717,9 @@ PKMN.PokedexState = {
       if (id - 1 === this.sel) { ctx.strokeStyle = "#f4d03f"; ctx.lineWidth = 3; ctx.strokeRect(8, y, CW - 16, 36); }
       ctx.fillStyle = "#fff";
       ctx.font = "14px sans-serif";
-      const label = seen ? `#${String(id).padStart(3, "0")} ${species.name} (${species.types.join("/")})` : `#${String(id).padStart(3, "0")} ???`;
+      const label = seen ? `#${String(id).padStart(3, "0")} ${species.name}` : `#${String(id).padStart(3, "0")} ???`;
       ctx.fillText(label, 16, y + 22);
+      if (seen) PKMN.drawTypeBadges(ctx, species.types, 260, y + 9, { fontSize: 9 });
       if (caughtIt) {
         ctx.textAlign = "right";
         ctx.fillText("Capturé ✔", CW - 16, y + 22);
@@ -728,7 +736,8 @@ PKMN.PokedexState = {
     ctx.fillStyle = "#2c3e50";
     ctx.font = "bold 18px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(`#${String(id).padStart(3, "0")} ${species.name} (${species.types.join("/")})`, 16, 26);
+    ctx.fillText(`#${String(id).padStart(3, "0")} ${species.name}`, 16, 26);
+    PKMN.drawTypeBadges(ctx, species.types, 300, 12);
     PKMN.drawPokemonSprite(ctx, id, 16, 34, 90, false);
 
     const statNames = { hp: "PV", atk: "Attaque", def: "Défense", spa: "Att.Spé", spd: "Déf.Spé", spe: "Vitesse" };

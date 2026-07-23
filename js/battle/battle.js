@@ -102,10 +102,59 @@ function moneyReward(level) {
   return PKMN.BALANCE.MONEY_REWARD_BASE + level * PKMN.BALANCE.MONEY_REWARD_PER_LEVEL;
 }
 
+// Fait rattraper progressivement à la barre de PV affichée (state[dispKey])
+// la vraie valeur de mon.hp, plutôt qu'un saut instantané. Se recale sans
+// animation si `mon` a changé (nouvel envoi, pas de "drain" depuis l'ancien).
+const HP_BAR_EASE_RATE = 5;
+function easeHpBar(state, dispKey, refKey, mon, dt) {
+  if (!mon) return;
+  if (state[refKey] !== mon) {
+    state[refKey] = mon;
+    state[dispKey] = mon.hp;
+    return;
+  }
+  const diff = mon.hp - state[dispKey];
+  if (Math.abs(diff) < 0.5) { state[dispKey] = mon.hp; return; }
+  state[dispKey] += diff * Math.min(1, HP_BAR_EASE_RATE * dt);
+}
+
 const STATUS_ABBR = { poison: "PSN", toxic: "TOX", paralysis: "PAR", burn: "BRN", sleep: "DOD", freeze: "GEL" };
 function statusTag(mon) {
   const tag = mon.status ? STATUS_ABBR[mon.status] : (mon.confused > 0 ? "CNF" : "");
   return tag ? `  [${tag}]` : "";
+}
+
+// Décor d'arène selon la carte d'où vient le combat: un intérieur (arène,
+// centre...) a son propre fond, un extérieur est deviné depuis le type
+// dominant de sa table de rencontres (pas d'attribut à authorer à la main).
+const BIOME_BY_DOMINANT_TYPE = { eau: "water", glace: "snow", roche: "cave", sol: "cave", spectre: "cave" };
+function biomeOfMap(map) {
+  if (!map) return "grass";
+  if (map.indoor) return "indoor";
+  const table = map.encounterTable || [];
+  const counts = {};
+  for (const e of table) {
+    const sp = PKMN.POKEDEX[e.id];
+    if (!sp) continue;
+    for (const t of sp.types) counts[t] = (counts[t] || 0) + 1;
+  }
+  let best = null, bestN = 0;
+  for (const t in counts) if (counts[t] > bestN) { best = t; bestN = counts[t]; }
+  return BIOME_BY_DOMINANT_TYPE[best] || "grass";
+}
+
+// Palette de décor par biome (ciel/plafond, sol, motifs de sol), calculée
+// une fois PKMN.PALETTE chargé (référencé seulement à l'appel, pas ici).
+function biomeStyle(name) {
+  const P = PKMN.PALETTE;
+  const styles = {
+    grass: { skyTop: "#4f7fc9", skyBottom: "#bfe0f5", ground: P.grassMid, tuftDark: P.grassDark, tuftLight: P.grassLight },
+    water: { skyTop: "#4f7fc9", skyBottom: "#bfe0f5", ground: P.waterMid, tuftDark: P.waterDark, tuftLight: P.waterLight },
+    snow: { skyTop: "#9fb8d9", skyBottom: "#eef5fa", ground: P.snowMid, tuftDark: P.snowMid, tuftLight: P.snowLight },
+    cave: { skyTop: "#241f30", skyBottom: "#544c68", ground: P.caveFloorDark, tuftDark: P.caveWallDark, tuftLight: P.caveFloorLight },
+    indoor: { skyTop: "#c3cdd6", skyBottom: "#f4f2ea", ground: P.floorDark, tuftDark: P.wallMid, tuftLight: P.floorLight }
+  };
+  return styles[name] || styles.grass;
 }
 
 PKMN.BattleState = {
@@ -134,6 +183,8 @@ PKMN.BattleState = {
   },
 
   onEnter() {
+    this.biome = biomeOfMap(PKMN.MAPS[PKMN.Player.mapKey]);
+    this.particles = [];
     this.active = PKMN.Player.firstAlive();
     this.participants = new Set([this.active]);
     for (const mon of PKMN.Player.party) { mon.statStages = { atk: 0, def: 0, spa: 0, spd: 0, spe: 0, acc: 0, eva: 0 }; mon.flinched = false; }
@@ -511,7 +562,7 @@ PKMN.BattleState = {
       const wasFull = defender.hp === defender.maxHp;
       const { dmg, eff, crit } = calcDamage(attacker, atkSpecies, defender, defSpecies, move);
       defender.hp = Math.max(0, defender.hp - dmg);
-      if (dmg > 0) this.triggerHitEffect(defender);
+      if (dmg > 0) this.triggerHitEffect(defender, move.type);
       if (defender.hp <= 0 && wasFull && defender.ability === "fermete") {
         defender.hp = 1;
         msgs.push(`${defSpecies.name} tient bon grâce à Fermeté !`);
@@ -721,15 +772,37 @@ PKMN.BattleState = {
   update(dt) {
     if (this.shakeT > 0) this.shakeT = Math.max(0, this.shakeT - dt);
     if (this.flashT > 0) this.flashT = Math.max(0, this.flashT - dt);
+    easeHpBar(this, "wildDisplayHp", "_wildHpRef", this.wild, dt);
+    easeHpBar(this, "activeDisplayHp", "_activeHpRef", this.active, dt);
+    if (this.particles && this.particles.length) {
+      for (const p of this.particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }
+      this.particles = this.particles.filter((p) => p.life > 0);
+    }
   },
 
   // Déclenché à chaque coup qui porte: petit tremblement d'écran + flash blanc
-  // sur le Pokémon touché, pour donner un peu d'impact aux dégâts.
-  triggerHitEffect(defender) {
+  // sur le Pokémon touché, plus une gerbe de particules à la couleur du type
+  // de l'attaque, pour donner un peu d'impact et de lisibilité aux dégâts.
+  triggerHitEffect(defender, moveType) {
     this.shakeT = 0.22;
     this.shakeSeed = Math.random() * 1000;
     this.flashMon = defender;
     this.flashT = 0.22;
+    this.spawnTypeBurst(defender, moveType);
+  },
+
+  spawnTypeBurst(defender, moveType) {
+    const W = PKMN.CANVAS_W, H = PKMN.CANVAS_H;
+    const isWild = defender === this.wild;
+    const cx = isWild ? W - 90 : 90;
+    const cy = isWild ? 90 : H - 160;
+    const color = PKMN.TYPE_COLORS[moveType] || "#fff";
+    if (!this.particles) this.particles = [];
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2 + Math.random() * 0.3;
+      const speed = 60 + Math.random() * 60;
+      this.particles.push({ x: cx, y: cy, vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, life: 0.4, maxLife: 0.4, color });
+    }
   },
 
   render(ctx) {
@@ -741,21 +814,22 @@ PKMN.BattleState = {
       ctx.translate(Math.sin(s) * 6 * mag, Math.cos(s * 1.3) * 4 * mag);
     }
 
+    const style = biomeStyle(this.biome);
     const skyH = H * 0.55;
     const sky = ctx.createLinearGradient(0, 0, 0, skyH);
-    sky.addColorStop(0, "#4f7fc9");
-    sky.addColorStop(1, "#bfe0f5");
+    sky.addColorStop(0, style.skyTop);
+    sky.addColorStop(1, style.skyBottom);
     ctx.fillStyle = sky;
     ctx.fillRect(-10, -10, W + 20, skyH + 10);
-    ctx.fillStyle = PKMN.PALETTE.grassMid;
+    ctx.fillStyle = style.ground;
     ctx.fillRect(-10, skyH, W + 20, H - skyH + 10);
-    ctx.fillStyle = PKMN.PALETTE.grassDark;
+    ctx.fillStyle = style.tuftDark;
     ctx.beginPath(); ctx.ellipse(W - 95, skyH + 32, 78, 20, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = PKMN.PALETTE.grassLight;
+    ctx.fillStyle = style.tuftLight;
     ctx.beginPath(); ctx.ellipse(W - 95, skyH + 28, 72, 16, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = PKMN.PALETTE.grassDark;
+    ctx.fillStyle = style.tuftDark;
     ctx.beginPath(); ctx.ellipse(120, H - 128, 88, 22, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = PKMN.PALETTE.grassLight;
+    ctx.fillStyle = style.tuftLight;
     ctx.beginPath(); ctx.ellipse(120, H - 132, 80, 18, 0, 0, Math.PI * 2); ctx.fill();
 
     if (this.isTrainer) {
@@ -771,7 +845,7 @@ PKMN.BattleState = {
     PKMN.drawPanel(ctx, 20, 20, 200, 46, { r: 6 });
     ctx.fillStyle = PKMN.PALETTE.ink; ctx.font = "13px Silkscreen, sans-serif"; ctx.textAlign = "left";
     ctx.fillText(`${wildSpecies.name}  Nv.${this.wild.level}${statusTag(this.wild)}`, 28, 38);
-    PKMN.drawHpBar(ctx, 28, 46, 130, 10, Math.max(0, this.wild.hp) / this.wild.maxHp);
+    PKMN.drawHpBar(ctx, 28, 46, 130, 10, Math.max(0, this.wildDisplayHp ?? this.wild.hp) / this.wild.maxHp);
     if (flashOn(this.wild)) ctx.filter = "brightness(2.4) saturate(0)";
     PKMN.drawPokemonSprite(ctx, this.wild.species, W - 150, 30, 120, false);
     ctx.filter = "none";
@@ -785,7 +859,17 @@ PKMN.BattleState = {
       ctx.fillStyle = PKMN.PALETTE.ink; ctx.font = "13px Silkscreen, sans-serif";
       ctx.fillText(`${activeSpecies.name}  Nv.${this.active.level}${statusTag(this.active)}`, W - 212, H - 172);
       ctx.fillText(`PV ${Math.max(0, this.active.hp)}/${this.active.maxHp}`, W - 212, H - 155);
-      PKMN.drawHpBar(ctx, W - 212, H - 148, 130, 10, Math.max(0, this.active.hp) / this.active.maxHp);
+      PKMN.drawHpBar(ctx, W - 212, H - 148, 130, 10, Math.max(0, this.activeDisplayHp ?? this.active.hp) / this.active.maxHp);
+    }
+
+    if (this.particles) {
+      for (const p of this.particles) {
+        const alpha = Math.max(0, p.life / p.maxLife);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3 * alpha + 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
 
     if (this.phase === "message") {

@@ -24,6 +24,8 @@ PKMN.PALETTE = {
   caveFloorDark: "#423a56",
   caveWallLight: "#332c44",
   caveWallDark: "#241f30",
+  snowLight: "#f4f8fb",
+  snowMid: "#d9e6ee",
   woodDark: "#5d4025",
   woodMid: "#7a5632",
   roofRed: "#b5453a",
@@ -85,6 +87,42 @@ PKMN.drawAdvanceIndicator = function (ctx, x, y, t) {
   ctx.lineTo(x, y + bob + 3);
   ctx.closePath();
   ctx.fill();
+};
+
+// Petit badge coloré (façon jeux modernes) pour afficher un type au lieu
+// d'un texte brut "feu/vol". Renvoie sa largeur pour empiler plusieurs
+// badges côte à côte (types primaire + secondaire).
+PKMN.drawTypeBadge = function (ctx, type, x, y, opts) {
+  opts = opts || {};
+  const label = PKMN.TYPE_LABELS[type] || type.toUpperCase();
+  const color = PKMN.TYPE_COLORS[type] || "#999";
+  const fontSize = opts.fontSize || 10;
+  ctx.font = `bold ${fontSize}px Silkscreen, sans-serif`;
+  const textW = ctx.measureText(label).width;
+  const padX = 6;
+  const w = textW + padX * 2;
+  const h = opts.h || fontSize + 8;
+  PKMN.roundRectPath(ctx, x, y, w, h, h / 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = "rgba(0,0,0,0.25)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = "#fff";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, x + w / 2, y + h / 2 + 1);
+  ctx.textBaseline = "alphabetic";
+  return w;
+};
+
+// Dessine 1 ou 2 badges de type côte à côte à partir d'un tableau de types.
+PKMN.drawTypeBadges = function (ctx, types, x, y, opts) {
+  let cx = x;
+  for (const t of types) {
+    cx += PKMN.drawTypeBadge(ctx, t, cx, y, opts) + 4;
+  }
+  return cx - x;
 };
 
 // Semis de petits pixels déterministes (même seed = mêmes points), pour
