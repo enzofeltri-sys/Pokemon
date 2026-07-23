@@ -1338,5 +1338,98 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town13: [
+    {
+      id: "badaud_auroria",
+      name: "Guetteur",
+      x: 9, y: 5, facing: "down",
+      color: "#5dade2", letter: "G",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Ici, le vent ne s'arrête jamais.", "Les Pokémon volants adorent ça — nous, un peu moins les jours de tempête."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_auroria",
+      name: "Ancien du village",
+      x: 12, y: 6, facing: "left",
+      color: "#7d6608", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint9" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "La Main Noire cherche quelque chose de précis, à ce qu'on raconte.",
+              "Pas un objet. Un lieu. Un endroit qu'on a longtemps cru n'être qu'une légende.",
+              "Continue ton chemin, jeune Dresseur. Tu comprendras bien assez tôt."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint9", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Le vent porte parfois des réponses. Écoute-le."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym11: [
+    {
+      id: "gym11_trainer",
+      name: "Fauconnier",
+      x: 4, y: 4, facing: "down",
+      color: "#784212", letter: "F",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym11_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Mes Pokémon dominent le ciel !"],
+            effects: [{ startTrainerBattle: "gym11_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Auréa t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym11_leader",
+      name: "Auréa",
+      x: 4, y: 2, facing: "down",
+      color: "#2e86c1", letter: "A",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym11" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Auréa, Championne de l'Arène du Ciel.",
+              "Ceux qui n'ont pas le vertige seulement arrivent jusqu'ici. Voyons si tu tiens debout."
+            ],
+            effects: [{ startTrainerBattle: "gym11_leader" }]
+          },
+          apres_defaite: {
+            text: ["Onze badges. Le sommet se rapproche."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
