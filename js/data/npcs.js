@@ -1617,5 +1617,98 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town16: [
+    {
+      id: "badaud_ferrance",
+      name: "Ouvrier",
+      x: 9, y: 5, facing: "down",
+      color: "#839192", letter: "O",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["Ferrance vit de ses forges depuis des générations.", "Le bruit des marteaux ne s'arrête jamais vraiment, ici."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_ferrance",
+      name: "Contremaître",
+      x: 12, y: 6, facing: "left",
+      color: "#4d5656", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint12" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "La Main Noire est venue commander des pièces métalliques, il y a peu. Des grandes.",
+              "Je n'ai pas posé de questions. On ne refuse pas ce genre de commande, par ici.",
+              "Mais j'ai bien vu les plans, en partant. Ça ressemblait à une porte. Une porte immense."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint12", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["J'espère ne jamais revoir ces gens-là."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym14: [
+    {
+      id: "gym14_trainer",
+      name: "Ingénieur",
+      x: 4, y: 4, facing: "down",
+      color: "#616a6b", letter: "I",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym14_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Mes créations sont increvables !"],
+            effects: [{ startTrainerBattle: "gym14_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Ferrus t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym14_leader",
+      name: "Ferrus",
+      x: 4, y: 2, facing: "down",
+      color: "#424949", letter: "F",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym14" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Ferrus, Champion de l'Arène de l'Acier.",
+              "Rien ne plie ici. Voyons si toi, tu tiens le coup."
+            ],
+            effects: [{ startTrainerBattle: "gym14_leader" }]
+          },
+          apres_defaite: {
+            text: ["Quatorze badges. Il n'en reste plus beaucoup avant le sommet."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };

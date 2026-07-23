@@ -251,6 +251,20 @@ PKMN.TRAINERS = {
     onWin: [{ badge: "badge13" }, { setFlag: "beat_gym13", value: true }]
   },
 
+  gym14_trainer: {
+    name: "Ingénieur",
+    team: [{ species: 81, level: 62 }],
+    reward: 850,
+    onWin: [{ setFlag: "beat_gym14_trainer", value: true }]
+  },
+
+  gym14_leader: {
+    name: "Ferrus",
+    team: [{ species: 82, level: 64 }, { species: 141, level: 66 }],
+    reward: 3200,
+    onWin: [{ badge: "badge14" }, { setFlag: "beat_gym14", value: true }]
+  },
+
   league_champion: {
     name: "Kian",
     team() {
