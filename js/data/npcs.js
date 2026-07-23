@@ -1524,5 +1524,98 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town15: [
+    {
+      id: "badaud_floramne",
+      name: "Rêveuse",
+      x: 9, y: 5, facing: "down",
+      color: "#af7ac5", letter: "R",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["On dort étrangement bien, à Floramne.", "Certains disent que les rêves qu'on y fait ne sont pas tout à fait les nôtres."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_floramne",
+      name: "Somnologue",
+      x: 12, y: 6, facing: "left",
+      color: "#6c3483", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint11" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "J'étudie les rêves des habitants depuis des années. Un motif revient sans cesse, ces derniers temps.",
+              "Une porte. Toujours la même. Et des silhouettes en noir qui l'attendent, patiemment.",
+              "Je crois que la Main Noire est bien plus proche du but qu'elle ne l'a jamais été."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint11", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Fais de beaux rêves. Ou pas, à ce stade..."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym13: [
+    {
+      id: "gym13_trainer",
+      name: "Somnambule",
+      x: 4, y: 4, facing: "down",
+      color: "#5b2c6f", letter: "S",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym13_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["... Tu es dans mon rêve, ou je suis dans le tien ?"],
+            effects: [{ startTrainerBattle: "gym13_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Oniria t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym13_leader",
+      name: "Oniria",
+      x: 4, y: 2, facing: "down",
+      color: "#4a235a", letter: "O",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym13" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Oniria, Championne de l'Arène des Songes.",
+              "Ferme les yeux si tu veux. Ça ne changera rien à l'issue de ce combat."
+            ],
+            effects: [{ startTrainerBattle: "gym13_leader" }]
+          },
+          apres_defaite: {
+            text: ["Treize badges. Le réveil approche, Dresseur."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
