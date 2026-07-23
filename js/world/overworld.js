@@ -274,7 +274,12 @@ const PLAYER_FRAME = 32;
 
 function drawPlayerSprite(ctx, screenX, screenY, facing, bob, walkT, stepParity) {
   const entry = PKMN.getSpriteImage(PLAYER_SPRITE_URL);
-  if (entry.status !== "ok") {
+  // Si une version différente de l'image traîne encore dans un cache
+  // (service worker périmé, PWA pas relancée après une mise à jour...),
+  // ses dimensions ne collent plus à la grille 3x4 attendue: mieux vaut
+  // retomber sur le dessin procédural que découper une case vide au
+  // hasard et afficher un joueur invisible.
+  if (entry.status !== "ok" || entry.img.naturalWidth !== PLAYER_FRAME * 3 || entry.img.naturalHeight !== PLAYER_FRAME * 4) {
     drawPlayerSpriteProcedural(ctx, screenX, screenY, facing, bob, walkT, stepParity);
     return;
   }
