@@ -279,6 +279,24 @@ PKMN.TRAINERS = {
     onWin: [{ badge: "badge15" }, { setFlag: "beat_gym15", value: true }]
   },
 
+  gym16_trainer: {
+    name: "Opérative de la Main Noire",
+    team: [{ species: 24, level: 68 }],
+    reward: 1000,
+    onWin: [{ setFlag: "beat_gym16_trainer", value: true }]
+  },
+
+  gym16_leader: {
+    name: "Ébène",
+    team: [{ species: 31, level: 68 }, { species: 53, level: 70 }, { species: 150, level: 72 }],
+    reward: 4000,
+    onWin: [
+      { badge: "badge16" },
+      { setFlag: "beat_gym16", value: true },
+      { setFlag: "all_badges_campaign2", value: true }
+    ]
+  },
+
   league_champion: {
     name: "Kian",
     team() {

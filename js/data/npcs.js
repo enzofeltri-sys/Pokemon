@@ -1803,5 +1803,113 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town18: [
+    {
+      id: "gardien_astrae",
+      name: "Gardien du sanctuaire",
+      x: 6, y: 5, facing: "down",
+      color: "#9a7d0a", letter: "G",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: [
+              "Astrae était un lieu interdit, avant qu'ils n'arrivent.",
+              "Nous n'avons pas pu les empêcher d'entrer. J'espère que toi, tu pourras les arrêter."
+            ],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_astrae",
+      name: "Ancienne du sanctuaire",
+      x: 13, y: 5, facing: "left",
+      color: "#7d6608", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint14" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "La Main Noire a fait d'Astrae leur repaire. Ils gardent l'entrée du véritable sanctuaire, plus loin.",
+              "Ce qu'ils cherchaient depuis toujours dort là-bas. Ils sont tout près de le réveiller.",
+              "Leur cheffe t'attend, si tu comptes aller jusqu'au bout. Ne la sous-estime pas."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint14", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Fais ce que nous n'avons pas pu faire."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym16: [
+    {
+      id: "gym16_trainer",
+      name: "Opérative de la Main Noire",
+      x: 4, y: 10, facing: "down",
+      color: "#17202a", letter: "O",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym16_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["Tu n'iras pas plus loin. Ordre de notre cheffe."],
+            effects: [{ startTrainerBattle: "gym16_trainer" }]
+          },
+          apres_defaite: {
+            text: ["...Vas-y. De toute façon, elle t'attend."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym16_leader",
+      name: "Ébène",
+      x: 4, y: 2, facing: "down",
+      color: "#0b0b0b", letter: "É",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_gym16_trainer", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_gym16" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: {
+            text: ["Passe d'abord mon éclaireuse. Je n'ai pas de temps à perdre avec les impatients."],
+            next: null
+          },
+          avant_combat: {
+            text: [
+              "Alors c'est toi, celui ou celle qui a suivi nos traces jusqu'ici.",
+              "Je dirige la Main Noire. Ce que nous cherchons ne te concerne pas — mais ta route s'arrête ici.",
+              "Montre-moi ce que valent tes badges face à ce que j'ai trouvé."
+            ],
+            effects: [{ startTrainerBattle: "gym16_leader" }]
+          },
+          apres_defaite: {
+            text: [
+              "...Impressionnant. Peu de Dresseurs peuvent en dire autant.",
+              "Mais ceci n'était qu'un contretemps. Tu n'as pas idée de ce qui t'attend, plus loin.",
+              "Reviens quand tu seras vraiment prêt. Le sanctuaire, lui, ne fait que commencer à s'éveiller."
+            ],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
