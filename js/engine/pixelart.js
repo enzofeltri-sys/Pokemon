@@ -33,9 +33,11 @@ PKMN.PALETTE = {
 
   ink: "#1c2030",
   paper: "#fbf7ea",
-  uiBorderDark: "#20263a",
-  uiBorderAccent: "#4d78c9",
-  uiFill: "#fbf7ea",
+  // Palette chaude reprise de la boîte de dialogue Sprout Lands (Cup Nooble,
+  // usage non-commercial credité) au lieu du bleu/gris froid d'origine.
+  uiBorderDark: "#6b4226",
+  uiBorderAccent: "#aa7959",
+  uiFill: "#f3e5c2",
   uiAccent: "#f4c542",
   uiAccentDark: "#c99a1f"
 };
@@ -78,7 +80,17 @@ PKMN.drawCursorTriangle = function (ctx, x, y, color) {
 };
 
 // Triangle clignotant en bas d'une boîte de texte, pour indiquer qu'on peut continuer.
+// Anime le rebond de la flèche "appuie pour continuer" à partir de la
+// feuille de sprite Sprout Lands (7 frames, 16x16, sprites/ui/advance_indicator.png).
+// Retombe sur le triangle dessiné à la main si l'image n'est pas dispo (hors-ligne).
 PKMN.drawAdvanceIndicator = function (ctx, x, y, t) {
+  const entry = PKMN.getSpriteImage("./sprites/ui/advance_indicator.png");
+  if (entry.status === "ok" && entry.img.naturalWidth === 112 && entry.img.naturalHeight === 16) {
+    const frame = Math.floor((t || 0) * 8) % 7;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(entry.img, frame * 16, 0, 16, 16, x - 8, y - 8, 16, 16);
+    return;
+  }
   const bob = Math.sin((t || 0) * 6) * 2;
   ctx.fillStyle = PKMN.PALETTE.ink;
   ctx.beginPath();

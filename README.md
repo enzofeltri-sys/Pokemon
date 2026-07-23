@@ -52,6 +52,12 @@ npm test
 Les constantes d'équilibrage (taux de capture, fractions de dégâts de statut,
 partage d'XP, etc.) sont centralisées dans `js/data/balance.js`.
 
+## Crédits
+
+- Personnage jouable (sprites/player.png) : dessin personnalisé fourni pour ce projet.
+- Boîte de dialogue et indicateur "appuie pour continuer" (sprites/ui/) :
+  *Sprout Lands - UI Pack - Basic pack*, par Cup Nooble (usage non-commercial).
+
 ## Note
 
 Projet fan réalisé pour un usage personnel uniquement. Pokémon, les noms et

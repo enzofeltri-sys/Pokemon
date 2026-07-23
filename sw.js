@@ -1,6 +1,6 @@
 // Service worker: met le jeu en cache pour qu'il fonctionne hors-ligne,
 // et garde les sprites Pokémon déjà chargés pour les revoir sans internet.
-const CACHE_NAME = "pkmn-perso-v46";
+const CACHE_NAME = "pkmn-perso-v47";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -30,6 +30,7 @@ const APP_SHELL = [
   "./js/engine/game.js",
   "./js/engine/main.js",
   "./sprites/player.png",
+  "./sprites/ui/advance_indicator.png",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png",
