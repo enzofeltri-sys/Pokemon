@@ -195,6 +195,16 @@ function drawWaterProcedural(ctx, px, py, seed) {
 }
 
 function drawWallBrick(ctx, px, py) {
+  const entry = PKMN.getSpriteImage("./sprites/tiles/wall_indoor.png");
+  if (entry.status === "ok" && entry.img.naturalWidth === 16 && entry.img.naturalHeight === 16) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(entry.img, 0, 0, 16, 16, px, py, TILE, TILE);
+    return;
+  }
+  drawWallBrickProcedural(ctx, px, py);
+}
+
+function drawWallBrickProcedural(ctx, px, py) {
   const P = PKMN.PALETTE;
   ctx.fillStyle = P.wallMid;
   ctx.fillRect(px, py, TILE, TILE);
@@ -287,6 +297,30 @@ function drawMart(ctx, px, py) {
   ctx.font = "bold 12px sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("$", px + TILE / 2, py + TILE - 8);
+}
+
+// Façade des bâtiments vus depuis l'extérieur (maison/Centre/Mart): porte du
+// pack Sprout Lands (recolorée par type de bâtiment — brun pour une maison,
+// rouge/rose pour un Centre Pokémon, bleu pour un Mart) dessinée sur 2 tuiles
+// de haut (la tuile de la porte + celle juste au-dessus, jusque-là de l'herbe
+// vide) pour donner un vrai fronton au lieu d'une simple porte isolée. Repli
+// sur l'ancien dessin à une seule tuile si l'image n'est pas prête.
+const BUILDING_DOOR_SPRITES = {
+  C: "./sprites/tiles/door_center.png",
+  D: "./sprites/tiles/door_house.png",
+  M: "./sprites/tiles/door_mart.png"
+};
+function drawBuildingEntrance(ctx, px, py, tile) {
+  const url = BUILDING_DOOR_SPRITES[tile];
+  const entry = url && PKMN.getSpriteImage(url);
+  if (entry && entry.status === "ok" && entry.img.naturalWidth === 16 && entry.img.naturalHeight === 32) {
+    drawPath(ctx, px, py, 0.3);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(entry.img, 0, 0, 16, 32, px, py - TILE, TILE, TILE * 2);
+    return;
+  }
+  if (tile === "M") drawMart(ctx, px, py);
+  else drawDoor(ctx, px, py, false);
 }
 
 function drawPC(ctx, px, py) {
@@ -984,8 +1018,8 @@ PKMN.OverworldState = {
         const seed = tileSeed(tx, ty);
         if (tile === "#") { map.cave ? drawCaveWall(ctx, sx, sy) : map.indoor ? drawWallBrick(ctx, sx, sy) : drawTree(ctx, sx, sy, seed, this.time); }
         else if (tile === '"') drawTallGrass(ctx, sx, sy, seed, this.time);
-        else if (tile === "C" || tile === "D") drawDoor(ctx, sx, sy, map.indoor);
-        else if (tile === "M") drawMart(ctx, sx, sy);
+        else if (tile === "C" || tile === "D") { map.indoor ? drawDoor(ctx, sx, sy, true) : drawBuildingEntrance(ctx, sx, sy, tile); }
+        else if (tile === "M") drawBuildingEntrance(ctx, sx, sy, tile);
         else if (tile === "P") drawPC(ctx, sx, sy);
         else if (tile === "H") drawHeal(ctx, sx, sy);
         else if (tile === "<" || tile === ">") drawWarp(ctx, sx, sy, tile);
