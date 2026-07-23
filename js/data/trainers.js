@@ -297,6 +297,46 @@ PKMN.TRAINERS = {
     ]
   },
 
+  super_elite1_artikodin: {
+    name: "Glacius",
+    team: [{ species: 144, level: 74 }],
+    reward: 3600,
+    onWin: [{ setFlag: "beat_super_elite1", value: true }]
+  },
+
+  super_elite2_electhor: {
+    name: "Fulgur",
+    team: [{ species: 145, level: 76 }],
+    reward: 3800,
+    onWin: [{ setFlag: "beat_super_elite2", value: true }]
+  },
+
+  super_elite3_sulfura: {
+    name: "Braisor",
+    team: [{ species: 146, level: 78 }],
+    reward: 4000,
+    onWin: [{ setFlag: "beat_super_elite3", value: true }]
+  },
+
+  super_elite4_roc: {
+    name: "Terrenn",
+    team: [{ species: 112, level: 79 }, { species: 115, level: 80 }],
+    reward: 4200,
+    onWin: [{ setFlag: "beat_super_elite4", value: true }]
+  },
+
+  super_champion: {
+    name: "Ébène",
+    team: [
+      { species: 31, level: 82 },
+      { species: 53, level: 83 },
+      { species: 150, level: 84 },
+      { species: 151, level: 85 }
+    ],
+    reward: 8000,
+    onWin: [{ setFlag: "beat_super_champion", value: true }]
+  },
+
   league_champion: {
     name: "Kian",
     team() {

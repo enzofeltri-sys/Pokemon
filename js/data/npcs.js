@@ -1911,5 +1911,120 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  super_league_hall: [
+    {
+      id: "super_elite1_artikodin",
+      name: "Glacius",
+      x: 4, y: 18, facing: "down",
+      color: "#aed6f1", letter: "G",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "all_badges_campaign2", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_super_elite1" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: { text: ["Seize badges sont nécessaires pour affronter la Super Ligue."], next: null },
+          avant_combat: { text: ["Je suis Glacius. Mon Artikodin n'a jamais connu la défaite."], effects: [{ startTrainerBattle: "super_elite1_artikodin" }] },
+          apres_defaite: { text: ["Le suivant t'attend plus haut."], next: null }
+        }
+      }
+    },
+    {
+      id: "super_elite2_electhor",
+      name: "Fulgur",
+      x: 4, y: 14, facing: "down",
+      color: "#f9e79f", letter: "F",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_super_elite1", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_super_elite2" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: { text: ["Bats d'abord Glacius."], next: null },
+          avant_combat: { text: ["Fulgur, gardien de la foudre. Électhor va te montrer ce qu'est la vitesse."], effects: [{ startTrainerBattle: "super_elite2_electhor" }] },
+          apres_defaite: { text: ["Continue. Ce n'est pas fini."], next: null }
+        }
+      }
+    },
+    {
+      id: "super_elite3_sulfura",
+      name: "Braisor",
+      x: 4, y: 10, facing: "down",
+      color: "#f5b041", letter: "B",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_super_elite2", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_super_elite3" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: { text: ["Bats d'abord Fulgur."], next: null },
+          avant_combat: { text: ["Braisor. Sulfura va réduire ta confiance en cendres."], effects: [{ startTrainerBattle: "super_elite3_sulfura" }] },
+          apres_defaite: { text: ["Un dernier membre du Conseil t'attend."], next: null }
+        }
+      }
+    },
+    {
+      id: "super_elite4_roc",
+      name: "Terrenn",
+      x: 4, y: 6, facing: "down",
+      color: "#a04000", letter: "T",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_super_elite3", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_super_elite4" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: { text: ["Bats d'abord Braisor."], next: null },
+          avant_combat: { text: ["Terrenn. Deux poids lourds, une seule issue possible."], effects: [{ startTrainerBattle: "super_elite4_roc" }] },
+          apres_defaite: { text: ["Elle t'attend au sommet. Bonne chance."], next: null }
+        }
+      }
+    },
+    {
+      id: "super_champion",
+      name: "Ébène",
+      x: 4, y: 2, facing: "down",
+      color: "#0b0b0b", letter: "É",
+      type: "utile",
+      dialogue: {
+        start: [
+          { condition: { flag: "beat_super_elite4", equals: false }, node: "pas_pret" },
+          { condition: { flag: "beat_super_champion" }, node: "apres_defaite" }
+        ],
+        default: "avant_combat",
+        nodes: {
+          pas_pret: {
+            text: ["Tu n'iras pas plus loin sans avoir battu tout mon Conseil."],
+            next: null
+          },
+          avant_combat: {
+            text: [
+              "Tu as tenu ta promesse. Alors voilà la mienne : je ne retiendrai plus rien.",
+              "Ce que nous avons réveillé ici dépasse largement ce que tu as affronté jusqu'à présent.",
+              "Voyons si seize badges suffisent face à ça."
+            ],
+            effects: [{ startTrainerBattle: "super_champion" }]
+          },
+          apres_defaite: {
+            text: [
+              "...",
+              "Je ne pensais pas que quelqu'un puisse aller aussi loin. Toi, tu l'as fait.",
+              "La Main Noire ne s'arrête pas là, Dresseur. Mais aujourd'hui, cette victoire t'appartient."
+            ],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };

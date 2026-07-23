@@ -1620,13 +1620,14 @@ PKMN.MAPS = {
       "#................#",
       "#........D.......#",
       "#................#",
-      "#................#",
+      "#........D.......#",
       "##################"
     ],
     warps: {
       "0,4": { toMap: "route19", x: 18, y: 4 },
       "9,2": { toMap: "center18", x: 4, y: 4 },
-      "9,6": { toMap: "gym16", x: 4, y: 15 }
+      "9,6": { toMap: "gym16", x: 4, y: 15 },
+      "9,8": { toMap: "super_league_hall", x: 4, y: 23 }
     }
   },
 
@@ -1670,6 +1671,44 @@ PKMN.MAPS = {
     ],
     warps: {
       "4,15": { toMap: "town18", x: 9, y: 7 }
+    }
+  },
+
+  // Super Ligue: un long sanctuaire souterrain, quatre Super-Membres du
+  // Conseil puis la cheffe de la Main Noire tout au sommet, pour la vraie
+  // conclusion de cette seconde campagne.
+  super_league_hall: {
+    name: "Sanctuaire Profond",
+    indoor: true,
+    cave: true,
+    tiles: [
+      "########",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "#......#",
+      "####D###"
+    ],
+    warps: {
+      "4,23": { toMap: "town18", x: 9, y: 7 }
     }
   }
 };
