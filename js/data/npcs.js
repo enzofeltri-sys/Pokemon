@@ -1245,5 +1245,98 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town12: [
+    {
+      id: "badaud_abyssia",
+      name: "Pêcheur",
+      x: 9, y: 5, facing: "down",
+      color: "#2874a6", letter: "P",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["L'eau a une drôle de teinte par ici, non ?", "Les vieux du coin disent que c'est comme ça depuis toujours."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_abyssia",
+      name: "Docker",
+      x: 12, y: 6, facing: "left",
+      color: "#34495e", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint8" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "La Main Noire ? Ouais, ils ont un intérêt pour la mer, ces gens-là.",
+              "On raconte qu'ils cherchent quelque chose d'endormi sous les flots, quelque part dans la région.",
+              "Moi, je préfère ne pas y penser et continuer à décharger mes filets."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint8", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["La mer garde ses secrets, à ce qu'on dit."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym10: [
+    {
+      id: "gym10_trainer",
+      name: "Plongeur",
+      x: 4, y: 4, facing: "down",
+      color: "#1b4f72", letter: "P",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym10_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["La marée ne pardonne pas."],
+            effects: [{ startTrainerBattle: "gym10_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Maréa t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym10_leader",
+      name: "Maréa",
+      x: 4, y: 2, facing: "down",
+      color: "#0b3d59", letter: "M",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym10" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Maréa, Championne de l'Arène des Marées Noires.",
+              "Ce qui vient de la mer ne repart jamais tout à fait indemne."
+            ],
+            effects: [{ startTrainerBattle: "gym10_leader" }]
+          },
+          apres_defaite: {
+            text: ["Dix badges. Tu avances vite.", "Reste prudent — la suite ne fait que commencer."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
