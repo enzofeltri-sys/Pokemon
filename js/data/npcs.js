@@ -1710,5 +1710,98 @@ PKMN.NPCS = {
         }
       }
     }
+  ],
+
+  town17: [
+    {
+      id: "badaud_lunecume",
+      name: "Pêcheuse nocturne",
+      x: 9, y: 5, facing: "down",
+      color: "#2874a6", letter: "P",
+      type: "inutile",
+      dialogue: {
+        start: "a",
+        nodes: {
+          a: {
+            text: ["On ne pêche qu'à la pleine lune, ici.", "Le reste du temps, la mer d'écume garde ses distances."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "informateur_lunecume",
+      name: "Astronome",
+      x: 12, y: 6, facing: "left",
+      color: "#1b2631", letter: "?",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "heard_main_noire_hint13" }, node: "revisite" }],
+        default: "premiere_fois",
+        nodes: {
+          premiere_fois: {
+            text: [
+              "La Main Noire a établi son camp à Astrae, à ce qu'on m'a rapporté.",
+              "Un sanctuaire, une zone interdite depuis des générations. Personne n'y va, d'habitude.",
+              "Si tu comptes les affronter, ce sera là-bas. Prépare-toi bien, Dresseur."
+            ],
+            effects: [{ setFlag: "heard_main_noire_hint13", value: true }],
+            next: null
+          },
+          revisite: {
+            text: ["Astrae. C'est là que tout se jouera, je crois."],
+            next: null
+          }
+        }
+      }
+    }
+  ],
+
+  gym15: [
+    {
+      id: "gym15_trainer",
+      name: "Veilleuse",
+      x: 4, y: 4, facing: "down",
+      color: "#1a5276", letter: "V",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym15_trainer" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: ["La lune éclaire mon camp, pas le tien."],
+            effects: [{ startTrainerBattle: "gym15_trainer" }]
+          },
+          apres_defaite: {
+            text: ["Séléna t'attend au fond de la salle."],
+            next: null
+          }
+        }
+      }
+    },
+    {
+      id: "gym15_leader",
+      name: "Séléna",
+      x: 4, y: 2, facing: "down",
+      color: "#0e3d5c", letter: "S",
+      type: "utile",
+      dialogue: {
+        start: [{ condition: { flag: "beat_gym15" }, node: "apres_defaite" }],
+        default: "avant_combat",
+        nodes: {
+          avant_combat: {
+            text: [
+              "Je suis Séléna, Championne de l'Arène des Marées Lunaires.",
+              "Après moi, il ne reste plus qu'Astrae. J'espère que tu es prêt."
+            ],
+            effects: [{ startTrainerBattle: "gym15_leader" }]
+          },
+          apres_defaite: {
+            text: ["Quinze badges. La dernière étape t'attend, maintenant."],
+            next: null
+          }
+        }
+      }
+    }
   ]
 };
